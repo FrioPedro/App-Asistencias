@@ -287,32 +287,90 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _buildStartSessionModal(BuildContext context, String eventId) {
+Widget _buildStartSessionModal(BuildContext context, String eventId) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Iniciar Turno', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+        const Text(
+          'Iniciar Turno',
+          style: TextStyle(
+            color: Colors.white, 
+            fontSize: 22, 
+            fontWeight: FontWeight.bold
+          )
+        ),
         const SizedBox(height: 16),
-        _buildActionOption(context, Icons.business, 'Oficina', 'Reuniones', eventId),
+        
+        // Opción 1: Oficina
+        _buildActionOption(context, Icons.business, 'Oficina', 'Reuniones / Administrativo', eventId),
         const SizedBox(height: 10),
-        _buildActionOption(context, Icons.build, 'Taller', 'Reparaciones', eventId),
+        
+        // Opción 2: Taller
+        _buildActionOption(context, Icons.build, 'Taller', 'Mantenimiento interno', eventId),
+        const SizedBox(height: 10),
+        
+        // Opción 3: Campo (NUEVA)
+        _buildActionOption(context, Icons.local_shipping, 'Campo', 'Visita a cliente', eventId),
+        const SizedBox(height: 10),
+        
+        // Opción 4: Remoto (NUEVA)
+        _buildActionOption(context, Icons.laptop_mac, 'Remoto', 'Home Office', eventId),
+        
+        // Espacio extra al final para que no choque con el borde
+        const SizedBox(height: 20),
       ],
     );
   }
 
-  Widget _buildExitSessionModal(BuildContext context, String eventId) {
+Widget _buildExitSessionModal(BuildContext context, String eventId) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Finalizar Turno', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+        // Título actualizado
+        const Text(
+          'Gestionar Turno', 
+          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Puedes cambiar tu actividad actual o finalizar el turno.',
+          style: TextStyle(color: Colors.grey[400], fontSize: 14),
+        ),
+        const SizedBox(height: 20),
+
+        // --- SECCIÓN 1: CAMBIAR ACTIVIDAD (Las 4 opciones) ---
+        const Text(
+          'CAMBIAR ACTIVIDAD', 
+          style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
+        ),
+        const SizedBox(height: 12),
+        
+        // Reutilizamos los mismos botones para permitir el cambio (Switching)
+        _buildActionOption(context, Icons.business, 'Oficina', 'Reuniones / Administrativo', eventId),
+        const SizedBox(height: 10),
+        _buildActionOption(context, Icons.build, 'Taller', 'Mantenimiento interno', eventId),
+        const SizedBox(height: 10),
+        _buildActionOption(context, Icons.local_shipping, 'Campo', 'Visita a cliente', eventId),
+        const SizedBox(height: 10),
+        _buildActionOption(context, Icons.laptop_mac, 'Remoto', 'Home Office', eventId),
+
         const SizedBox(height: 24),
+        const SizedBox(height: 24),
+
+        // --- SECCIÓN 2: ACCIONES DE CIERRE ---
         Row(
           children: [
+            // Botón REPORTE
             Expanded(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.assignment),
                 label: const Text("REPORTE"),
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2C2C2C), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2C2C2C), 
+                  foregroundColor: Colors.white, 
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportSelectionScreen()));
@@ -320,22 +378,30 @@ class _EventsScreenState extends State<EventsScreen> {
               ),
             ),
             const SizedBox(width: 12),
+            // Botón SALIDA
             Expanded(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.logout),
                 label: const Text("SALIDA"),
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF5350), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEF5350), 
+                  foregroundColor: Colors.white, 
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: () {
-                  // --- ACCIÓN: FINALIZAR SESIÓN LOCAL ---
-                  _endSessionLocal(eventId);
-                  
+                  _endSessionLocal(eventId); // Finaliza la sesión
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Salida registrada'), backgroundColor: Colors.red));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Salida registrada'), backgroundColor: Colors.red)
+                  );
                 },
               ),
             ),
           ],
-        )
+        ),
+        // Espacio extra para seguridad en dispositivos con bordes curvos
+        const SizedBox(height: 30),
       ],
     );
   }
