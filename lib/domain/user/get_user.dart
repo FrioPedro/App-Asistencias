@@ -1,6 +1,5 @@
 import 'package:app_asistencias/core/enpoinService.dart';
 import 'package:app_asistencias/models/user_model.dart';
-import 'package:dio/dio.dart';
 
 class GetUser {
 
