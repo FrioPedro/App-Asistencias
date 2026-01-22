@@ -8,7 +8,7 @@ class LoginUser {
   static Future<bool> authenticate(String user, String password) async{
     final api = EndpointService.instance;
 
-    final response = await api.post("/token");
+    final response = await api.post("/token", data: {"username": user, "password": password});
 
     print("[authenticate] body: ${response.data}");
 
@@ -17,7 +17,7 @@ class LoginUser {
       await Token.saveToken(token);
       return true;
     }
-    
+
     return false;
   }
 
