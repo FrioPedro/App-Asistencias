@@ -1,52 +1,43 @@
-import '../models/event_model.dart';
+import 'package:flutter/foundation.dart'; // Para debugPrint
+import '../models/assigment_model.dart'; // Importamos el nuevo modelo
 
 class HistoryProvider {
   
-  /// Simula la petición para traer el historial de eventos
-  Future<List<EventModel>> fetchHistory() async {
+  /// Obtiene el historial de asignaciones
+  /// Retorna una lista de AssigmentModel (tu nuevo modelo)
+  Future<List<AssigmentModel>> fetchHistory() async {
     try {
-      // 1. Simulación de carga (3 segundos)
+      // 1. Simulación de espera
       await Future.delayed(const Duration(seconds: 3));
 
-      // 2. Retornamos la lista mezclada (Pasados y Futuros)
+      // 2. Retorno de datos
+      // Como pediste borrar lo simulado, aquí devolvemos una lista vacía.
+      // Cuando conectes ISAR, aquí harás: return await isar.assigmentModels.where().findAll();
+      
+      /* --- EJEMPLO DE CÓMO CARGAR UN DATO MANUALMENTE (SI LO NECESITAS PARA PRUEBAS) ---
       return [
-        // Eventos Recientes/Futuros
-        EventModel(
-          id: 'ORD-2026-001',
-          name: 'MANTENIMIENTO PREVENTIVO',
-          company: 'FrioPacking Perú',
-          code: 'ORD-2026-001',
-          dateTime: 'Hoy, 08:00 AM',
-          type: EventType.other,
-        ),
-        EventModel(
-          id: 'ORD-2026-002',
-          name: 'INSTALACIÓN DE EQUIPO',
-          company: 'Supermercados Méndez',
-          code: 'ORD-2026-002',
-          dateTime: 'Hoy, 10:30 AM',
-          type: EventType.technicalVisit,
-        ),
-        // Eventos Pasados (Histórico)
-        EventModel(
-          id: 'ORD-2026-100',
-          name: 'MANTENIMIENTO CORRECTIVO',
-          company: 'Distribuidor ABC',
-          code: 'ORD-2026-100',
-          dateTime: 'Ayer, 09:00 AM',
-          type: EventType.emergency,
-        ),
-        EventModel(
-          id: 'ORD-2026-099',
-          name: 'REVISIÓN TÉCNICA',
-          company: 'Frigolín',
-          code: 'ORD-2026-099',
-          dateTime: '20/01/2026, 03:00 PM',
-          type: EventType.technicalVisit,
-        ),
+        AssigmentModel(
+          serverId: 101,
+          documentId: 'ORD-2026-001',
+          client: 'FrioPacking Perú',
+          description: 'MANTENIMIENTO PREVENTIVO',
+          assigmentType: AssigmentType.other, // OTR
+        )..updatedAt = DateTime.now(), // Asignamos fecha
+
+        AssigmentModel(
+          serverId: 102,
+          documentId: 'ORD-2026-002',
+          client: 'Supermercados Méndez',
+          description: 'INSTALACIÓN DE EQUIPO',
+          assigmentType: AssigmentType.technicalVisit, // VST
+        )..updatedAt = DateTime.now().subtract(const Duration(hours: 2)),
       ];
+      -------------------------------------------------------------------------------- */
+
+      return []; // Lista vacía por ahora
+      
     } catch (e) {
-      print("Error cargando historial: $e");
+      debugPrint("Error cargando historial: $e");
       return [];
     }
   }

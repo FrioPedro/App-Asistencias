@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ---
-import '../../models/event_model.dart';          // Aquí vive el Enum EventType
-import '../../providers/events_provider.dart';   // Tu clase simple (sin Provider package)
+import '../../models/assigment_model.dart';      // <--- TU NUEVO MODELO
+import '../../providers/events_provider.dart';   // Asegúrate de que este provider retorne List<AssigmentModel>
 import '../widgets/event_card.dart';
 import '../widgets/event_card_skeleton.dart';
 import 'profile_screen.dart';
@@ -18,18 +18,18 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
-  // 1. Instancia de tu servicio (la clase simple)
+  // 1. Instancia de tu servicio
   final EventsProvider _eventsService = EventsProvider();
 
   // 2. Estado local de la pantalla
-  List<EventModel> _events = [];        // Lista de eventos
-  bool _isLoading = true;               // Control de carga
-  String _searchQuery = '';             // Texto del buscador
+  List<AssigmentModel> _events = [];    // <--- AHORA ES LISTA DE ASSIGMENTMODEL
+  bool _isLoading = true;
+  String _searchQuery = '';
   
-  // Controlador del input
   late TextEditingController _searchController;
-
+  
   // Mapa para controlar participaciones (ID -> Icono)
+  // Usamos el ID del servidor o el ID local como String
   final Map<String, IconData> _participatingEvents = {};
 
   @override
@@ -38,19 +38,18 @@ class _EventsScreenState extends State<EventsScreen> {
     _searchController = TextEditingController();
     _searchController.addListener(_onSearchChanged);
 
-    // 3. Cargamos los datos al iniciar la pantalla
+    // 3. Cargamos los datos
     _loadData();
   }
 
-  // Función asíncrona para pedir datos al servicio
   Future<void> _loadData() async {
-    // Llamamos a tu método fetchEvents (que tiene el delay de 3s)
+    // El provider debe devolver Future<List<AssigmentModel>>
     final loadedEvents = await _eventsService.fetchEvents();
 
     if (mounted) {
       setState(() {
         _events = loadedEvents;
-        _isLoading = false; // Dejamos de mostrar el skeleton
+        _isLoading = false;
       });
     }
   }
@@ -67,21 +66,36 @@ class _EventsScreenState extends State<EventsScreen> {
     });
   }
 
-  // Filtramos la lista local _events
-  List<EventModel> _filterEvents() {
+  // Helper para formatear fecha (DateTime -> String "Hoy, 08:00 AM")
+  String _formatDate(DateTime date) {
+    // Aquí puedes usar intl, pero para mantenerlo simple y sin librerías:
+    final now = DateTime.now();
+    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final amPm = date.hour >= 12 ? 'PM' : 'AM';
+    final minute = date.minute.toString().padLeft(2, '0');
+    
+    final datePart = isToday ? 'Hoy' : '${date.day}/${date.month}';
+    return '$datePart, $hour:$minute $amPm';
+  }
+
+  // Filtramos la lista local
+  List<AssigmentModel> _filterEvents() {
     if (_searchQuery.isEmpty) return _events;
     
     return _events.where((event) {
-      final name = event.name.toLowerCase();
-      final company = event.company.toLowerCase();
-      final code = event.code.toLowerCase();
-      return name.contains(_searchQuery) ||
-          company.contains(_searchQuery) ||
-          code.contains(_searchQuery);
+      // Usamos los nuevos campos con Null Check (?? '')
+      final desc = (event.description ?? '').toLowerCase();
+      final client = (event.client ?? '').toLowerCase();
+      final docId = (event.documentId ?? '').toLowerCase();
+      
+      return desc.contains(_searchQuery) ||
+          client.contains(_searchQuery) ||
+          docId.contains(_searchQuery);
     }).toList();
   }
 
-  // --- MÉTODOS DE ACCIÓN (Gestión de Estado Local) ---
+  // --- MÉTODOS DE ACCIÓN ---
 
   void _startSessionLocal(String eventId, IconData icon) {
     setState(() {
@@ -97,7 +111,6 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Obtenemos la lista filtrada para pintarla
     final filteredEvents = _filterEvents();
 
     return Scaffold(
@@ -123,7 +136,7 @@ class _EventsScreenState extends State<EventsScreen> {
               
               const SizedBox(height: 12),
 
-              // CONTENIDO PRINCIPAL (Skeleton o Lista)
+              // CONTENIDO
               Expanded(
                 child: _isLoading
                     ? _buildSkeletons()
@@ -146,13 +159,13 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _buildEventList(List<EventModel> events) {
+  Widget _buildEventList(List<AssigmentModel> events) {
     if (events.isEmpty) {
       return Center(
         child: Text(
           _searchQuery.isEmpty
-              ? 'No hay eventos disponibles'
-              : 'No se encontraron eventos',
+              ? 'No hay asignaciones disponibles'
+              : 'No se encontraron resultados',
           style: TextStyle(color: Colors.grey[500]),
         ),
       );
@@ -160,21 +173,25 @@ class _EventsScreenState extends State<EventsScreen> {
 
     return ListView(
       children: events.map((event) {
-        // Verificamos estado en nuestro mapa local
-        bool isParticipating = _participatingEvents.containsKey(event.id);
+        // Usamos documentId como clave única, o el ID de Isar convertido a String
+        final String uniqueId = event.documentId ?? event.id.toString();
+
+        bool isParticipating = _participatingEvents.containsKey(uniqueId);
         bool isAnyEventActive = _participatingEvents.isNotEmpty;
 
         return EventCard(
-          eventName: event.name,
-          companyName: event.company,
-          eventCode: event.code,
-          dateTime: event.dateTime,
-          eventType: event.type, 
+          // Mapeo de campos nuevos a la tarjeta
+          eventName: event.description ?? 'Sin descripción',
+          companyName: event.client ?? 'Sin cliente',
+          eventCode: event.documentId ?? '---',
+          dateTime: _formatDate(event.updatedAt), // Formateamos el DateTime
+          
+          // Pasamos el nuevo Enum (asegúrate de actualizar EventCard también)
+          assigmentType: event.assigmentType, 
           
           isParticipating: isParticipating,
-          actionIcon: _participatingEvents[event.id],
+          actionIcon: _participatingEvents[uniqueId],
           onTap: () {
-            // Validación de exclusividad
             if (isAnyEventActive && !isParticipating) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -185,11 +202,10 @@ class _EventsScreenState extends State<EventsScreen> {
               return;
             }
 
-            // Abrir el modal correspondiente
             _showActionModal(
               context,
-              event.name,
-              event.id,
+              event.description ?? '',
+              uniqueId,
               isActiveSession: isParticipating,
             );
           },
@@ -198,7 +214,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  // HEADER (Simplificado para el ejemplo)
+  // HEADER
   Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -263,7 +279,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  // --- MODALES Y LÓGICA ---
+  // --- MODALES ---
 
   void _showActionModal(BuildContext context, String eventName, String eventId, {required bool isActiveSession}) {
     showModalBottomSheet(
@@ -287,90 +303,53 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-Widget _buildStartSessionModal(BuildContext context, String eventId) {
+  // MODAL INICIO (Con tus 4 opciones)
+  Widget _buildStartSessionModal(BuildContext context, String eventId) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Iniciar Turno',
-          style: TextStyle(
-            color: Colors.white, 
-            fontSize: 22, 
-            fontWeight: FontWeight.bold
-          )
-        ),
+        const Text('Iniciar Turno', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-        
-        // Opción 1: Oficina
         _buildActionOption(context, Icons.business, 'Oficina', 'Reuniones / Administrativo', eventId),
         const SizedBox(height: 10),
-        
-        // Opción 2: Taller
         _buildActionOption(context, Icons.build, 'Taller', 'Mantenimiento interno', eventId),
         const SizedBox(height: 10),
-        
-        // Opción 3: Campo (NUEVA)
         _buildActionOption(context, Icons.local_shipping, 'Campo', 'Visita a cliente', eventId),
         const SizedBox(height: 10),
-        
-        // Opción 4: Remoto (NUEVA)
         _buildActionOption(context, Icons.laptop_mac, 'Remoto', 'Home Office', eventId),
-        
-        // Espacio extra al final para que no choque con el borde
         const SizedBox(height: 20),
       ],
     );
   }
 
-Widget _buildExitSessionModal(BuildContext context, String eventId) {
+  // MODAL SALIDA (Con tus 4 opciones para cambiar + acciones finales)
+  Widget _buildExitSessionModal(BuildContext context, String eventId) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título actualizado
-        const Text(
-          'Gestionar Turno', 
-          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)
-        ),
+        const Text('Gestionar Turno', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Text(
-          'Puedes cambiar tu actividad actual o finalizar el turno.',
-          style: TextStyle(color: Colors.grey[400], fontSize: 14),
-        ),
+        Text('Puedes cambiar tu actividad actual o finalizar el turno.', style: TextStyle(color: Colors.grey[400], fontSize: 14)),
         const SizedBox(height: 20),
-
-        // --- SECCIÓN 1: CAMBIAR ACTIVIDAD (Las 4 opciones) ---
-        const Text(
-          'CAMBIAR ACTIVIDAD', 
-          style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1),
-        ),
+        const Text('CAMBIAR ACTIVIDAD', style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1)),
         const SizedBox(height: 12),
-        
-        // Reutilizamos los mismos botones para permitir el cambio (Switching)
         _buildActionOption(context, Icons.business, 'Oficina', 'Reuniones / Administrativo', eventId),
         const SizedBox(height: 10),
         _buildActionOption(context, Icons.build, 'Taller', 'Mantenimiento interno', eventId),
         const SizedBox(height: 10),
-        _buildActionOption(context, Icons.local_shipping, 'Transporte', 'Traslados', eventId),
+        _buildActionOption(context, Icons.local_shipping, 'Campo', 'Visita a cliente', eventId),
         const SizedBox(height: 10),
-        _buildActionOption(context, Icons.construction, 'Servicio', 'Visitas técnicas', eventId),
-
+        _buildActionOption(context, Icons.laptop_mac, 'Remoto', 'Home Office', eventId),
         const SizedBox(height: 24),
+        const Divider(color: Colors.white24),
         const SizedBox(height: 24),
-
-        // --- SECCIÓN 2: ACCIONES DE CIERRE ---
         Row(
           children: [
-            // Botón REPORTE
             Expanded(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.assignment),
                 label: const Text("REPORTE"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C2C2C), 
-                  foregroundColor: Colors.white, 
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2C2C2C), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16)),
                 onPressed: () {
                   Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportSelectionScreen()));
@@ -378,29 +357,20 @@ Widget _buildExitSessionModal(BuildContext context, String eventId) {
               ),
             ),
             const SizedBox(width: 12),
-            // Botón SALIDA
             Expanded(
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.logout),
                 label: const Text("SALIDA"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF5350), 
-                  foregroundColor: Colors.white, 
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF5350), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16)),
                 onPressed: () {
-                  _endSessionLocal(eventId); // Finaliza la sesión
+                  _endSessionLocal(eventId);
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Salida registrada'), backgroundColor: Colors.red)
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Salida registrada'), backgroundColor: Colors.red));
                 },
               ),
             ),
           ],
         ),
-        // Espacio extra para seguridad en dispositivos con bordes curvos
         const SizedBox(height: 30),
       ],
     );
@@ -409,9 +379,7 @@ Widget _buildExitSessionModal(BuildContext context, String eventId) {
   Widget _buildActionOption(BuildContext context, IconData icon, String title, String subtitle, String eventId) {
     return GestureDetector(
       onTap: () {
-        // --- ACCIÓN: INICIAR SESIÓN LOCAL ---
         _startSessionLocal(eventId, icon);
-        
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Participando: $title')));
       },

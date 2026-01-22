@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
 
-// --- IMPORTANTE: Importamos el Enum desde el modelo ---
-// Esto hace que el 'EventType' de aquí sea EL MISMO que el de tu base de datos/provider.
-import '../../models/event_model.dart';
+// --- IMPORTANTE: Importamos el nuevo modelo con el Enum 'AssigmentType' ---
+import '../../models/assigment_model.dart';
 
-/// Widget que muestra una tarjeta de evento
+/// Widget que muestra una tarjeta de evento/asignación
 class EventCard extends StatelessWidget {
-  /// Nombre del evento
+  /// Nombre del evento / Descripción
   final String eventName;
 
-  /// Nombre de la empresa/cliente
+  /// Nombre de la empresa / Cliente
   final String companyName;
 
-  /// Código único del evento
+  /// Código único del evento / Document ID
   final String eventCode;
 
   /// Fecha y hora del evento
   final String dateTime;
 
-  /// Tipo de evento (Emergency, TechnicalVisit, Other) - Viene de event_model.dart
-  final EventType eventType;
+  /// Tipo de asignación (Viene de assigment_model.dart)
+  final AssigmentType assigmentType;
 
   /// Callback ejecutado al tocar la tarjeta
   final VoidCallback? onTap;
@@ -38,7 +37,8 @@ class EventCard extends StatelessWidget {
     required this.companyName,
     required this.eventCode,
     required this.dateTime,
-    this.eventType = EventType.other,
+    // Valor por defecto usando el nuevo enum 'other'
+    this.assigmentType = AssigmentType.other,
     this.onTap,
     this.isParticipating = false,
     this.actionIcon,
@@ -50,16 +50,16 @@ class EventCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        // Importante: clipBehavior recorta el ícono de fondo que se sale del contenedor
+        // Importante: clipBehavior recorta el ícono de fondo
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           color: const Color(0xFF1F1F1F), // Gris oscuro
           borderRadius: BorderRadius.circular(16),
-          // Borde condicional: verde si participa, sin borde si no
+          // Borde condicional: verde si participa
           border: isParticipating
               ? Border.all(color: const Color(0xFF4CAF50), width: 2.0)
               : null,
-          // Sombra verde difuminada opcional cuando participa
+          // Sombra verde difuminada opcional
           boxShadow: isParticipating
               ? [
                   BoxShadow(
@@ -72,7 +72,7 @@ class EventCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // --- CAPA 1: ÍCONO DE FONDO CON EFECTO DE BARRIDO LINEAL ---
+            // --- CAPA 1: ÍCONO DE FONDO (Si participa) ---
             if (isParticipating && actionIcon != null)
               Positioned(
                 right: -30,
@@ -96,7 +96,7 @@ class EventCard extends StatelessWidget {
                     blendMode: BlendMode.dstIn,
                     child: Stack(
                       children: [
-                        // 1.1 Versión Borrosa (Glow de fondo)
+                        // 1.1 Versión Borrosa (Glow)
                         Center(
                           child: ImageFiltered(
                             imageFilter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
@@ -107,7 +107,7 @@ class EventCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // 1.2 Versión Nítida (Frente)
+                        // 1.2 Versión Nítida
                         Center(
                           child: Icon(
                             actionIcon,
@@ -121,13 +121,13 @@ class EventCard extends StatelessWidget {
                 ),
               ),
 
-            // --- CAPA 2: CONTENIDO DE LA TARJETA (TEXTOS) ---
+            // --- CAPA 2: CONTENIDO DE LA TARJETA ---
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  // COLUMNA IZQUIERDA: Textos
+                  // COLUMNA IZQUIERDA: Datos
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,8 +174,9 @@ class EventCard extends StatelessWidget {
                       color: _getTagColor(),
                       borderRadius: BorderRadius.circular(20),
                     ),
+                    // Usamos .label de tu extensión en assigment_model.dart
                     child: Text(
-                      _getTagText(),
+                      assigmentType.label.toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
@@ -193,27 +194,30 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  /// Retorna el color de la etiqueta según el tipo de evento
+  /// Retorna el color de la etiqueta según el tipo de asignación
   Color _getTagColor() {
-    switch (eventType) {
-      case EventType.emergency:
-        return const Color(0xFFFF6B6B); // Rojo/Salmón para emergencias
-      case EventType.technicalVisit:
-        return const Color(0xFF2E60C4); // Azul para visitas técnicas
-      case EventType.other:
-        return Colors.white.withOpacity(0.1); // Gris transparente para otros
-    }
-  }
-
-  /// Retorna el texto de la etiqueta según el tipo de evento
-  String _getTagText() {
-    switch (eventType) {
-      case EventType.emergency:
-        return 'EMERGENCIA';
-      case EventType.technicalVisit:
-        return 'VISITA TÉCNICA';
-      case EventType.other:
-        return 'OTRO';
+    switch (assigmentType) {
+      case AssigmentType.emergency:
+        return const Color(0xFFFF6B6B); // Rojo (Emergencia)
+      
+      case AssigmentType.technicalVisit:
+      case AssigmentType.serviceProject:
+        return const Color(0xFF2E60C4); // Azul (Servicios)
+      
+      case AssigmentType.projectOrder:
+      case AssigmentType.projectAdditional:
+        return const Color(0xFF4CAF50); // Verde (Proyectos)
+      
+      case AssigmentType.warrantyProject:
+        return const Color(0xFFFFC107); // Amarillo (Garantía)
+      
+      case AssigmentType.transfer:
+        return const Color(0xFF9C27B0); // Morado (Traslados)
+      
+      case AssigmentType.officeAssistance:
+      case AssigmentType.other:
+      default:
+        return Colors.white.withOpacity(0.1); // Gris (Otros)
     }
   }
 }
