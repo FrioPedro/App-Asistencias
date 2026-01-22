@@ -1,19 +1,14 @@
 import '../models/event_model.dart';
-// import 'package:http/http.dart' as http;
-// import 'dart:convert';
 
+// Esta clase se encarga SOLO de traer los datos.
 class EventsProvider {
-  // Esta función devuelve una "Promesa" (Future) con la lista de eventos
+  
   Future<List<EventModel>> fetchEvents() async {
     try {
-      // ==================================================================
-      // TODO BACKEND
-      // ==================================================================
-      
-      // Simulación de espera de red
+      // Simulación de carga (3 segundos)
       await Future.delayed(const Duration(seconds: 3));
 
-      // Retornamos la lista simulada
+      // Retorno de datos de prueba
       return [
         EventModel(
           id: 'ORD-2026-001',
@@ -31,7 +26,7 @@ class EventsProvider {
           dateTime: 'Hoy, 10:30 AM',
           type: EventType.technicalVisit,
         ),
-         EventModel(
+        EventModel(
           id: 'ORD-2026-003',
           name: 'REPARACIÓN DE EMERGENCIA',
           company: 'Hotel Costa',
@@ -40,10 +35,8 @@ class EventsProvider {
           type: EventType.emergency,
         ),
       ];
-      
     } catch (e) {
-      // Si falla, retornamos una lista vacía o lanzamos el error
-      print("Error fetching events: $e");
+      print("Error obteniendo eventos: $e");
       return [];
     }
   }
