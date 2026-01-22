@@ -228,14 +228,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildLoadingRow() {
     return Row(
       children: [
-        Container(width: 48, height: 48, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(12))),
+        Container(width: 48, height: 48, decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12))),
         const SizedBox(width: 16),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(width: 60, height: 10, color: Colors.white.withValues(alpha: 0.05)),
+            Container(width: 60, height: 10, color: Colors.white.withOpacity(0.05)),
             const SizedBox(height: 8),
-            Container(width: 120, height: 14, color: Colors.white.withValues(alpha: 0.05)),
+            Container(width: 120, height: 14, color: Colors.white.withOpacity(0.05)),
           ],
         )
       ],
