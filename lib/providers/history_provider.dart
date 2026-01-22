@@ -2,7 +2,7 @@ import '../models/event_model.dart';
 
 class HistoryProvider {
   
-  /// Simula la petición para traer TODO el historial de eventos
+  /// Simula la petición para traer el historial de eventos
   Future<List<EventModel>> fetchHistory() async {
     try {
       // 1. Simulación de carga (3 segundos)

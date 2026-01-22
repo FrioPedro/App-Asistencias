@@ -202,7 +202,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
         duration: const Duration(milliseconds: 300),
         height: 150,
         decoration: BoxDecoration(
-          color: hasPhoto ? const Color(0xFF4CAF50).withValues(alpha: 0.1) : const Color(0xFF1F1F1F),
+          color: hasPhoto ? const Color(0xFF4CAF50).withOpacity(0.1) : const Color(0xFF1F1F1F),
           borderRadius: BorderRadius.circular(16),
           border: hasPhoto ? Border.all(color: const Color(0xFF4CAF50), width: 2) : null,
         ),
@@ -212,7 +212,7 @@ class _ReportFormScreenState extends State<ReportFormScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: hasPhoto ? const Color(0xFF4CAF50) : Colors.white.withValues(alpha: 0.05),
+                color: hasPhoto ? const Color(0xFF4CAF50) : Colors.white.withOpacity(0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(

@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
               ),
               value: isAutoExitEnabled,
-              activeThumbColor: Theme.of(context).primaryColor,
+              activeColor: Theme.of(context).primaryColor,
               onChanged: (bool value) {
                 setState(() {
                   isAutoExitEnabled = value;
