@@ -5,39 +5,37 @@ part 'user_model.g.dart';
 @collection
 class UserModel {
   Id id = Isar.autoIncrement;
-  int? serverId;
   String? nationalId;
   String? names;
   String? lastNames;
   String? zone;
-  String token;
 
   UserModel({
-    this.serverId,
     this.nationalId,
     this.names,
     this.lastNames,
     this.zone,
-    required this.token,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final collaborator = (json['Collaborator'] ?? '') as String;
+    final parts = collaborator.trim().split(RegExp(r'\s+'));
+
+    final name = parts.isNotEmpty ? parts.first : '';
+    final lastNames = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+
     return UserModel(
-      serverId: json['id'],
-      nationalId: json['nationalId'],
-      names: json['names'],
-      lastNames: json['lastNames'],
-      zone: json['branchId'],
-      token: json['token'],
+      nationalId: json['documento'] ?? json['Document'],
+      names: json['nombres'] ?? name,
+      lastNames: json['apellidos'] ?? lastNames,
+      zone: json['zone'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id': serverId,
-    'nationalId': nationalId,
-    'names': names,
-    'lastNames': lastNames,
-    'branch': zone,
-    'token': token,
-  };
+        'documento': nationalId,
+        'nombres': names,
+        'apellidos': lastNames,
+        'zone': zone,
+      };
 }
