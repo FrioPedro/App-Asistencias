@@ -9,12 +9,15 @@ class UserModel {
   String? names;
   String? lastNames;
   String? zone;
+  bool active = true;
+
 
   UserModel({
     this.nationalId,
     this.names,
     this.lastNames,
     this.zone,
+    this.active = true,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
