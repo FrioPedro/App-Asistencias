@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 // --- IMPORTS ---
 import '../../models/event_model.dart';          // Necesitamos el modelo
 import '../../providers/event_detail_provider.dart'; // El nuevo provider
-import '../widgets/event_card.dart'; // (Opcional) Si necesitas reutilizar estilos
 
 class EventDetailScreen extends StatefulWidget {
   // En lugar de pasar strings sueltos, pasamos el objeto completo
