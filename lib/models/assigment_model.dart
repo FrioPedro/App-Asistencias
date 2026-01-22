@@ -14,6 +14,7 @@ enum AssigmentType {
   other,               // OTR
 }
 
+
 @collection
 class AssigmentModel {
 
