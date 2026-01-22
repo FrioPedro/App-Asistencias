@@ -4,5 +4,4 @@ class GetAssigned {
   Future<List<AssignmentModel>> fetchAssignment() async {
     return [];
   }
-
 }
