@@ -104,7 +104,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               surface: Color(0xFF1E1E1E),
               onSurface: Colors.white,
               secondary: Color(0xFF4CAF50),
-            ), dialogTheme: const DialogTheme(backgroundColor: const Color(0xFF1E1E1E)),
+            ), dialogTheme: const DialogTheme(backgroundColor: Color(0xFF1E1E1E)),
           ),
           child: child!,
         );
