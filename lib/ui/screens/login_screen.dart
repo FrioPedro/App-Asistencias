@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../providers/auth_provider.dart'; // <--- Importamos el provider
 import 'events_screen.dart';
 
-/// Pantalla de inicio de sesión (Login).
-/// Proporciona una interfaz para que el usuario ingrese sus credenciales
-/// y acceda a la pantalla de eventos. Incluye:
-/// - Logo de la aplicación
-/// - Campo de usuario
-/// - Campo de contraseña con visibilidad toggle
-/// - Botón continuar
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -15,77 +9,132 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-/// Estado para la pantalla de login.
-/// Gestiona:
-/// - Visibilidad de la contraseña (toggle seguro/visible)
-/// - Validación y navegación de login
 class _LoginScreenState extends State<LoginScreen> {
-  /// Controla si la contraseña está visible (true) u oculta (false)
-  bool _isObscured = true;
+  // 1. Instanciamos el Provider (Lógica)
+  final AuthProvider _authProvider = AuthProvider();
+
+  // 2. Controladores para leer el texto de los inputs
+  final TextEditingController _userController = TextEditingController();
+  final TextEditingController _passController = TextEditingController();
+
+  // 3. Variables de estado visual
+  bool _isObscured = true; // Ocultar contraseña
+  bool _isLoading = false; // Círculo de carga
+
+  @override
+  void dispose() {
+    // Limpiamos controladores al salir para liberar memoria
+    _userController.dispose();
+    _passController.dispose();
+    super.dispose();
+  }
+
+  /// Método para manejar el proceso de login
+  Future<void> _handleLogin() async {
+    // Ocultar teclado
+    FocusScope.of(context).unfocus();
+
+    // Validaciones básicas antes de llamar al provider
+    if (_userController.text.isEmpty || _passController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor ingrese usuario y contraseña'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    // Activar estado de carga
+    setState(() => _isLoading = true);
+
+    // Llamar al provider
+    final bool success = await _authProvider.login(
+      _userController.text.trim(),
+      _passController.text.trim(),
+    );
+
+    // Desactivar estado de carga (si el widget sigue vivo)
+    if (mounted) {
+      setState(() => _isLoading = false);
+
+      if (success) {
+        // ÉXITO: Navegar a Eventos
+        Navigator.pushReplacement( // Usamos pushReplacement para que no pueda volver al login con "atrás"
+          context,
+          MaterialPageRoute(builder: (context) => const EventsScreen()),
+        );
+      } else {
+        // ERROR: Mostrar mensaje
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Credenciales incorrectas'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // SafeArea: Evita que el diseño se superponga con la barra de notificaciones
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            // Permite scroll si el teclado superpone el botón
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Sección 1: Logo de la aplicación
+                // LOGO
                 Image.asset(
                   'assets/images/logo_frioteam.png',
                   height: 120,
                   fit: BoxFit.contain,
                 ),
 
-                const SizedBox(height: 80), // Espacio entre logo e inputs
+                const SizedBox(height: 80),
 
-                // Sección 2: Campo de entrada para usuario
+                // INPUT USUARIO
                 _buildTextField(
+                  controller: _userController, // <--- Conectamos controlador
                   hintText: 'Usuario',
                   icon: Icons.person_outline,
                 ),
                 const SizedBox(height: 16),
 
-                // Sección 3: Campo de entrada para contraseña
+                // INPUT CONTRASEÑA
                 _buildTextField(
+                  controller: _passController, // <--- Conectamos controlador
                   hintText: 'Contraseña',
                   icon: Icons.lock_outline,
                   isPassword: true,
                 ),
                 const SizedBox(height: 24),
 
-                // Sección 4: Botón para iniciar sesión y navegar
+                // BOTÓN DE LOGIN
                 SizedBox(
-                  width: double.infinity, // Ancho 100%
+                  width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Navega a la pantalla de eventos
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const EventsScreen()),
-                      );
-                    },
+                    // Si está cargando, deshabilitamos el botón (null)
+                    onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
+                      disabledBackgroundColor: Colors.grey, // Color cuando está deshabilitado
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 0, // Diseño plano (flat)
+                      elevation: 0,
                     ),
-                    child: const Text(
-                      'Continuar',
-                      style: TextStyle(
-                        fontSize: 16, 
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Text(
+                            'Continuar',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -96,27 +145,22 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// Construye un campo de texto reutilizable para usuario/contraseña.
-  /// 
-  /// Parámetros:
-  ///   hintText - Texto de ayuda a mostrar en el campo
-  ///   icon - Icono del campo
-  ///   isPassword - Si es true, oculta el texto (para contraseña)
   Widget _buildTextField({
+    required TextEditingController controller, // <--- Nuevo parámetro obligatorio
     required String hintText,
     required IconData icon,
     bool isPassword = false,
   }) {
     return TextField(
+      controller: controller, // Asignamos el controlador
       obscureText: isPassword ? _isObscured : false,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         filled: true,
-        fillColor: const Color(0xFF2C2C2C), // Gris oscuro para inputs
+        fillColor: const Color(0xFF2C2C2C),
         hintText: hintText,
         hintStyle: TextStyle(color: Colors.grey[500]),
         prefixIcon: Icon(icon, color: Colors.grey[500]),
-        // Botón toggle para mostrar/ocultar contraseña
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
@@ -124,7 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.grey[500],
                 ),
                 onPressed: () {
-                  // Alterna entre mostrar y ocultar la contraseña
                   setState(() {
                     _isObscured = !_isObscured;
                   });
@@ -133,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none, // Sin borde visible
+          borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
       ),
