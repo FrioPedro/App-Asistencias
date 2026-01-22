@@ -350,9 +350,9 @@ Widget _buildExitSessionModal(BuildContext context, String eventId) {
         const SizedBox(height: 10),
         _buildActionOption(context, Icons.build, 'Taller', 'Mantenimiento interno', eventId),
         const SizedBox(height: 10),
-        _buildActionOption(context, Icons.local_shipping, 'Campo', 'Visita a cliente', eventId),
+        _buildActionOption(context, Icons.local_shipping, 'Transporte', 'Traslados', eventId),
         const SizedBox(height: 10),
-        _buildActionOption(context, Icons.laptop_mac, 'Remoto', 'Home Office', eventId),
+        _buildActionOption(context, Icons.construction, 'Servicio', 'Visitas técnicas', eventId),
 
         const SizedBox(height: 24),
         const SizedBox(height: 24),
