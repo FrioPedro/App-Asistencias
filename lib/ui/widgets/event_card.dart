@@ -201,7 +201,7 @@ class EventCard extends StatelessWidget {
       case EventType.technicalVisit:
         return const Color(0xFF2E60C4); // Azul para visitas técnicas
       case EventType.other:
-        return Colors.white.withValues(alpha: 0.1); // Gris transparente para otros
+        return Colors.white.withOpacity(0.1); // Gris transparente para otros
     }
   }
 

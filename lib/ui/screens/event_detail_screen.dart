@@ -77,7 +77,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               decoration: BoxDecoration(
                 color: isEmergency 
                     ? const Color(0xFFFF6B6B) 
-                    : Colors.white.withValues(alpha: 0.1),
+                    : Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
@@ -197,7 +197,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, color: Colors.white, size: 24),

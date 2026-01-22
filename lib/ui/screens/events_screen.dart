@@ -245,7 +245,7 @@ class _EventsScreenState extends State<EventsScreen> {
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.04),
+        fillColor: Colors.white.withOpacity(0.04),
         hintText: 'Buscar...',
         hintStyle: TextStyle(color: Colors.grey[600]),
         prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
