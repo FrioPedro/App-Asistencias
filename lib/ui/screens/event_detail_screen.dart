@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-// --- IMPORTS ---
-import '../../models/event_model.dart';          // Necesitamos el modelo
-import '../../providers/event_detail_provider.dart'; // El nuevo provider
+// --- IMPORTS ACTUALIZADOS ---
+import '../../models/assigment_model.dart';          // Tu nuevo modelo
+import '../../providers/event_detail_provider.dart'; // El provider
 
 class EventDetailScreen extends StatefulWidget {
-  // En lugar de pasar strings sueltos, pasamos el objeto completo
-  final EventModel event;
+  // Ahora recibimos el nuevo modelo
+  final AssigmentModel event;
 
   const EventDetailScreen({
     super.key,
@@ -31,9 +31,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     _loadExtraDetails();
   }
 
-  // Carga los datos que faltan (Supervisor, Horario, etc.)
+  // Carga los datos que faltan usando el ID del documento
   Future<void> _loadExtraDetails() async {
-    final details = await _provider.getExtraDetails(widget.event.id);
+    // Usamos el documentId (ej. ORD-001) o el ID numérico como respaldo
+    final String searchId = widget.event.documentId ?? widget.event.id.toString();
+    
+    final details = await _provider.getExtraDetails(searchId);
+    
     if (mounted) {
       setState(() {
         _extraDetails = details;
@@ -42,11 +46,22 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
+  // Helper para formatear la fecha (DateTime -> String)
+  String _formatDateTime(DateTime date) {
+    return "${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Determinamos si es emergencia basado en el tipo del modelo
-    final isEmergency = widget.event.type == EventType.emergency;
+    // Determinamos si es emergencia usando el nuevo Enum
+    final isEmergency = widget.event.assigmentType == AssigmentType.emergency;
     final primaryColor = Theme.of(context).primaryColor;
+
+    // Preparamos los textos (Null Safety)
+    final title = widget.event.description ?? 'Sin descripción';
+    final client = widget.event.client ?? 'Cliente desconocido';
+    final dateString = _formatDateTime(widget.event.updatedAt);
+    final typeLabel = widget.event.assigmentType.label.toUpperCase(); // Usamos tu getter .label
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -61,7 +76,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onPressed: () {
-              // Aquí podrías poner "Reportar problema" o "Ver historial"
+              // Menú de opciones
             }, 
           ),
         ],
@@ -81,7 +96,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                isEmergency ? 'EMERGENCIA' : 'NORMAL',
+                isEmergency ? 'EMERGENCIA' : typeLabel, // Mostramos la etiqueta real
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -91,9 +106,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // 2. Título y Empresa (Datos inmediatos del modelo)
+            // 2. Título (Descripción) y Empresa (Cliente)
             Text(
-              widget.event.name,
+              title,
               style: const TextStyle(
                 fontSize: 32, 
                 fontWeight: FontWeight.bold, 
@@ -102,7 +117,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              widget.event.company,
+              client,
               style: TextStyle(
                 fontSize: 18, 
                 color: Colors.grey[400]
@@ -117,7 +132,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF2C2C2C),
                 borderRadius: BorderRadius.circular(24),
-                // Aquí podrías usar: image: DecorationImage(...) con un mapa estático
               ),
               child: Center(
                 child: Column(
@@ -126,7 +140,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     Icon(Icons.location_on, size: 40, color: Colors.grey[600]),
                     const SizedBox(height: 8),
                     Text(
-                      'Cargando ubicación...', // Podrías actualizar esto con _extraDetails['coordinates']
+                      'Cargando ubicación...', 
                       style: TextStyle(color: Colors.grey[500]),
                     )
                   ],
@@ -135,20 +149,20 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
             const SizedBox(height: 32),
 
-            // 4. Detalles de la Asignación (Mezcla de datos inmediatos y cargados)
+            // 4. Detalles de la Asignación
             
-            // Fecha (Viene del modelo, inmediato)
-            _buildDetailRow(Icons.calendar_today, 'Fecha', widget.event.dateTime),
+            // Fecha (Convertida de DateTime)
+            _buildDetailRow(Icons.calendar_today, 'Fecha', dateString),
             const SizedBox(height: 24),
             
-            // Horario (Viene del provider, requiere carga)
+            // Horario (Viene del provider)
             _isLoadingExtras 
                 ? _buildLoadingRow() 
                 : _buildDetailRow(Icons.access_time, 'Horario', _extraDetails['schedule'] ?? 'No definido'),
             
             const SizedBox(height: 24),
             
-            // Supervisor (Viene del provider, requiere carga)
+            // Supervisor (Viene del provider)
             _isLoadingExtras 
                 ? _buildLoadingRow() 
                 : _buildDetailRow(Icons.person_outline, 'Supervisor', _extraDetails['supervisor'] ?? 'No asignado'),
@@ -161,8 +175,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                   // Aquí puedes abrir el mismo modal de acciones que usas en la lista
-                   // O navegar a una pantalla de reporte
                    ScaffoldMessenger.of(context).showSnackBar(
                      const SnackBar(content: Text("Función de registro iniciada"))
                    );
@@ -224,7 +236,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  // Widget esqueleto pequeño para cuando carga el supervisor/horario
+  // Widget esqueleto pequeño
   Widget _buildLoadingRow() {
     return Row(
       children: [

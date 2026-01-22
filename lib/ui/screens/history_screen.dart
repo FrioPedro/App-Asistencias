@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-// --- IMPORTS ---
-import '../../models/event_model.dart';
-import '../../providers/history_provider.dart'; // <--- Tu nuevo provider
+// --- IMPORTS ACTUALIZADOS ---
+import '../../models/assigment_model.dart';      // Nuevo modelo
+import '../../providers/history_provider.dart';  // Provider actualizado
 import '../widgets/event_card.dart';
 import '../widgets/event_card_skeleton.dart';
 
@@ -23,8 +23,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _isLoading = true;
   DateTimeRange? _selectedDateRange;
   
-  // Lista donde guardaremos los datos que vienen del provider
-  List<EventModel> _allEvents = [];
+  // Lista de nuevos modelos
+  List<AssigmentModel> _allEvents = [];
 
   @override
   void initState() {
@@ -59,32 +59,48 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
-  // --- LÓGICA DE FECHAS (Se mantiene igual para soportar "Hoy/Ayer") ---
-
-  DateTime _parseDateString(String dateStr) {
+  // Helper para formatear fecha (DateTime -> String)
+  String _formatDate(DateTime date) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final lowerStr = dateStr.toLowerCase();
+    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final amPm = date.hour >= 12 ? 'PM' : 'AM';
+    final minute = date.minute.toString().padLeft(2, '0');
+    
+    final datePart = isToday ? 'Hoy' : '${date.day}/${date.month}/${date.year}';
+    return '$datePart, $hour:$minute $amPm';
+  }
 
-    if (lowerStr.contains('hoy')) {
-      return today;
-    } else if (lowerStr.contains('ayer')) {
-      return today.subtract(const Duration(days: 1));
-    } else {
-      try {
-        final parts = dateStr.split(',')[0].split('/'); 
-        if (parts.length == 3) {
-          return DateTime(
-            int.parse(parts[2]),
-            int.parse(parts[1]),
-            int.parse(parts[0]),
-          );
-        }
-      } catch (e) {
-        return today; 
+  // --- LÓGICA DE FILTRADO (Adaptada a AssigmentModel) ---
+  
+  List<AssigmentModel> _getFilteredEvents() {
+    return _allEvents.where((event) {
+      // 1. Filtro de Texto (Usamos propiedades nuevas con Null Check)
+      final desc = (event.description ?? '').toLowerCase();
+      final client = (event.client ?? '').toLowerCase();
+      final docId = (event.documentId ?? '').toLowerCase();
+
+      final matchesText = _searchQuery.isEmpty || 
+          desc.contains(_searchQuery) ||
+          client.contains(_searchQuery) ||
+          docId.contains(_searchQuery);
+
+      if (!matchesText) return false;
+
+      // 2. Filtro de Fechas
+      if (_selectedDateRange != null) {
+        // Usamos directamente event.updatedAt que ya es DateTime
+        final eventDate = event.updatedAt;
+        
+        final start = _selectedDateRange!.start.subtract(const Duration(seconds: 1));
+        final end = _selectedDateRange!.end.add(const Duration(days: 1));
+        
+        final matchesDate = eventDate.isAfter(start) && eventDate.isBefore(end);
+        if (!matchesDate) return false;
       }
-    }
-    return today;
+
+      return true;
+    }).toList();
   }
 
   Future<void> _pickDateRange() async {
@@ -104,7 +120,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
               surface: Color(0xFF1E1E1E),
               onSurface: Colors.white,
               secondary: Color(0xFF4CAF50),
-            ), dialogTheme: const DialogTheme(backgroundColor: Color(0xFF1E1E1E)),
+            ), 
+            dialogTheme: const DialogTheme(backgroundColor: Color(0xFF1E1E1E)),
           ),
           child: child!,
         );
@@ -116,31 +133,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
         _selectedDateRange = newDateRange;
       });
     }
-  }
-
-  // --- FILTRADO (Adaptado a EventModel) ---
-  List<EventModel> _getFilteredEvents() {
-    return _allEvents.where((event) {
-      // 1. Filtro de Texto (Usamos propiedades del modelo)
-      final matchesText = _searchQuery.isEmpty || 
-          event.name.toLowerCase().contains(_searchQuery) ||
-          event.company.toLowerCase().contains(_searchQuery) ||
-          event.code.toLowerCase().contains(_searchQuery);
-
-      if (!matchesText) return false;
-
-      // 2. Filtro de Fechas
-      if (_selectedDateRange != null) {
-        final eventDate = _parseDateString(event.dateTime);
-        final start = _selectedDateRange!.start.subtract(const Duration(seconds: 1));
-        final end = _selectedDateRange!.end.add(const Duration(days: 1));
-        
-        final matchesDate = eventDate.isAfter(start) && eventDate.isBefore(end);
-        if (!matchesDate) return false;
-      }
-
-      return true;
-    }).toList();
   }
 
   @override
@@ -262,13 +254,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           )
                         : ListView(
                             children: filteredEvents.map((event) => EventCard(
-                                  eventName: event.name,
-                                  companyName: event.company,
-                                  eventCode: event.code,
-                                  dateTime: event.dateTime,
-                                  eventType: event.type,
-                                  isParticipating: false, // En histórico no mostramos iconos de estado
-                                  onTap: null, // Sin acción al tocar
+                                  // Mapeo de campos nuevos
+                                  eventName: event.description ?? 'Sin descripción',
+                                  companyName: event.client ?? 'Sin cliente',
+                                  eventCode: event.documentId ?? '---',
+                                  dateTime: _formatDate(event.updatedAt), // Formato de fecha
+                                  
+                                  // Nuevo Enum
+                                  assigmentType: event.assigmentType,
+                                  
+                                  isParticipating: false, // Histórico estático
+                                  onTap: null, 
                                 )).toList(),
                           ),
               ),
