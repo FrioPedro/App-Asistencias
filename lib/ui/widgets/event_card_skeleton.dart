@@ -16,8 +16,8 @@ class EventCardSkeleton extends StatelessWidget {
       // El widget Shimmer anima todo lo que está adentro
       child: Shimmer.fromColors(
         // Colores ajustados para tu tema oscuro:
-        baseColor: Colors.white.withOpacity(0.05),      // Gris muy oscuro
-        highlightColor: Colors.white.withOpacity(0.1),  // Brillo más claro
+        baseColor: Colors.white.withValues(alpha: 0.05),      // Gris muy oscuro
+        highlightColor: Colors.white.withValues(alpha: 0.1),  // Brillo más claro
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(

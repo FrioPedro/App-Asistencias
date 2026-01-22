@@ -104,7 +104,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               surface: Color(0xFF1E1E1E),
               onSurface: Colors.white,
               secondary: Color(0xFF4CAF50),
-            ), dialogTheme: DialogThemeData(backgroundColor: const Color(0xFF1E1E1E)),
+            ), dialogTheme: const DialogThemeData(backgroundColor: const Color(0xFF1E1E1E)),
           ),
           child: child!,
         );
@@ -177,7 +177,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.04),
+                        fillColor: Colors.white.withValues(alpha: 0.04),
                         hintText: 'Buscar evento...',
                         hintStyle: TextStyle(color: Colors.grey[600]),
                         prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
@@ -222,9 +222,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50).withOpacity(0.15),
+                      color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.5)),
+                      border: Border.all(color: const Color(0xFF4CAF50).withValues(alpha: 0.5)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,

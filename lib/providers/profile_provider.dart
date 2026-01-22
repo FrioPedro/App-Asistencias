@@ -9,12 +9,10 @@ class ProfileProvider {
 
       // Retornamos el modelo EXACTO de tu compañero
       return UserModel(
-        serverId: 1,
         names: 'CARLOS ALEJANDRO',
         lastNames: 'SMITH TAY',
         nationalId: '20230270D',
         zone: 'LIMA - PERÚ',
-        token: 'token_de_prueba_123', // Campo obligatorio en su modelo
       );
     } catch (e) {
       print("Error cargando perfil: $e");
