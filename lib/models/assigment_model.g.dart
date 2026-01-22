@@ -2,7 +2,7 @@
 
 part of 'assigment_model.dart';
 
-// *************************************************************************
+// **************************************************************************
 // IsarCollectionGenerator
 // **************************************************************************
 
@@ -17,34 +17,39 @@ const AssigmentModelSchema = CollectionSchema(
   name: r'AssigmentModel',
   id: 1753838317202392815,
   properties: {
-    r'assigmentType': PropertySchema(
+    r'active': PropertySchema(
       id: 0,
+      name: r'active',
+      type: IsarType.bool,
+    ),
+    r'assigmentType': PropertySchema(
+      id: 1,
       name: r'assigmentType',
       type: IsarType.byte,
       enumMap: _AssigmentModelassigmentTypeEnumValueMap,
     ),
     r'client': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'client',
       type: IsarType.string,
     ),
     r'description': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'description',
       type: IsarType.string,
     ),
     r'documentId': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'documentId',
       type: IsarType.string,
     ),
     r'serverId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'serverId',
       type: IsarType.long,
     ),
     r'updatedAt': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'updatedAt',
       type: IsarType.dateTime,
     )
@@ -110,12 +115,13 @@ void _assigmentModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeByte(offsets[0], object.assigmentType.index);
-  writer.writeString(offsets[1], object.client);
-  writer.writeString(offsets[2], object.description);
-  writer.writeString(offsets[3], object.documentId);
-  writer.writeLong(offsets[4], object.serverId);
-  writer.writeDateTime(offsets[5], object.updatedAt);
+  writer.writeBool(offsets[0], object.active);
+  writer.writeByte(offsets[1], object.assigmentType.index);
+  writer.writeString(offsets[2], object.client);
+  writer.writeString(offsets[3], object.description);
+  writer.writeString(offsets[4], object.documentId);
+  writer.writeLong(offsets[5], object.serverId);
+  writer.writeDateTime(offsets[6], object.updatedAt);
 }
 
 AssigmentModel _assigmentModelDeserialize(
@@ -125,16 +131,17 @@ AssigmentModel _assigmentModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = AssigmentModel(
+    active: reader.readBoolOrNull(offsets[0]) ?? true,
     assigmentType: _AssigmentModelassigmentTypeValueEnumMap[
-            reader.readByteOrNull(offsets[0])] ??
+            reader.readByteOrNull(offsets[1])] ??
         AssigmentType.projectOrder,
-    client: reader.readStringOrNull(offsets[1]),
-    description: reader.readStringOrNull(offsets[2]),
-    documentId: reader.readStringOrNull(offsets[3]),
-    serverId: reader.readLongOrNull(offsets[4]),
+    client: reader.readStringOrNull(offsets[2]),
+    description: reader.readStringOrNull(offsets[3]),
+    documentId: reader.readStringOrNull(offsets[4]),
+    serverId: reader.readLongOrNull(offsets[5]),
   );
   object.id = id;
-  object.updatedAt = reader.readDateTime(offsets[5]);
+  object.updatedAt = reader.readDateTime(offsets[6]);
   return object;
 }
 
@@ -146,18 +153,20 @@ P _assigmentModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readBoolOrNull(offset) ?? true) as P;
+    case 1:
       return (_AssigmentModelassigmentTypeValueEnumMap[
               reader.readByteOrNull(offset)] ??
           AssigmentType.projectOrder) as P;
-    case 1:
-      return (reader.readStringOrNull(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 5:
+      return (reader.readLongOrNull(offset)) as P;
+    case 6:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -406,6 +415,16 @@ extension AssigmentModelQueryWhere
 
 extension AssigmentModelQueryFilter
     on QueryBuilder<AssigmentModel, AssigmentModel, QFilterCondition> {
+  QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
+      activeEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'active',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
       assigmentTypeEqualTo(AssigmentType value) {
     return QueryBuilder.apply(this, (query) {
@@ -1118,6 +1137,19 @@ extension AssigmentModelQueryLinks
 
 extension AssigmentModelQuerySortBy
     on QueryBuilder<AssigmentModel, AssigmentModel, QSortBy> {
+  QueryBuilder<AssigmentModel, AssigmentModel, QAfterSortBy> sortByActive() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AssigmentModel, AssigmentModel, QAfterSortBy>
+      sortByActiveDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.desc);
+    });
+  }
+
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterSortBy>
       sortByAssigmentType() {
     return QueryBuilder.apply(this, (query) {
@@ -1202,6 +1234,19 @@ extension AssigmentModelQuerySortBy
 
 extension AssigmentModelQuerySortThenBy
     on QueryBuilder<AssigmentModel, AssigmentModel, QSortThenBy> {
+  QueryBuilder<AssigmentModel, AssigmentModel, QAfterSortBy> thenByActive() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AssigmentModel, AssigmentModel, QAfterSortBy>
+      thenByActiveDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.desc);
+    });
+  }
+
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterSortBy>
       thenByAssigmentType() {
     return QueryBuilder.apply(this, (query) {
@@ -1298,6 +1343,12 @@ extension AssigmentModelQuerySortThenBy
 
 extension AssigmentModelQueryWhereDistinct
     on QueryBuilder<AssigmentModel, AssigmentModel, QDistinct> {
+  QueryBuilder<AssigmentModel, AssigmentModel, QDistinct> distinctByActive() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'active');
+    });
+  }
+
   QueryBuilder<AssigmentModel, AssigmentModel, QDistinct>
       distinctByAssigmentType() {
     return QueryBuilder.apply(this, (query) {
@@ -1345,6 +1396,12 @@ extension AssigmentModelQueryProperty
   QueryBuilder<AssigmentModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<AssigmentModel, bool, QQueryOperations> activeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'active');
     });
   }
 

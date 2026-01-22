@@ -17,23 +17,28 @@ const UserModelSchema = CollectionSchema(
   name: r'UserModel',
   id: 7195426469378571114,
   properties: {
-    r'lastNames': PropertySchema(
+    r'active': PropertySchema(
       id: 0,
+      name: r'active',
+      type: IsarType.bool,
+    ),
+    r'lastNames': PropertySchema(
+      id: 1,
       name: r'lastNames',
       type: IsarType.string,
     ),
     r'names': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'names',
       type: IsarType.string,
     ),
     r'nationalId': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'nationalId',
       type: IsarType.string,
     ),
     r'zone': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'zone',
       type: IsarType.string,
     )
@@ -91,10 +96,11 @@ void _userModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.lastNames);
-  writer.writeString(offsets[1], object.names);
-  writer.writeString(offsets[2], object.nationalId);
-  writer.writeString(offsets[3], object.zone);
+  writer.writeBool(offsets[0], object.active);
+  writer.writeString(offsets[1], object.lastNames);
+  writer.writeString(offsets[2], object.names);
+  writer.writeString(offsets[3], object.nationalId);
+  writer.writeString(offsets[4], object.zone);
 }
 
 UserModel _userModelDeserialize(
@@ -104,10 +110,11 @@ UserModel _userModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = UserModel(
-    lastNames: reader.readStringOrNull(offsets[0]),
-    names: reader.readStringOrNull(offsets[1]),
-    nationalId: reader.readStringOrNull(offsets[2]),
-    zone: reader.readStringOrNull(offsets[3]),
+    active: reader.readBoolOrNull(offsets[0]) ?? true,
+    lastNames: reader.readStringOrNull(offsets[1]),
+    names: reader.readStringOrNull(offsets[2]),
+    nationalId: reader.readStringOrNull(offsets[3]),
+    zone: reader.readStringOrNull(offsets[4]),
   );
   object.id = id;
   return object;
@@ -121,12 +128,14 @@ P _userModelDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset) ?? true) as P;
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -224,6 +233,16 @@ extension UserModelQueryWhere
 
 extension UserModelQueryFilter
     on QueryBuilder<UserModel, UserModel, QFilterCondition> {
+  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> activeEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'active',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -877,6 +896,18 @@ extension UserModelQueryLinks
     on QueryBuilder<UserModel, UserModel, QFilterCondition> {}
 
 extension UserModelQuerySortBy on QueryBuilder<UserModel, UserModel, QSortBy> {
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByActive() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByActiveDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QAfterSortBy> sortByLastNames() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lastNames', Sort.asc);
@@ -928,6 +959,18 @@ extension UserModelQuerySortBy on QueryBuilder<UserModel, UserModel, QSortBy> {
 
 extension UserModelQuerySortThenBy
     on QueryBuilder<UserModel, UserModel, QSortThenBy> {
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByActive() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserModel, UserModel, QAfterSortBy> thenByActiveDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'active', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -991,6 +1034,12 @@ extension UserModelQuerySortThenBy
 
 extension UserModelQueryWhereDistinct
     on QueryBuilder<UserModel, UserModel, QDistinct> {
+  QueryBuilder<UserModel, UserModel, QDistinct> distinctByActive() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'active');
+    });
+  }
+
   QueryBuilder<UserModel, UserModel, QDistinct> distinctByLastNames(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1025,6 +1074,12 @@ extension UserModelQueryProperty
   QueryBuilder<UserModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<UserModel, bool, QQueryOperations> activeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'active');
     });
   }
 

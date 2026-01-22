@@ -26,6 +26,7 @@ class AssigmentModel {
   String? documentId;
   String? client;
   String? description;
+  bool active = true;
  
 
   @enumerated
@@ -39,6 +40,7 @@ class AssigmentModel {
       this.client,
       this.description,
       this.assigmentType = AssigmentType.projectOrder,
+      this.active = true,
     });
 
 
@@ -55,8 +57,7 @@ class AssigmentModel {
 
     final prefix = document.length >= 3 ? document.substring(0, 3) : '';
     assigmentType = AssigmentTypeX.fromCode(prefix);
-
-    
+    active = true;
   }
 }
 
