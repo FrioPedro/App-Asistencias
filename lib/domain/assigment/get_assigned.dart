@@ -61,6 +61,7 @@ class GetAssigned {
 
       return data
           .map<AssigmentModel>((json) => AssigmentModel.fromJson(json))
+          
           .toList();
     }
     return [];
