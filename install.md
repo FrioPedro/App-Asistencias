@@ -14,3 +14,7 @@ Configurar el entorno de sistema en win
 Instalar version de flutter
 
 fvm install 3.22.3
+
+Confirmar que se esta en la version establecida
+
+fvm flutter doctor -v
