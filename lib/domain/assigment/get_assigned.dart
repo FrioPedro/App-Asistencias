@@ -1,7 +1,7 @@
-import 'package:app_asistencias/models/assignment_model.dart';
+import 'package:app_asistencias/models/assigment_model.dart';
 
 class GetAssigned {
-  static Future<List<AssignmentModel>> fetchAssignment() async {
+  static Future<List<AssigmentModel>> fetchAssignment() async {
     return [];
   }
 }
