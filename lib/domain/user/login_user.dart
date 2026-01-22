@@ -1,7 +1,5 @@
 import 'package:app_asistencias/core/enpoinService.dart';
-import 'package:dio/dio.dart';
 import 'package:app_asistencias/domain/token/token.dart';
-import 'dart:convert';
 
 class LoginUser {
 
