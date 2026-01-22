@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
 
-/// Enum para clasificar el tipo de evento
-/// - emergency: Evento de emergencia (rojo)
-/// - technicalVisit: Visita técnica (azul)
-/// - other: Otro tipo de evento (gris)
-enum EventType { emergency, technicalVisit, other }
+// --- IMPORTANTE: Importamos el Enum desde el modelo ---
+// Esto hace que el 'EventType' de aquí sea EL MISMO que el de tu base de datos/provider.
+import '../../models/event_model.dart';
 
 /// Widget que muestra una tarjeta de evento
-/// Contiene información del evento y etiqueta de tipo.
-/// Cuando isParticipating == true, muestra un efecto visual de borde verde y un ícono de fondo.
 class EventCard extends StatelessWidget {
   /// Nombre del evento
   final String eventName;
@@ -23,7 +19,7 @@ class EventCard extends StatelessWidget {
   /// Fecha y hora del evento
   final String dateTime;
 
-  /// Tipo de evento (Emergency, TechnicalVisit, Other)
+  /// Tipo de evento (Emergency, TechnicalVisit, Other) - Viene de event_model.dart
   final EventType eventType;
 
   /// Callback ejecutado al tocar la tarjeta
@@ -35,12 +31,6 @@ class EventCard extends StatelessWidget {
   /// Icono grande difuminado de fondo (opcional, solo si participa)
   final IconData? actionIcon;
 
-  /// Método auxiliar para compatibilidad con código legacy
-  static EventType fromIsEmergency(bool isEmergency) {
-    if (isEmergency) return EventType.emergency;
-    return EventType.other;
-  }
-
   /// Constructor del EventCard
   const EventCard({
     super.key,
@@ -51,7 +41,7 @@ class EventCard extends StatelessWidget {
     this.eventType = EventType.other,
     this.onTap,
     this.isParticipating = false,
-    this.actionIcon, // Nuevo parámetro
+    this.actionIcon,
   });
 
   @override
@@ -61,7 +51,6 @@ class EventCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         // Importante: clipBehavior recorta el ícono de fondo que se sale del contenedor
-        // Esto evita que el efecto de blur se vea fuera de las esquinas redondeadas
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           color: const Color(0xFF1F1F1F), // Gris oscuro
@@ -84,32 +73,27 @@ class EventCard extends StatelessWidget {
         child: Stack(
           children: [
             // --- CAPA 1: ÍCONO DE FONDO CON EFECTO DE BARRIDO LINEAL ---
-            // Solo se muestra si está participando y se le pasó un ícono.
-            // Se coloca PRIMERO en el Stack para que quede DETRÁS del texto.
             if (isParticipating && actionIcon != null)
               Positioned(
-                right: -30, // Desplazado a la derecha para efecto de corte
-                top: 0, // Ocupa todo el alto verticalmente
+                right: -30,
+                top: 0,
                 bottom: 0,
                 child: SizedBox(
-                  width: 180, // Ancho del área del ícono
-                  // Usamos ShaderMask para aplicar el gradiente de transparencia
+                  width: 180,
                   child: ShaderMask(
                     shaderCallback: (rect) {
                       return const LinearGradient(
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                         colors: [
-                          Colors.transparent, // Izquierda: Totalmente invisible
-                          Colors.transparent, // Punto medio: Sigue invisible para asegurar limpieza
-                          Colors.black,       // Derecha: Visible (Opaco)
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.black,
                         ],
-                        // STOPS: 0.0 a 0.2 mantiene transparencia total.
-                        // De 0.2 a 1.0 hace la transición a visible.
-                        stops: [0.0, 0.2, 1.0], 
+                        stops: [0.0, 0.2, 1.0],
                       ).createShader(rect);
                     },
-                    blendMode: BlendMode.dstIn, // Aplica la máscara
+                    blendMode: BlendMode.dstIn,
                     child: Stack(
                       children: [
                         // 1.1 Versión Borrosa (Glow de fondo)
@@ -118,8 +102,8 @@ class EventCard extends StatelessWidget {
                             imageFilter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
                             child: Icon(
                               actionIcon,
-                              size: 120, // Tamaño gigante
-                              color: Colors.white.withOpacity(0.3), // Un poco más brillante
+                              size: 120,
+                              color: Colors.white.withOpacity(0.3),
                             ),
                           ),
                         ),
@@ -128,7 +112,6 @@ class EventCard extends StatelessWidget {
                           child: Icon(
                             actionIcon,
                             size: 120,
-                            // Mismo color base pero con opacidad elegante
                             color: Colors.white.withOpacity(0.2),
                           ),
                         ),
@@ -139,7 +122,6 @@ class EventCard extends StatelessWidget {
               ),
 
             // --- CAPA 2: CONTENIDO DE LA TARJETA (TEXTOS) ---
-            // Se coloca DESPUÉS en el Stack para que siempre esté legible ENCIMA del ícono
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(

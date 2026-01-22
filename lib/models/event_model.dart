@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 // El Enum que ya usabas
 enum EventType { other, technicalVisit, emergency }
