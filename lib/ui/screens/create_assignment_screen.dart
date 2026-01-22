@@ -282,7 +282,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                           _selectedCollaborators[collaborator] = value ?? false;
                         });
                         // Actualizamos también el estado de la pantalla principal
-                        this.setState(() {}); 
+                        setState(() {}); 
                       },
                       title: Text(collaborator, style: const TextStyle(color: Colors.white)),
                       checkColor: Colors.white,
