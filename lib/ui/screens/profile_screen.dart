@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/user_model.dart';          // El modelo de tu compañero
 import '../../providers/profile_provider.dart'; // El provider adaptado
+import '../widgets/log_viewer_screen.dart';     // Pantalla de logs (Modo Dev)
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,6 +16,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserModel? _user;       
   bool _isLoading = true; 
   bool isAutoExitEnabled = false; 
+
+  // Variables para el modo desarrollador (Triple Tap)
+  int _tapCount = 0;
+  DateTime? _lastTapTime;
+
+  void _handleSecretTap() {
+    final now = DateTime.now();
+    // Si pasó más de 500ms desde el último toque, reiniciamos el contador
+    if (_lastTapTime == null || now.difference(_lastTapTime!) > const Duration(milliseconds: 500)) {
+      _tapCount = 0;
+    }
+    
+    _tapCount++;
+    _lastTapTime = now;
+
+    if (_tapCount == 3) {
+      _tapCount = 0; // Reiniciar
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const LogViewerScreen()));
+    }
+  }
 
   @override
   void initState() {
@@ -125,6 +146,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: Colors.white, 
                   fontWeight: FontWeight.bold
                 ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // Texto de versión con secreto (Triple Tap)
+          GestureDetector(
+            onTap: _handleSecretTap,
+            behavior: HitTestBehavior.opaque, // Detecta toques aunque sea texto
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                "Versión 1.0.2",
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ),
           ),

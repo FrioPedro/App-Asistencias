@@ -9,6 +9,7 @@ import 'profile_screen.dart';
 import 'create_assignment_screen.dart';
 import 'history_screen.dart';
 import 'report_selection_screen.dart';
+import '../widgets/log_viewer_screen.dart'; // Importamos la pantalla de logs
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
