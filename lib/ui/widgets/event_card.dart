@@ -231,7 +231,6 @@ class EventCard extends StatelessWidget {
       
       case AssigmentType.officeAssistance:
       case AssigmentType.other:
-      default:
         return Colors.white.withOpacity(0.1); // Gris (Otros)
     }
   }

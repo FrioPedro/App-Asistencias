@@ -48,7 +48,6 @@ class LogProvider {
       case LogType.warning:
         return const Color(0xFFFFCA28); // Ámbar
       case LogType.info:
-      default:
         return const Color(0xFF42A5F5); // Azul claro
     }
   }
