@@ -1,5 +1,6 @@
 import '../models/user_model.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
+import 'package:app_asistencias/domain/auth/session.dart';
 
 class ProfileProvider {
   
@@ -13,5 +14,10 @@ class ProfileProvider {
       print("Error cargando perfil: $e");
       return null;
     }
+  }
+
+  /// Cierra la sesión actual y notifica a la app
+  Future<void> logout() async {
+    await session.logout();
   }
 }

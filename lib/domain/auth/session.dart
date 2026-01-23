@@ -15,7 +15,7 @@ class Session extends ChangeNotifier {
   }
 
   Future<void> login(String token) async {
-    await Token.saveToken(token);
+    //await Token.saveToken(token);
     _token = token;
     notifyListeners();
   }
@@ -28,3 +28,6 @@ class Session extends ChangeNotifier {
   }
 
 }
+
+// Instancia global compartida para toda la aplicación
+final session = Session();

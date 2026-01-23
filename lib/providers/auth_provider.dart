@@ -1,4 +1,6 @@
 import 'package:app_asistencias/domain/auth/login_user.dart';
+import 'package:app_asistencias/domain/auth/session.dart';
+
 
 class AuthProvider {
   /// Simula el inicio de sesión contra una API.
@@ -6,7 +8,12 @@ class AuthProvider {
   Future<bool> login(String username, String password) async {
     try {
       
-      return await LoginUser.authenticate(username,password);
+      final state = await LoginUser.authenticate(username,password); print(state);
+      if (state){
+        session.login("");
+        return true;
+      }
+      return false;
     } catch (e) {
       print('Error en login: $e');
       return false;

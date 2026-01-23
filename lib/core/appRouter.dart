@@ -15,8 +15,7 @@ Page<void> buildPage(Widget child, GoRouterState state) => CustomTransitionPage<
   child: child,
 );
 
-final session = Session();
-
+// Al eliminar 'final session = Session();', usamos la instancia global importada arriba
 final router = GoRouter(
   initialLocation: session.isLoggedIn ? '/home' : '/login',
   refreshListenable: session, // <- clave (sin providers)

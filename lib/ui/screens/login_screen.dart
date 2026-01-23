@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../providers/auth_provider.dart'; // <--- Importamos el provider
-import 'events_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -56,11 +55,8 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
 
       if (success) {
-        // ÉXITO: Navegar a Eventos
-        Navigator.pushReplacement( // Usamos pushReplacement para que no pueda volver al login con "atrás"
-          context,
-          MaterialPageRoute(builder: (context) => const EventsScreen()),
-        );
+        // ÉXITO: No es necesario navegar manualmente.
+        // El GoRouter detectará el cambio en 'session' y redirigirá a '/home' automáticamente.
       } else {
         // ERROR: Mostrar mensaje
         ScaffoldMessenger.of(context).showSnackBar(
