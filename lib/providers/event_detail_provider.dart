@@ -1,5 +1,4 @@
 
-
 class EventDetailProvider {
   
   /// Simula obtener detalles extendidos de un evento mediante su ID

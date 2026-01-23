@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
-import '../../models/assigment_model.dart';      // Nuevo modelo
+import '../../models/activity_model.dart';       // Usamos ActivityModel para el historial
 import '../../providers/history_provider.dart';  // Provider actualizado
 import '../widgets/event_card.dart';
 import '../widgets/event_card_skeleton.dart';
@@ -24,7 +24,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   DateTimeRange? _selectedDateRange;
   
   // Lista de nuevos modelos
-  List<AssigmentModel> _allEvents = [];
+  List<ActivityModel> _allEvents = [];
 
   @override
   void initState() {
@@ -73,7 +73,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   // --- LÓGICA DE FILTRADO (Adaptada a AssigmentModel) ---
   
-  List<AssigmentModel> _getFilteredEvents() {
+  List<ActivityModel> _getFilteredEvents() {
     return _allEvents.where((event) {
       // 1. Filtro de Texto (Usamos propiedades nuevas con Null Check)
       final desc = (event.description ?? '').toLowerCase();
@@ -89,8 +89,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       // 2. Filtro de Fechas
       if (_selectedDateRange != null) {
-        // Usamos directamente event.updatedAt que ya es DateTime
-        final eventDate = event.updatedAt;
+        // Usamos directamente event.timestamp que ya es DateTime
+        final eventDate = event.timestamp;
         
         final start = _selectedDateRange!.start.subtract(const Duration(seconds: 1));
         final end = _selectedDateRange!.end.add(const Duration(days: 1));
@@ -258,16 +258,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   eventName: event.description ?? 'Sin descripción',
                                   companyName: event.client ?? 'Sin cliente',
                                   eventCode: event.documentId ?? '---',
-                                  dateTime: _formatDate(event.updatedAt), // Formato de fecha
+                                  dateTime: _formatDate(event.timestamp), // Formato de fecha
                                   
                                   // Nuevo Enum
-                                  assigmentType: event.assigmentType,
+                                  assigmentType: event.activityType,
                                   
                                   isParticipating: false, // Histórico estático
                                   onTap: null, 
                                   
-                                  // PRUEBA VISUAL: Simulamos que este cliente específico no se ha sincronizado
-                                  hasPendingSync: event.client == 'FrioPacking Perú',
+                                  hasPendingSync: !event.isSynced,
                                 )).toList(),
                           ),
               ),
