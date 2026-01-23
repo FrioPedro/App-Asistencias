@@ -10,7 +10,7 @@ class AuthProvider {
       
       final state = await LoginUser.authenticate(username,password); print(state);
       if (state){
-        session.login("");
+        await session.init(); // Recargamos el token real guardado para activar la sesión
         return true;
       }
       return false;
