@@ -24,7 +24,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   DateTimeRange? _selectedDateRange;
   
   // Lista de nuevos modelos
-  List<ActivityModel> _allEvents = [];
+  List<ActivityModel> _allActivities = [];
 
   @override
   void initState() {
@@ -38,10 +38,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   /// Pide los datos al Provider
   Future<void> _loadData() async {
-    final loadedEvents = await _historyService.fetchHistory();
+    final loadedActivities = await _historyService.fetchHistory();
     if (mounted) {
       setState(() {
-        _allEvents = loadedEvents;
+        _allActivities = loadedActivities;
         _isLoading = false;
       });
     }
@@ -73,12 +73,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   // --- LÓGICA DE FILTRADO (Adaptada a AssigmentModel) ---
   
-  List<ActivityModel> _getFilteredEvents() {
-    return _allEvents.where((event) {
+  List<ActivityModel> _getFilteredActivities() {
+    return _allActivities.where((activity) {
       // 1. Filtro de Texto (Usamos propiedades nuevas con Null Check)
-      final desc = (event.description ?? '').toLowerCase();
-      final client = (event.client ?? '').toLowerCase();
-      final docId = (event.documentId ?? '').toLowerCase();
+      final desc = (activity.description ?? '').toLowerCase();
+      final client = (activity.client ?? '').toLowerCase();
+      final docId = (activity.documentId ?? '').toLowerCase();
 
       final matchesText = _searchQuery.isEmpty || 
           desc.contains(_searchQuery) ||
@@ -89,13 +89,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       // 2. Filtro de Fechas
       if (_selectedDateRange != null) {
-        // Usamos directamente event.timestamp que ya es DateTime
-        final eventDate = event.timestamp;
+        // Usamos directamente activity.timestamp con un fallback por seguridad
+        final activityDate = activity.timestamp ?? DateTime.now();
         
         final start = _selectedDateRange!.start.subtract(const Duration(seconds: 1));
         final end = _selectedDateRange!.end.add(const Duration(days: 1));
         
-        final matchesDate = eventDate.isAfter(start) && eventDate.isBefore(end);
+        final matchesDate = activityDate.isAfter(start) && activityDate.isBefore(end);
         if (!matchesDate) return false;
       }
 
@@ -137,7 +137,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredEvents = _getFilteredEvents();
+    final filteredActivities = _getFilteredActivities();
     final isDateFilterActive = _selectedDateRange != null;
 
     return Scaffold(
@@ -170,7 +170,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.04),
-                        hintText: 'Buscar evento...',
+                        hintText: 'Buscar actividad...',
                         hintStyle: TextStyle(color: Colors.grey[600]),
                         prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
                         suffixIcon: _searchQuery.isNotEmpty
@@ -241,32 +241,32 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Expanded(
                 child: _isLoading 
                     ? _buildSkeletons() 
-                    : filteredEvents.isEmpty
+                    : filteredActivities.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(Icons.history_toggle_off, size: 60, color: Colors.grey[800]),
                                 const SizedBox(height: 16),
-                                Text('No se encontraron eventos', style: TextStyle(color: Colors.grey[600])),
+                                Text('No se encontraron actividades', style: TextStyle(color: Colors.grey[600])),
                               ],
                             ),
                           )
                         : ListView(
-                            children: filteredEvents.map((event) => EventCard(
+                            children: filteredActivities.map((activity) => EventCard(
                                   // Mapeo de campos nuevos
-                                  eventName: event.description ?? 'Sin descripción',
-                                  companyName: event.client ?? 'Sin cliente',
-                                  eventCode: event.documentId ?? '---',
-                                  dateTime: _formatDate(event.timestamp), // Formato de fecha
+                                  eventName: activity.description ?? 'Sin descripción',
+                                  companyName: activity.client ?? 'Sin cliente',
+                                  eventCode: activity.documentId ?? '---',
+                                  dateTime: _formatDate(activity.timestamp ?? DateTime.now()), // Formato de fecha
                                   
                                   // Nuevo Enum
-                                  assigmentType: event.activityType,
+                                  assigmentType: activity.activityType,
                                   
                                   isParticipating: false, // Histórico estático
                                   onTap: null, 
                                   
-                                  hasPendingSync: !event.isSynced,
+                                  hasPendingSync: !(activity.isSynced ?? true),
                                 )).toList(),
                           ),
               ),

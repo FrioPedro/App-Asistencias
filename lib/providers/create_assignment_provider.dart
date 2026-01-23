@@ -4,7 +4,7 @@ class CreateAssignmentProvider {
   
   /// Simula el envío de la nueva asignación al servidor
   /// Retorna `true` si fue exitoso, `false` si falló.
-  Future<bool> createAssignment(AssignmentModel assignment) async {
+  Future<bool> createAssignment(ActivityModel assignment) async {
     try {
       // 1. Simular validación y espera de red (2 segundos)
       await Future.delayed(const Duration(seconds: 2));

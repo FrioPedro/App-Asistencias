@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import '../../models/activity_model.dart';          // Modelo de datos
 import '../../providers/create_assignment_provider.dart'; // Lógica de negocio
 
-class CreateAssignmentScreen extends StatefulWidget {
-  const CreateAssignmentScreen({super.key});
+class CreateActivityScreen extends StatefulWidget {
+  const CreateActivityScreen({super.key});
 
   @override
-  State<CreateAssignmentScreen> createState() => _CreateAssignmentScreenState();
+  State<CreateActivityScreen> createState() => _CreateActivityScreenState();
 }
 
-class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
+class _CreateActivityScreenState extends State<CreateActivityScreen> {
   // 1. Instancia del Provider
   final CreateAssignmentProvider _provider = CreateAssignmentProvider();
 
@@ -19,7 +19,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
 
   // Variables de formulario
   String _selectedClient = 'FRIOPACKING S.A.C.';
-  String _selectedAssignmentType = 'VISITA TÉCNICA';
+  String _selectedActivityType = 'VISITA TÉCNICA';
   String _selectedZone = 'SUR';
   
   // Estado de carga para el botón
@@ -63,18 +63,16 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
     setState(() => _isLoading = true);
 
     // 3. Crear el objeto Modelo
-    final newAssignment = AssignmentModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    final newActivity = ActivityModel(
       client: _selectedClient,
-      type: _selectedAssignmentType,
-      zone: _selectedZone,
       description: _descriptionController.text,
-      collaborators: selectedList,
-      createdAt: DateTime.now(),
+      collaborator: selectedList.join(', '), // Guardamos como string para el modelo
+      timestamp: DateTime.now(),
+      isSynced: false,
     );
 
     // 4. Llamar al Provider
-    final success = await _provider.createAssignment(newAssignment);
+    final success = await _provider.createAssignment(newActivity);
 
     if (mounted) {
       setState(() => _isLoading = false); // Apagar carga
@@ -106,7 +104,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Crear asignación',
+          'Crear actividad',
           style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
@@ -181,11 +179,11 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
 
                 // TIPO
                 _buildFormField(
-                  label: 'Tipo de asignación',
+                  label: 'Tipo de actividad',
                   child: _buildDropdown(
-                    value: _selectedAssignmentType,
+                    value: _selectedActivityType,
                     items: const ['VISITA TÉCNICA', 'MANTENIMIENTO', 'REPARACIÓN', 'INSTALACIÓN'],
-                    onChanged: (val) => setState(() => _selectedAssignmentType = val!),
+                    onChanged: (val) => setState(() => _selectedActivityType = val!),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -216,7 +214,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                     child: _isLoading 
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                         : const Text(
-                            'CREAR ASIGNACIÓN',
+                            'CREAR ACTIVIDAD',
                             style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                   ),

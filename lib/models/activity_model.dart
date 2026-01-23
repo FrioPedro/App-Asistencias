@@ -136,11 +136,11 @@ class ActivityModel {
   double? longitude;
 
   @Index()
-  DateTime timestamp = DateTime.now();
+  DateTime? timestamp;
 
   /// Estado de sincronización
   @Index()
-  bool isSynced = false;
+  bool? isSynced;
 
   ActivityModel({
     this.serverId,
@@ -154,10 +154,9 @@ class ActivityModel {
     this.activityType = AssigmentType.other,
     this.latitude,
     this.longitude,
-    DateTime? timestamp,
-    bool? isSynced,
-  })  : timestamp = timestamp ?? DateTime.now(),
-        isSynced = isSynced ?? false;
+    this.timestamp,
+    this.isSynced = false,
+  });
 
   /// ✅ Del server (evento / historial)
   ActivityModel.fromServer(Map<String, dynamic> json) {
@@ -189,7 +188,7 @@ class ActivityModel {
     required String collaboratorId,
     required String zone,
   }) {
-    final ts = timestamp.toIso8601String().replaceFirst('T', ' ').split('.').first;
+    final ts = (timestamp ?? DateTime.now()).toIso8601String().replaceFirst('T', ' ').split('.').first;
 
     return {
       'project': project,

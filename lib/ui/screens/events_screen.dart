@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ---
-import '../../models/assigment_model.dart';      // <--- TU NUEVO MODELO
+import '../../models/activity_model.dart';      // <--- USANDO ACTIVITYMODEL
 import '../../providers/events_provider.dart';   // Asegúrate de que este provider retorne List<AssigmentModel>
 import '../widgets/event_card.dart';
 import '../widgets/event_card_skeleton.dart';
 import 'profile_screen.dart';
-import 'create_assignment_screen.dart';
+import 'create_activity_screen.dart';
 import 'history_screen.dart';
 import 'report_selection_screen.dart';
 
@@ -22,7 +22,7 @@ class _EventsScreenState extends State<EventsScreen> {
   final EventsProvider _eventsService = EventsProvider();
 
   // 2. Estado local de la pantalla
-  List<AssigmentModel> _events = [];    // <--- AHORA ES LISTA DE ASSIGMENTMODEL
+  List<ActivityModel> _activities = [];    // <--- CAMBIADO A ACTIVITYMODEL
   bool _isLoading = true;
   String _searchQuery = '';
   
@@ -43,12 +43,12 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   Future<void> _loadData() async {
-    // El provider debe devolver Future<List<AssigmentModel>>
-    final loadedEvents = await _eventsService.fetchEvents();
+    // El provider debe devolver Future<List<ActivityModel>>
+    final loadedActivities = await _eventsService.fetchEvents();
 
     if (mounted) {
       setState(() {
-        _events = loadedEvents;
+        _activities = loadedActivities;
         _isLoading = false;
       });
     }
@@ -80,10 +80,10 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   // Filtramos la lista local
-  List<AssigmentModel> _filterEvents() {
-    if (_searchQuery.isEmpty) return _events;
+  List<ActivityModel> _filterActivities() {
+    if (_searchQuery.isEmpty) return _activities;
     
-    return _events.where((event) {
+    return _activities.where((event) {
       // Usamos los nuevos campos con Null Check (?? '')
       final desc = (event.description ?? '').toLowerCase();
       final client = (event.client ?? '').toLowerCase();
@@ -111,7 +111,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredEvents = _filterEvents();
+    final filteredActivities = _filterActivities();
 
     return Scaffold(
       appBar: AppBar(
@@ -140,7 +140,7 @@ class _EventsScreenState extends State<EventsScreen> {
               Expanded(
                 child: _isLoading
                     ? _buildSkeletons()
-                    : _buildEventList(filteredEvents),
+                    : _buildEventList(filteredActivities),
               ),
             ],
           ),
@@ -159,7 +159,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _buildEventList(List<AssigmentModel> events) {
+  Widget _buildEventList(List<ActivityModel> events) {
     if (events.isEmpty) {
       return Center(
         child: Text(
@@ -184,10 +184,10 @@ class _EventsScreenState extends State<EventsScreen> {
           eventName: event.description ?? 'Sin descripción',
           companyName: event.client ?? 'Sin cliente',
           eventCode: event.documentId ?? '---',
-          dateTime: _formatDate(event.updatedAt), // Formateamos el DateTime
+          dateTime: _formatDate(event.timestamp ?? DateTime.now()), // Formateamos el DateTime
           
           // Pasamos el nuevo Enum (asegúrate de actualizar EventCard también)
-          assigmentType: event.assigmentType, 
+          assigmentType: event.activityType, 
           
           isParticipating: isParticipating,
           actionIcon: _participatingEvents[uniqueId],
@@ -233,7 +233,7 @@ class _EventsScreenState extends State<EventsScreen> {
           children: [
             _buildHeaderButton(Icons.history, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()))),
             const SizedBox(width: 12),
-            _buildHeaderButton(Icons.add, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateAssignmentScreen()))),
+            _buildHeaderButton(Icons.add, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateActivityScreen()))),
             const SizedBox(width: 12),
             _buildHeaderButton(Icons.person, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()))),
           ],
