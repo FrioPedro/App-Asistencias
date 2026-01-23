@@ -1,4 +1,4 @@
-import '../models/assignment_model.dart';
+import '../models/activity_model.dart';
 
 class CreateAssignmentProvider {
   

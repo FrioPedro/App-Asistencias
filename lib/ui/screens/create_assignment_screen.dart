@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 // --- IMPORTS ---
-import '../../models/assignment_model.dart';          // Modelo de datos
+import '../../models/activity_model.dart';          // Modelo de datos
 import '../../providers/create_assignment_provider.dart'; // Lógica de negocio
 
 class CreateAssignmentScreen extends StatefulWidget {
