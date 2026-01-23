@@ -8,13 +8,10 @@ class HistoryProvider {
   Future<List<AssigmentModel>> fetchHistory() async {
     try {
       // 1. Simulación de espera
-      await Future.delayed(const Duration(seconds: 3));
+      await Future.delayed(const Duration(seconds: 1)); // Reduje el tiempo para probar más rápido
 
       // 2. Retorno de datos
-      // Como pediste borrar lo simulado, aquí devolvemos una lista vacía.
-      // Cuando conectes ISAR, aquí harás: return await isar.assigmentModels.where().findAll();
       
-      /* --- EJEMPLO DE CÓMO CARGAR UN DATO MANUALMENTE (SI LO NECESITAS PARA PRUEBAS) ---
       return [
         AssigmentModel(
           serverId: 101,
@@ -32,9 +29,6 @@ class HistoryProvider {
           assigmentType: AssigmentType.technicalVisit, // VST
         )..updatedAt = DateTime.now().subtract(const Duration(hours: 2)),
       ];
-      -------------------------------------------------------------------------------- */
-
-      return []; // Lista vacía por ahora
       
     } catch (e) {
       debugPrint("Error cargando historial: $e");

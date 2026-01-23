@@ -25,7 +25,8 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   // Estado de carga para el botón
   bool _isLoading = false;
 
-  final List<String> _availableCollaborators = [
+  // OPTIMIZACIÓN: static const para evitar recrear la lista en memoria
+  static const List<String> _availableCollaborators = [
     'Juan Pérez', 'María García', 'Carlos López', 
     'Ana Martínez', 'Roberto Sánchez', 'Diana Flores',
   ];
@@ -125,7 +126,8 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                   label: 'Cliente',
                   child: _buildDropdown(
                     value: _selectedClient,
-                    items: ['FRIOPACKING S.A.C.', 'SUPERMERCADOS MÉNDEZ', 'HOTEL COSTA', 'DISTRIBUIDOR ABC', 'FRIGOLATINA'],
+                    // OPTIMIZACIÓN: const para no recrear la lista en cada build
+                    items: const ['FRIOPACKING S.A.C.', 'SUPERMERCADOS MÉNDEZ', 'HOTEL COSTA', 'DISTRIBUIDOR ABC', 'FRIGOLATINA'],
                     onChanged: (val) => setState(() => _selectedClient = val!),
                   ),
                 ),
@@ -185,7 +187,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                   label: 'Tipo de asignación',
                   child: _buildDropdown(
                     value: _selectedAssignmentType,
-                    items: ['VISITA TÉCNICA', 'MANTENIMIENTO', 'REPARACIÓN', 'INSTALACIÓN'],
+                    items: const ['VISITA TÉCNICA', 'MANTENIMIENTO', 'REPARACIÓN', 'INSTALACIÓN'],
                     onChanged: (val) => setState(() => _selectedAssignmentType = val!),
                   ),
                 ),
@@ -196,7 +198,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                   label: 'Zona',
                   child: _buildDropdown(
                     value: _selectedZone,
-                    items: ['SUR', 'NORTE', 'ESTE', 'OESTE'],
+                    items: const ['SUR', 'NORTE', 'ESTE', 'OESTE'],
                     onChanged: (val) => setState(() => _selectedZone = val!),
                   ),
                 ),
@@ -263,7 +265,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   // --- LÓGICA DE COLABORADORES ---
 
   void _showCollaboratorsDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -281,8 +283,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
                         setStateDialog(() {
                           _selectedCollaborators[collaborator] = value ?? false;
                         });
-                        // Actualizamos también el estado de la pantalla principal
-                        setState(() {}); 
+                        // OPTIMIZACIÓN: No llamamos a setState() aquí para evitar reconstruir la pantalla de fondo en cada click
                       },
                       title: Text(collaborator, style: const TextStyle(color: Colors.white)),
                       checkColor: Colors.white,
@@ -299,7 +300,10 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
           },
         );
       },
-    );
+    ).then((_) {
+      // OPTIMIZACIÓN: Actualizamos la pantalla principal SOLO cuando se cierra el diálogo
+      setState(() {});
+    });
   }
 
   String _getSelectedCollaboratorsText() {

@@ -265,6 +265,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   
                                   isParticipating: false, // Histórico estático
                                   onTap: null, 
+                                  
+                                  // PRUEBA VISUAL: Simulamos que este cliente específico no se ha sincronizado
+                                  hasPendingSync: event.client == 'FrioPacking Perú',
                                 )).toList(),
                           ),
               ),

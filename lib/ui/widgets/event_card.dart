@@ -30,6 +30,9 @@ class EventCard extends StatelessWidget {
   /// Icono grande difuminado de fondo (opcional, solo si participa)
   final IconData? actionIcon;
 
+  /// Indica si el registro está pendiente de sincronización (Offline)
+  final bool hasPendingSync;
+
   /// Constructor del EventCard
   const EventCard({
     super.key,
@@ -42,6 +45,7 @@ class EventCard extends StatelessWidget {
     this.onTap,
     this.isParticipating = false,
     this.actionIcon,
+    this.hasPendingSync = false,
   });
 
   @override
@@ -166,6 +170,17 @@ class EventCard extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                  // ÍCONO DE SINCRONIZACIÓN PENDIENTE (Offline)
+                  if (hasPendingSync)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8.0, bottom: 4.0),
+                      child: Icon(
+                        Icons.cloud_off_outlined,
+                        color: Colors.orangeAccent,
+                        size: 20,
+                      ),
+                    ),
 
                   // COLUMNA DERECHA: La etiqueta (Tag)
                   Container(
