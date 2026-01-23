@@ -110,23 +110,24 @@ class ActivityModel {
   @Index()
   String? documentId;
 
+  /// ✅ Cliente (ej: "FRIOPACKING S.A.C.")
+  @Index()
+  String? client;
+
   String? description;
   String? collaborator;
 
   /// Texto que llega del server
   String? motiveText;
 
-  /// Motivo para marcación (1 entrada / 2 salida)
   @Index()
   @enumerated
   MotiveType motive = MotiveType.entry;
 
-  /// Task (Oficina, Taller, Servicio, Transporte)
   @Index()
   @enumerated
   TaskType task = TaskType.office;
 
-  /// Tipo derivado del documento (EMG, PRY, etc.)
   @Index()
   @enumerated
   AssigmentType activityType = AssigmentType.other;
@@ -137,13 +138,14 @@ class ActivityModel {
   @Index()
   DateTime timestamp = DateTime.now();
 
-  /// ✅ SINCRONIZACIÓN
+  /// Estado de sincronización
   @Index()
-  bool isSynced = false; // 👈 siempre false por defecto
+  bool isSynced = false;
 
   ActivityModel({
     this.serverId,
     this.documentId,
+    this.client,
     this.description,
     this.collaborator,
     this.motiveText,
@@ -157,9 +159,10 @@ class ActivityModel {
   })  : timestamp = timestamp ?? DateTime.now(),
         isSynced = isSynced ?? false;
 
-  /// Del server → esto YA está sincronizado
+  /// ✅ Del server (evento / historial)
   ActivityModel.fromServer(Map<String, dynamic> json) {
     documentId = json['Document'] as String?;
+    client = json['Client'] as String?; // 👈 NUEVO
     description = json['Description'] as String?;
     collaborator = json['Collaborator'] as String?;
     motiveText = json['Motive'] as String?;
@@ -177,6 +180,26 @@ class ActivityModel {
     longitude = (json['Longitude'] as num?)?.toDouble();
     timestamp = _parseServerTimestamp(json['Timestamp']);
 
-    isSynced = true; // 👈 viene del server → ya sincronizado
+    isSynced = true; // viene del server → sincronizado
+  }
+
+  /// Payload para enviar marcación (NO incluye client)
+  Map<String, dynamic> toMarkPayload({
+    required int project,
+    required String collaboratorId,
+    required String zone,
+  }) {
+    final ts = timestamp.toIso8601String().replaceFirst('T', ' ').split('.').first;
+
+    return {
+      'project': project,
+      'motive': motive.id,
+      'collaborator': collaboratorId,
+      'latitude': latitude,
+      'longitude': longitude,
+      'timestamp': ts,
+      'zone': zone,
+      'task': task.id,
+    };
   }
 }
