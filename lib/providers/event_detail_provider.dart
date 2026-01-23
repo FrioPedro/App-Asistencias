@@ -1,4 +1,4 @@
-// lib/providers/event_detail_provider.dart
+
 
 class EventDetailProvider {
   

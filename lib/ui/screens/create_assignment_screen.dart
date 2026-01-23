@@ -96,6 +96,7 @@ class _CreateAssignmentScreenState extends State<CreateAssignmentScreen> {
   @override
   Widget build(BuildContext context) {
     // Usamos el color primario del tema o uno fijo si prefieres
+    final primaryColor = Theme.of(context).primaryColor; // O const Color(0xFF2E60C4)
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
