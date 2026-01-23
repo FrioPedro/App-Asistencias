@@ -72,7 +72,7 @@ class EventCard extends StatelessWidget {
                     offset: const Offset(0, 2),
                   )
                 ]
-              : [],
+              : const [],
         ),
         child: Stack(
           children: [
@@ -231,7 +231,6 @@ class EventCard extends StatelessWidget {
       
       case AssigmentType.officeAssistance:
       case AssigmentType.other:
-      default:
         return Colors.white.withOpacity(0.1); // Gris (Otros)
     }
   }
