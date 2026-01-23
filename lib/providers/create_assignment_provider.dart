@@ -12,7 +12,7 @@ class CreateAssignmentProvider {
       // Aquí iría tu llamada HTTP:
       // final response = await http.post(url, body: assignment.toJson());
       
-      print("Asignación creada: ${assignment.toJson()}");
+      //print("Asignación creada: ${assignment.toJson()}");
 
       return true; // Éxito
     } catch (e) {

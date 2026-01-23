@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ---
-import '../../models/activity_model.dart';      // <--- USANDO ACTIVITYMODEL
+import '../../models/assigment_model.dart';
 import '../../providers/events_provider.dart';   // Asegúrate de que este provider retorne List<AssigmentModel>
 import '../widgets/event_card.dart';
 import '../widgets/event_card_skeleton.dart';
@@ -22,7 +22,7 @@ class _EventsScreenState extends State<EventsScreen> {
   final EventsProvider _eventsService = EventsProvider();
 
   // 2. Estado local de la pantalla
-  List<ActivityModel> _activities = [];    // <--- CAMBIADO A ACTIVITYMODEL
+  List<AssigmentModel> _assignments = [];
   bool _isLoading = true;
   String _searchQuery = '';
   
@@ -44,11 +44,11 @@ class _EventsScreenState extends State<EventsScreen> {
 
   Future<void> _loadData() async {
     // El provider debe devolver Future<List<ActivityModel>>
-    final loadedActivities = await _eventsService.fetchEvents();
+    final loadedAssignments = await _eventsService.fetchEvents();
 
     if (mounted) {
       setState(() {
-        _activities = loadedActivities;
+        _assignments = loadedAssignments;
         _isLoading = false;
       });
     }
@@ -80,10 +80,10 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   // Filtramos la lista local
-  List<ActivityModel> _filterActivities() {
-    if (_searchQuery.isEmpty) return _activities;
+  List<AssigmentModel> _filterAssignments() {
+    if (_searchQuery.isEmpty) return _assignments;
     
-    return _activities.where((event) {
+    return _assignments.where((event) {
       // Usamos los nuevos campos con Null Check (?? '')
       final desc = (event.description ?? '').toLowerCase();
       final client = (event.client ?? '').toLowerCase();
@@ -111,7 +111,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredActivities = _filterActivities();
+    final filteredAssignments = _filterAssignments();
 
     return Scaffold(
       appBar: AppBar(
@@ -140,7 +140,7 @@ class _EventsScreenState extends State<EventsScreen> {
               Expanded(
                 child: _isLoading
                     ? _buildSkeletons()
-                    : _buildEventList(filteredActivities),
+                    : _buildEventList(filteredAssignments),
               ),
             ],
           ),
@@ -159,7 +159,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _buildEventList(List<ActivityModel> events) {
+  Widget _buildEventList(List<AssigmentModel> events) {
     if (events.isEmpty) {
       return Center(
         child: Text(
@@ -184,10 +184,10 @@ class _EventsScreenState extends State<EventsScreen> {
           eventName: event.description ?? 'Sin descripción',
           companyName: event.client ?? 'Sin cliente',
           eventCode: event.documentId ?? '---',
-          dateTime: _formatDate(event.timestamp ?? DateTime.now()), // Formateamos el DateTime
+          dateTime: _formatDate(event.updatedAt), // Formateamos el DateTime
           
           // Pasamos el nuevo Enum (asegúrate de actualizar EventCard también)
-          assigmentType: event.activityType, 
+          assigmentType: event.assigmentType, 
           
           isParticipating: isParticipating,
           actionIcon: _participatingEvents[uniqueId],
