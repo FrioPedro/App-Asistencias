@@ -1,4 +1,4 @@
-import 'package:app_asistencias/domain/user/login_user.dart';
+import 'package:app_asistencias/domain/auth/login_user.dart';
 
 class AuthProvider {
   /// Simula el inicio de sesión contra una API.

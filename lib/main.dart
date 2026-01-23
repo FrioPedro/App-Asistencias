@@ -1,9 +1,13 @@
+import 'package:app_asistencias/core/appRouter.dart';
 import 'package:flutter/material.dart';
-// AJUSTE: La ruta correcta según tu estructura de carpetas
-import 'ui/screens/login_screen.dart'; 
+import 'package:app_asistencias/domain/auth/session.dart';
 
 /// Punto de entrada principal de la aplicación
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await session.init(); // <- CLAVE: carga token antes del router
+
   runApp(const MyApp());
 }
 
@@ -14,7 +18,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false, // Quitar debug de la esquina
       title: 'Asistencia',
 
@@ -48,7 +52,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       // Pantalla inicial: LoginScreen
-      home: const LoginScreen(),
+      routerConfig: router,
     );
   }
 }
