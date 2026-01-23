@@ -72,7 +72,7 @@ class EventCard extends StatelessWidget {
                     offset: const Offset(0, 2),
                   )
                 ]
-              : [],
+              : const [],
         ),
         child: Stack(
           children: [
