@@ -29,6 +29,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   late TextEditingController _searchController;
 
+  // Mapa para los íconos de eventos activos
   final Map<String, IconData> _participatingEvents = {};
   
   // Mapa para guardar la hora de inicio de la sesión activa
@@ -43,6 +44,26 @@ class _EventsScreenState extends State<EventsScreen> {
     _searchController = TextEditingController();
     _searchController.addListener(_onSearchChanged);
     _loadData();
+  }
+
+  // --- LÓGICA DE VALIDACIÓN DE HORARIO ---
+  // Devuelve TRUE si se permite crear actividad.
+  bool get _isCreationAllowed {
+    final now = DateTime.now();
+    
+    // 1. Si es fin de semana (Sábado=6, Domingo=7), siempre permitido.
+    if (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday) {
+      return true;
+    }
+
+    // 2. Si es Lunes a Viernes, verificamos si estamos en el rango prohibido.
+    // Prohibido: de 06:00 a 19:59 (8 PM)
+    final hour = now.hour;
+    if (hour >= 6 && hour < 20) {
+      return false; // Bloqueado
+    }
+
+    return true; // Permitido (noche/madrugada)
   }
 
   Future<void> _loadData() async {
@@ -275,13 +296,32 @@ class _EventsScreenState extends State<EventsScreen> {
               ),
             ),
             const SizedBox(width: 12),
+            
+            // --- BOTÓN DE CREAR ACTIVIDAD (BLOQUEADO) ---
             _buildHeaderButton(
               Icons.add,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
-              ),
+              () {
+                // Verificar si está permitido antes de navegar
+                if (!_isCreationAllowed) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Horario restringido (Lun-Vie 6AM - 8PM).'),
+                      backgroundColor: Colors.redAccent,
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                  return; // DETIENE LA EJECUCIÓN AQUÍ
+                }
+
+                // Si pasa la validación, navega
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
+                );
+              },
             ),
+            // --------------------------------------------
+
             const SizedBox(width: 12),
             _buildHeaderButton(
               Icons.person,
@@ -359,7 +399,7 @@ class _EventsScreenState extends State<EventsScreen> {
             
             // Lógica para iniciar/cambiar actividad
             Future<void> onActivitySelected(String title, IconData icon) async {
-              setModalState(() => isModalLoading = true); // 1. Activar carga
+              setModalState(() => isModalLoading = true); 
 
               try {
                 final task = _taskFromTitle(title);
@@ -378,14 +418,13 @@ class _EventsScreenState extends State<EventsScreen> {
                       SnackBar(content: Text('Participando: $title')));
                 }
               } catch (e) {
-                setModalState(() => isModalLoading = false); // Error: Quitar carga
-                // Aquí podrías mostrar un error
+                setModalState(() => isModalLoading = false); 
               }
             }
 
             // Lógica para marcar salida
             Future<void> onExitSelected() async {
-              setModalState(() => isModalLoading = true); // 1. Activar carga
+              setModalState(() => isModalLoading = true); 
 
               try {
                 final sid = event.serverId;
@@ -401,7 +440,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Salida registrada'),
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.red,
                     ),
                   );
                 }
@@ -450,7 +489,7 @@ class _EventsScreenState extends State<EventsScreen> {
     BuildContext context,
     AssigmentModel event,
     String eventKey,
-    Function(String, IconData) onOptionSelected, // Recibe callback
+    Function(String, IconData) onOptionSelected, 
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -484,8 +523,8 @@ class _EventsScreenState extends State<EventsScreen> {
     BuildContext context,
     AssigmentModel event,
     String eventKey,
-    Function(String, IconData) onOptionSelected, // Recibe callback
-    VoidCallback onExitSelected,                 // Recibe callback salida
+    Function(String, IconData) onOptionSelected, 
+    VoidCallback onExitSelected,                 
   ) {
     final activeIcon = _participatingEvents[eventKey];
 
@@ -573,7 +612,6 @@ class _EventsScreenState extends State<EventsScreen> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                // Ejecuta el callback que activa la carga
                 onPressed: onExitSelected, 
               ),
             ),
