@@ -16,6 +16,7 @@ extension UserZoneX on UserZone {
     }
   }
 
+  /// Convierte un String (ej: "sur", "Sur") al Enum correspondiente
   static UserZone? fromString(String? value) {
     switch (value?.trim().toLowerCase()) {
       case 'sur':
@@ -29,5 +30,6 @@ extension UserZoneX on UserZone {
     }
   }
 
+  /// Retorna la lista de etiquetas para usar en Dropdowns ['Sur', 'Centro', 'Norte']
   static List<String> labels() => UserZone.values.map((e) => e.label).toList();
 }

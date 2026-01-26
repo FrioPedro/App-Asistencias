@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:animated_custom_dropdown/custom_dropdown.dart'; // <--- 1. IMPORTAR ESTO
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
 import '../../models/user_model.dart';          
 import '../../providers/profile_provider.dart'; 
 import '../widgets/log_viewer_screen.dart';     
+
+// ✅ Importamos el modelo y la extensión
+import '../../models/user_zone.dart'; 
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,13 +21,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserModel? _user;       
   bool _isLoading = true; 
   
-  // 2. Variable para la zona seleccionada
-  String? _selectedZone;
+  // Variable para la zona seleccionada (Texto visible)
+  String? _selectedZoneLabel;
   
-  // 3. Lista de opciones
-  static const List<String> _zones = ['Norte', 'Sur', 'Este', 'Oeste'];
+  // ✅ Obtenemos las opciones directamente del Enum
+  final List<String> _zones = UserZoneX.labels();
 
-  // Variables para el modo desarrollador (Triple Tap)
+  // Variables para el modo desarrollador
   int _tapCount = 0;
   DateTime? _lastTapTime;
 
@@ -57,26 +60,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _user = userLoaded;
         _isLoading = false;
         
-        // 4. Inicializar la zona seleccionada con la del usuario
-        // Aseguramos que coincida con la lista, o seleccionamos la primera si no coincide
-        if (userLoaded != null && _zones.contains(userLoaded.zone)) {
-          _selectedZone = userLoaded.zone;
-        } else {
-          _selectedZone = null; // O _zones.first por defecto
+        // Intentamos matchear la zona que viene del usuario con nuestras etiquetas
+        if (userLoaded != null) {
+          // Asumiendo que userLoaded.zone trae algo como "norte" o "Norte"
+          final zoneEnum = UserZoneX.fromString(userLoaded.zone);
+          _selectedZoneLabel = zoneEnum?.label; 
         }
       });
     }
   }
 
-  // Lógica para guardar el cambio de zona (Opcional: conectar con API)
-  Future<void> _updateZone(String newZone) async {
+  /// ✅ Lógica para guardar el cambio de zona
+  Future<void> _updateZone(String newZoneLabel) async {
     setState(() {
-      _selectedZone = newZone;
+      _selectedZoneLabel = newZoneLabel;
+      _isLoading = true; 
     });
-    // AQUÍ: Podrías llamar a _profileService.updateZone(newZone) si existiera esa función
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Zona cambiada a: $newZone')),
-    );
+
+    try {
+      // 1. Usamos la extensión para convertir el texto "Sur" -> UserZone.sur
+      final zoneEnum = UserZoneX.fromString(newZoneLabel);
+
+      if (zoneEnum != null) {
+        // 2. Llamamos al provider
+        await _profileService.updateZone(zoneEnum);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Zona actualizada a: $newZoneLabel'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+      
+      // 3. Recargamos perfil
+      await _loadProfile();
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al actualizar zona'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -108,7 +140,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
-          // Avatar
           const CircleAvatar(
             radius: 50,
             backgroundColor: Colors.grey,
@@ -116,18 +147,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 40),
 
-          // Información Personal
           _buildInfoTile('Nombres', fullName.isNotEmpty ? fullName : 'Sin Nombre'),
           const SizedBox(height: 16),
           _buildInfoTile('Documento', document),
           const SizedBox(height: 16),
           
-          // 5. Selector de Zona (Reemplaza al tile fijo)
+          // Selector de Zona
           _buildZoneSelector(),
           
           const SizedBox(height: 40),
 
-          // Botón Cerrar Sesión
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -153,7 +182,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           const SizedBox(height: 30),
 
-          // Texto de versión
           GestureDetector(
             onTap: _handleSecretTap,
             behavior: HitTestBehavior.opaque, 
@@ -170,7 +198,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Widget para campos de solo lectura
   Widget _buildInfoTile(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,11 +223,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // 6. Nuevo Widget para el Dropdown de Zona
   Widget _buildZoneSelector() {
     const cardColor = Color(0xFF2C2C2C);
     
-    // Configuración de estilo igual a tu app
     final darkDropdownDecoration = CustomDropdownDecoration(
       closedFillColor: cardColor,
       expandedFillColor: cardColor,
@@ -225,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 8),
         CustomDropdown<String>(
           items: _zones,
-          initialItem: _selectedZone,
+          initialItem: _selectedZoneLabel,
           hintText: 'Seleccione zona',
           decoration: darkDropdownDecoration,
           onChanged: (value) {
