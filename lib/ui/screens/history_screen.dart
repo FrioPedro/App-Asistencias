@@ -267,6 +267,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                   onTap: null, 
                                   
                                   hasPendingSync: !(activity.isSynced ?? true),
+                                  motive: activity.motive,
                                 )).toList(),
                           ),
               ),

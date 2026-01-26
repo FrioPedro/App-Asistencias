@@ -249,6 +249,7 @@ class EventCard extends StatelessWidget {
   /// Construye la etiqueta para el motivo del registro (Entrada/Salida)
   Widget _buildMotiveTag() {
     final isEntry = motive == MotiveType.entry;
+    print(motive.toString());
     final label = isEntry ? 'ENTRADA' : 'SALIDA';
     final color = isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
 
