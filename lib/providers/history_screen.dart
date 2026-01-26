@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../models/activity_model.dart';
 import '../../providers/history_provider.dart';
-import '../widgets/event_card.dart';
-import '../widgets/event_card_skeleton.dart'; // Para el estado de carga
+import 'package:app_asistencias/ui/widgets/event_card.dart';
+import 'package:app_asistencias/ui/widgets/event_card_skeleton.dart'; // Para el estado de carga
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -27,18 +27,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     setState(() {
       _historyFuture = _provider.fetchHistory();
     });
-  }
-
-  String _formatTimestamp(DateTime? timestamp) {
-    if (timestamp == null) return 'Fecha desconocida';
-
-    final day = timestamp.day.toString().padLeft(2, '0');
-    final month = timestamp.month.toString().padLeft(2, '0');
-    final year = timestamp.year;
-    final hour = timestamp.hour.toString().padLeft(2, '0');
-    final minute = timestamp.minute.toString().padLeft(2, '0');
-    final second = timestamp.second.toString().padLeft(2, '0');
-    return '$day/$month/$year $hour:$minute:$second';
   }
 
   @override
@@ -86,8 +74,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   eventName: activity.description ?? 'Sin Descripción',
                   companyName: activity.client ?? 'Cliente no especificado',
                   eventCode: 'ID Asignación: ${activity.serverId}',
-                  dateTime: _formatTimestamp(activity.timestamp),
+                  dateTime: activity.timestamp != null ? DateFormat('dd/MM/yyyy HH:mm:ss').format(activity.timestamp!) : 'Fecha desconocida',
                   motive: activity.motive, // <-- ¡Aquí usamos el nuevo parámetro!
+                  assigmentType: activity.activityType,
                   hasPendingSync: !(activity.isSynced ?? true),
                 );
               },

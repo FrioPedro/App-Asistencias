@@ -157,7 +157,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                                       fontSize: 12),
                                 ),
                                 Text(
-                                  '${log.timestamp.hour}:${log.timestamp.minute}:${log.timestamp.second}',
+                                  '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}:${log.timestamp.second.toString().padLeft(2, '0')}',
                                   style: TextStyle(
                                       color: Colors.grey[600], fontSize: 12),
                                 ),
