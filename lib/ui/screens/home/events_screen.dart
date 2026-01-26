@@ -462,7 +462,7 @@ class _EventsScreenState extends State<EventsScreen> {
                     return;
                   }
 
-                  _eventsService.endAttendance(serverId: sid);
+                  await _eventsService.endAttendance(serverId: sid);
 
                   _endSessionLocal(eventKey);
                   Navigator.pop(context);
@@ -495,7 +495,7 @@ class _EventsScreenState extends State<EventsScreen> {
       onTap: () async {
         final task = _taskFromTitle(title);
 
-        _eventsService.startAttendance(
+        await _eventsService.startAttendance(
           assignment: event,
           task: task,
         );
