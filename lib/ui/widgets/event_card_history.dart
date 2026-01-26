@@ -194,7 +194,8 @@ class EventCard extends StatelessWidget {
 
                   // COLUMNA DERECHA: La etiqueta (Tag)
                   Column(
-                    children: [                      
+                    children: [
+                      _buildMotiveTag(),                      
                       _buildAssignmentTypeTag(),
                     ],
                   )

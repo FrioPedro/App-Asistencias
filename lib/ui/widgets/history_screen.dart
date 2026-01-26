@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/activity_model.dart';
 import '../../providers/history_provider.dart';
-import '../widgets/event_card.dart';
+import '../widgets/event_card_history.dart';
 import '../widgets/event_card_skeleton.dart'; // Para el estado de carga
 
 class HistoryScreen extends StatefulWidget {

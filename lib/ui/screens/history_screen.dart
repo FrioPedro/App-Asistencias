@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // --- IMPORTS ACTUALIZADOS ---
 import '../../models/activity_model.dart';       // Usamos ActivityModel para el historial
 import '../../providers/history_provider.dart';  // Provider actualizado
-import '../widgets/event_card.dart';
+import '../widgets/event_card_history.dart';
 import '../widgets/event_card_skeleton.dart';
 
 class HistoryScreen extends StatefulWidget {
