@@ -1,6 +1,8 @@
 import '../models/user_model.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
+import 'package:app_asistencias/domain/user/update_user.dart';
+import 'package:app_asistencias/models/user_zone.dart';
 
 class ProfileProvider {
   /// Simula obtener el usuario actual (ya sea de Isar o API)
@@ -24,6 +26,10 @@ class ProfileProvider {
       print("Error cargando perfil: $e");
       return null;
     }
+  }
+
+  Future<void> updateZone(UserZone zone) async {
+    await UpdateUser.updateZone(zone);
   }
 
   /// Cierra la sesión actual y notifica a la app
