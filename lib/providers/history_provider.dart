@@ -1,7 +1,6 @@
 import 'package:app_asistencias/domain/activity/syncService.dart';
-import 'package:flutter/foundation.dart'; // Para debugPrint
+// Para debugPrint
 import 'package:app_asistencias/models/activity_model.dart';
-import 'package:isar/isar.dart';
 import 'package:app_asistencias/domain/activity/get_activity.dart';
 
 class HistoryProvider {

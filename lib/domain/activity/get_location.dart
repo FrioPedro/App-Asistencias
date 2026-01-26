@@ -35,11 +35,11 @@ class GetLocation {
         final pos = await Geolocator.getCurrentPosition(
           locationSettings: AndroidSettings(
             accuracy: LocationAccuracy.bestForNavigation,
-            timeLimit: Duration(seconds: 5),
+            timeLimit: const Duration(seconds: 5),
             forceLocationManager: false,
             distanceFilter: 0,
           ),
-        ).timeout(Duration(seconds: 5));
+        ).timeout(const Duration(seconds: 5));
         if (pos.accuracy <= 50) return pos;
       } catch (_) {}
     }

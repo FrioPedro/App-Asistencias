@@ -109,118 +109,121 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // CLIENTE
-                _buildFormField(
-                  label: 'Cliente',
-                  child: _buildDropdown(
-                    value: _selectedClient,
-                    // OPTIMIZACIÓN: const para no recrear la lista en cada build
-                    items: const ['FRIOPACKING S.A.C.', 'SUPERMERCADOS MÉNDEZ', 'HOTEL COSTA', 'DISTRIBUIDOR ABC', 'FRIGOLATINA'],
-                    onChanged: (val) => setState(() => _selectedClient = val!),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // DESCRIPCIÓN
-                _buildFormField(
-                  label: 'Descripción',
-                  child: Container(
-                    decoration: BoxDecoration(color: const Color(0xFF2C2C2C), borderRadius: BorderRadius.circular(12)),
-                    child: TextField(
-                      controller: _descriptionController,
-                      style: const TextStyle(color: Colors.white),
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: 'Ingrese detalles...',
-                        hintStyle: TextStyle(color: Colors.grey[600]),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(16.0),
-                      ),
+        child: AbsorbPointer(
+          absorbing: _isLoading, // Bloquea toda interacción si está cargando
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // CLIENTE
+                  _buildFormField(
+                    label: 'Cliente',
+                    child: _buildDropdown(
+                      value: _selectedClient,
+                      // OPTIMIZACIÓN: const para no recrear la lista en cada build
+                      items: const ['FRIOPACKING S.A.C.', 'SUPERMERCADOS MÉNDEZ', 'HOTEL COSTA', 'DISTRIBUIDOR ABC', 'FRIGOLATINA'],
+                      onChanged: (val) => setState(() => _selectedClient = val!),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // COLABORADORES
-                _buildFormField(
-                  label: 'Colaboradores',
-                  child: GestureDetector(
-                    onTap: _showCollaboratorsDialog,
+                  // DESCRIPCIÓN
+                  _buildFormField(
+                    label: 'Descripción',
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                       decoration: BoxDecoration(color: const Color(0xFF2C2C2C), borderRadius: BorderRadius.circular(12)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _getSelectedCollaboratorsText(),
-                              style: TextStyle(
-                                color: _getSelectedCollaboratorsList().isEmpty ? Colors.grey[600] : Colors.white,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Icon(Icons.arrow_drop_down, color: Colors.grey[600], size: 24),
-                        ],
+                      child: TextField(
+                        controller: _descriptionController,
+                        style: const TextStyle(color: Colors.white),
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          hintText: 'Ingrese detalles...',
+                          hintStyle: TextStyle(color: Colors.grey[600]),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.all(16.0),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // TIPO
-                _buildFormField(
-                  label: 'Tipo de actividad',
-                  child: _buildDropdown(
-                    value: _selectedActivityType,
-                    items: const ['VISITA TÉCNICA', 'MANTENIMIENTO', 'REPARACIÓN', 'INSTALACIÓN'],
-                    onChanged: (val) => setState(() => _selectedActivityType = val!),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // ZONA
-                _buildFormField(
-                  label: 'Zona',
-                  child: _buildDropdown(
-                    value: _selectedZone,
-                    items: const ['SUR', 'NORTE', 'ESTE', 'OESTE'],
-                    onChanged: (val) => setState(() => _selectedZone = val!),
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                // BOTÓN CREAR
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _submitForm, // Deshabilitar si carga
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2E60C4), // Azul corporativo
-                      disabledBackgroundColor: Colors.grey,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
+                  // COLABORADORES
+                  _buildFormField(
+                    label: 'Colaboradores',
+                    child: GestureDetector(
+                      onTap: _showCollaboratorsDialog,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                        decoration: BoxDecoration(color: const Color(0xFF2C2C2C), borderRadius: BorderRadius.circular(12)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _getSelectedCollaboratorsText(),
+                                style: TextStyle(
+                                  color: _getSelectedCollaboratorsList().isEmpty ? Colors.grey[600] : Colors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Icon(Icons.arrow_drop_down, color: Colors.grey[600], size: 24),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: _isLoading 
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text(
-                            'CREAR ACTIVIDAD',
-                            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
                   ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 20),
+
+                  // TIPO
+                  _buildFormField(
+                    label: 'Tipo de actividad',
+                    child: _buildDropdown(
+                      value: _selectedActivityType,
+                      items: const ['VISITA TÉCNICA', 'MANTENIMIENTO', 'REPARACIÓN', 'INSTALACIÓN'],
+                      onChanged: (val) => setState(() => _selectedActivityType = val!),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ZONA
+                  _buildFormField(
+                    label: 'Zona',
+                    child: _buildDropdown(
+                      value: _selectedZone,
+                      items: const ['SUR', 'NORTE', 'ESTE', 'OESTE'],
+                      onChanged: (val) => setState(() => _selectedZone = val!),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // BOTÓN CREAR
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _submitForm, // Deshabilitar si carga
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2E60C4), // Azul corporativo
+                        disabledBackgroundColor: Colors.grey,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: _isLoading 
+                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Text(
+                              'CREAR ACTIVIDAD',
+                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),

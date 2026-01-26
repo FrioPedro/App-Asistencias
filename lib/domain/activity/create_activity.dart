@@ -1,4 +1,3 @@
-import 'package:isar/isar.dart';
 
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/models/activity_model.dart';

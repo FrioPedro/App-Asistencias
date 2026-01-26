@@ -33,6 +33,9 @@ class EventCard extends StatelessWidget {
   /// Indica si el registro está pendiente de sincronización (Offline)
   final bool hasPendingSync;
 
+  /// Indica si se está procesando una acción (Bloquea clicks y muestra carga)
+  final bool isLoading;
+
   /// Constructor del EventCard
   const EventCard({
     super.key,
@@ -46,12 +49,13 @@ class EventCard extends StatelessWidget {
     this.isParticipating = false,
     this.actionIcon,
     this.hasPendingSync = false,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap, // Bloquea el tap si está cargando
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         // Importante: clipBehavior recorta el ícono de fondo
@@ -203,6 +207,23 @@ class EventCard extends StatelessWidget {
                 ],
               ),
             ),
+
+            // --- CAPA 3: ESTADO DE CARGA (Bloqueo visual) ---
+            if (isLoading)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5), // Oscurece la tarjeta
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF4CAF50), // Verde corporativo
+                      strokeWidth: 3,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
