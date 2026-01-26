@@ -6,6 +6,7 @@ import 'package:isar/isar.dart';
 class GetAssigned {
   static Future<List<AssigmentModel>> fetchAssignment() async {
     final isar = await Database.instance();
+
     List<AssigmentModel> assignmentsOnline = [];
     try {
       assignmentsOnline = await getAssignment();
@@ -14,22 +15,33 @@ class GetAssigned {
         final localAssignmentsActive =
             await isar.assigmentModels.filter().activeEqualTo(true).findAll();
 
+        print(localAssignmentsActive);
+
         await isar.writeTxn(() async {
-          // Guardar o actualizar las asignaciones obtenidas online
-          for (final assignmentOnline in assignmentsOnline) {
-            await isar.assigmentModels.put(assignmentOnline);
+          for (final online in assignmentsOnline) {
+            // buscar si ya existe por serverId
+            final existing = await isar.assigmentModels
+                .filter()
+                .serverIdEqualTo(online.serverId)
+                .findFirst();
+
+            if (existing != null) {
+              online.id = existing.id; // ⭐ clave: conservar el id local
+            }
+
+            online.active = true; // si viene online, debe quedar activa
+            await isar.assigmentModels.put(online);
           }
 
-          // Desactivar las que ya no están online
-          for (final localAssignment in localAssignmentsActive) {
-            final existsOnline = assignmentsOnline.any(
-              (onlineAssignment) =>
-                  onlineAssignment.serverId == localAssignment.serverId,
-            );
+          final localActive =
+              await isar.assigmentModels.filter().activeEqualTo(true).findAll();
 
+          for (final local in localActive) {
+            final existsOnline =
+                assignmentsOnline.any((o) => o.serverId == local.serverId);
             if (!existsOnline) {
-              localAssignment.active = false;
-              await isar.assigmentModels.put(localAssignment);
+              local.active = false;
+              await isar.assigmentModels.put(local);
             }
           }
         });
@@ -61,7 +73,6 @@ class GetAssigned {
 
       return data
           .map<AssigmentModel>((json) => AssigmentModel.fromJson(json))
-          
           .toList();
     }
     return [];

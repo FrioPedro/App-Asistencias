@@ -20,7 +20,7 @@ class AssigmentModel {
 
   Id id = Isar.autoIncrement;
   
-  @Index()
+  @Index(unique: true)
   int? serverId;
 
   String? documentId;

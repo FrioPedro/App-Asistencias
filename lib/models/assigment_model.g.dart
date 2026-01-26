@@ -63,7 +63,7 @@ const AssigmentModelSchema = CollectionSchema(
     r'serverId': IndexSchema(
       id: -7950187970872907662,
       name: r'serverId',
-      unique: false,
+      unique: true,
       replace: false,
       properties: [
         IndexPropertySchema(
@@ -207,6 +207,61 @@ List<IsarLinkBase<dynamic>> _assigmentModelGetLinks(AssigmentModel object) {
 void _assigmentModelAttach(
     IsarCollection<dynamic> col, Id id, AssigmentModel object) {
   object.id = id;
+}
+
+extension AssigmentModelByIndex on IsarCollection<AssigmentModel> {
+  Future<AssigmentModel?> getByServerId(int? serverId) {
+    return getByIndex(r'serverId', [serverId]);
+  }
+
+  AssigmentModel? getByServerIdSync(int? serverId) {
+    return getByIndexSync(r'serverId', [serverId]);
+  }
+
+  Future<bool> deleteByServerId(int? serverId) {
+    return deleteByIndex(r'serverId', [serverId]);
+  }
+
+  bool deleteByServerIdSync(int? serverId) {
+    return deleteByIndexSync(r'serverId', [serverId]);
+  }
+
+  Future<List<AssigmentModel?>> getAllByServerId(List<int?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'serverId', values);
+  }
+
+  List<AssigmentModel?> getAllByServerIdSync(List<int?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'serverId', values);
+  }
+
+  Future<int> deleteAllByServerId(List<int?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'serverId', values);
+  }
+
+  int deleteAllByServerIdSync(List<int?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'serverId', values);
+  }
+
+  Future<Id> putByServerId(AssigmentModel object) {
+    return putByIndex(r'serverId', object);
+  }
+
+  Id putByServerIdSync(AssigmentModel object, {bool saveLinks = true}) {
+    return putByIndexSync(r'serverId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByServerId(List<AssigmentModel> objects) {
+    return putAllByIndex(r'serverId', objects);
+  }
+
+  List<Id> putAllByServerIdSync(List<AssigmentModel> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'serverId', objects, saveLinks: saveLinks);
+  }
 }
 
 extension AssigmentModelQueryWhereSort

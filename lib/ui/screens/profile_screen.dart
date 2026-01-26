@@ -102,9 +102,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _buildInfoTile('Documento', document),
           const SizedBox(height: 16),
           _buildInfoTile('Zona', zone),
+          /* Toggle Salida Automática
           const SizedBox(height: 16),
 
-          // Toggle Salida Automática
           Container(
             decoration: BoxDecoration(
               color: const Color(0xFF2C2C2C),
@@ -124,6 +124,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
           ),
+          */
+          
           const SizedBox(height: 40),
 
           // Botón Cerrar Sesión

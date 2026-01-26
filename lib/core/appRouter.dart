@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
 import 'package:app_asistencias/ui/screens/login_screen.dart'; 
-import 'package:app_asistencias/ui/screens/events_screen.dart'; 
+import 'package:app_asistencias/ui/screens/home/events_screen.dart'; 
 
 // tu buildPage(...)
 Page<void> buildPage(Widget child, GoRouterState state) => CustomTransitionPage<void>(

@@ -1,6 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:app_asistencias/models/activity_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/user_model.dart';
 
@@ -15,8 +16,9 @@ class Database {
 
     _instance = await Isar.open(
       [
+        ActivityModelSchema,
+        AssigmentModelSchema,
         UserModelSchema,
-        AssigmentModelSchema
       ],
       directory: dir.path,
       inspector: true, 
