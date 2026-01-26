@@ -80,13 +80,17 @@ extension MotiveTypeX on MotiveType {
   }
 }
 
-/// Soporta:
-/// - "2025-10-29T15:19:21"
-/// - "2025-05-26 10:42:53"
 DateTime _parseServerTimestamp(dynamic v) {
-  if (v == null) return DateTime.now();
+  // 👇 fecha antigua por defecto
+  final fallback = DateTime.fromMillisecondsSinceEpoch(0);
+
+  if (v == null) return fallback;
+
   if (v is DateTime) return v;
-  if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
+
+  if (v is int) {
+    return DateTime.fromMillisecondsSinceEpoch(v);
+  }
 
   if (v is String) {
     final iso = DateTime.tryParse(v);
@@ -97,8 +101,10 @@ DateTime _parseServerTimestamp(dynamic v) {
     if (iso2 != null) return iso2;
   }
 
-  return DateTime.now();
+  return fallback;
 }
+
+
 
 @collection
 class ActivityModel {
@@ -135,7 +141,7 @@ class ActivityModel {
   double? latitude;
   double? longitude;
 
-  @Index()
+  @Index(unique: true, replace: true)
   DateTime? timestamp;
 
   /// Estado de sincronización

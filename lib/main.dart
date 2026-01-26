@@ -1,57 +1,70 @@
-import 'package:app_asistencias/core/appRouter.dart';
 import 'package:flutter/material.dart';
+import 'package:workmanager/workmanager.dart';
+
+import 'package:app_asistencias/core/appRouter.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
+
+import 'package:app_asistencias/core/sync_worker.dart';
 
 /// Punto de entrada principal de la aplicación
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await session.init(); // <- CLAVE: carga token antes del router
+  await session.init(); // ✅ CLAVE: carga token antes del router
+
+  // ✅ Workmanager init
+  await Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: true, // pon false en release
+  );
+
+  // ✅ sync cada 1 min (wifi o datos)
+  await Workmanager().registerPeriodicTask(
+    'sync-task-1',
+    kSyncTask,
+    frequency: const Duration(minutes: 1),
+    constraints: Constraints(
+      networkType: NetworkType.connected, // ✅ wifi o datos móviles
+    ),
+  );
 
   runApp(const MyApp());
 }
 
 /// Widget raíz de la aplicación
-/// Configura el tema global Dark Mode y la pantalla inicial
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      debugShowCheckedModeBanner: false, // Quitar debug de la esquina
+      debugShowCheckedModeBanner: false,
       title: 'Asistencia',
-
-      // --- CONFIGURACIÓN DEL TEMA DARK MODE ---
       theme: ThemeData(
-        brightness: Brightness.dark, // Modo oscuro base
-        useMaterial3: true, // Usar Material Design 3
-        
-        // Fondo global para todos los Scaffold
+        brightness: Brightness.dark,
+        useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFF18191D),
-
-        // Paleta de colores personalizada Dark Mode
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF2E60C4), // Azul primario
-          secondary: Color(0xFFFF6D6D), // Rojo/Salmón secundario
-          error: Color(0xFFFF6D6D), // Mismo rojo para errores
-          surface: Color(0xFF1E1E1E), // Superficie gris oscuro
+          primary: Color(0xFF2E60C4),
+          secondary: Color(0xFFFF6D6D),
+          error: Color(0xFFFF6D6D),
+          surface: Color(0xFF1E1E1E),
         ),
-        
-        // Estilo global para ElevatedButton (botón principal)
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2E60C4), // Azul personalizado
-            foregroundColor: Colors.white, // Texto blanco
-            elevation: 0, // Sin sombra
+            backgroundColor: const Color(0xFF2E60C4),
+            foregroundColor: Colors.white,
+            elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10), // Bordes redondeados
+              borderRadius: BorderRadius.circular(10),
             ),
-            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            textStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
         ),
       ),
-      // Pantalla inicial: LoginScreen
       routerConfig: router,
     );
   }

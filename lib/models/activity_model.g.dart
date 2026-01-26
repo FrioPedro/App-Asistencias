@@ -173,8 +173,8 @@ const ActivityModelSchema = CollectionSchema(
     r'timestamp': IndexSchema(
       id: 1852253767416892198,
       name: r'timestamp',
-      unique: false,
-      replace: false,
+      unique: true,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'timestamp',
@@ -391,6 +391,62 @@ List<IsarLinkBase<dynamic>> _activityModelGetLinks(ActivityModel object) {
 void _activityModelAttach(
     IsarCollection<dynamic> col, Id id, ActivityModel object) {
   object.id = id;
+}
+
+extension ActivityModelByIndex on IsarCollection<ActivityModel> {
+  Future<ActivityModel?> getByTimestamp(DateTime? timestamp) {
+    return getByIndex(r'timestamp', [timestamp]);
+  }
+
+  ActivityModel? getByTimestampSync(DateTime? timestamp) {
+    return getByIndexSync(r'timestamp', [timestamp]);
+  }
+
+  Future<bool> deleteByTimestamp(DateTime? timestamp) {
+    return deleteByIndex(r'timestamp', [timestamp]);
+  }
+
+  bool deleteByTimestampSync(DateTime? timestamp) {
+    return deleteByIndexSync(r'timestamp', [timestamp]);
+  }
+
+  Future<List<ActivityModel?>> getAllByTimestamp(
+      List<DateTime?> timestampValues) {
+    final values = timestampValues.map((e) => [e]).toList();
+    return getAllByIndex(r'timestamp', values);
+  }
+
+  List<ActivityModel?> getAllByTimestampSync(List<DateTime?> timestampValues) {
+    final values = timestampValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'timestamp', values);
+  }
+
+  Future<int> deleteAllByTimestamp(List<DateTime?> timestampValues) {
+    final values = timestampValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'timestamp', values);
+  }
+
+  int deleteAllByTimestampSync(List<DateTime?> timestampValues) {
+    final values = timestampValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'timestamp', values);
+  }
+
+  Future<Id> putByTimestamp(ActivityModel object) {
+    return putByIndex(r'timestamp', object);
+  }
+
+  Id putByTimestampSync(ActivityModel object, {bool saveLinks = true}) {
+    return putByIndexSync(r'timestamp', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByTimestamp(List<ActivityModel> objects) {
+    return putAllByIndex(r'timestamp', objects);
+  }
+
+  List<Id> putAllByTimestampSync(List<ActivityModel> objects,
+      {bool saveLinks = true}) {
+    return putAllByIndexSync(r'timestamp', objects, saveLinks: saveLinks);
+  }
 }
 
 extension ActivityModelQueryWhereSort

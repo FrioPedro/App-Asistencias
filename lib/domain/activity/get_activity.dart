@@ -9,16 +9,15 @@ class GetActivity {
   static Future<List<ActivityModel>> getLocalData() async {
     final isar = await Database.instance();
 
-    final recent = await isar.activityModels
-        .where()
-        .sortByTimestampDesc()
-        .findAll();
+    final recent =
+        await isar.activityModels.where().sortByTimestamp().findAll();
 
     return recent.reversed.toList();
   }
 
   /// Últimas 20 actividades locales por asignación (serverId), ordenadas de más antigua -> más nueva
-  static Future<List<ActivityModel>> getActivityByAssignment(int serverId) async {
+  static Future<List<ActivityModel>> getActivityByAssignment(
+      int serverId) async {
     final isar = await Database.instance();
 
     final recent = await isar.activityModels
@@ -90,5 +89,27 @@ class GetActivity {
         .sortByTimestamp()
         .limit(limit)
         .findAll();
+  }
+
+  static Future<List<ActivityModel>> syncOnlineToLocal() async {
+    try {
+      final online = await getOnlineData();
+      if (online.isEmpty) return await getLocalData();
+
+      final isar = await Database.instance();
+
+      await isar.writeTxn(() async {
+        for (final activity in online) {
+          if (activity.timestamp == null) continue;
+
+          // Si existe por timestamp, se reemplaza automáticamente
+          await isar.activityModels.put(activity);
+        }
+      });
+
+      return await getLocalData();
+    } catch (e) {
+      return await getLocalData();
+    }
   }
 }

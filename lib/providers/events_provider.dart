@@ -1,16 +1,20 @@
 import 'package:app_asistencias/domain/assigment/get_assigned.dart';
+import 'package:app_asistencias/domain/activity/register_activity.dart';
 import 'package:app_asistencias/domain/activity/create_activity.dart';
 import 'package:app_asistencias/domain/session/active_session_storage.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/activity_model.dart';
+import 'package:app_asistencias/domain/activity/syncService.dart';
 
 class EventsProvider {
   final ActiveSessionStorage _storage;
+  final ActivitySyncService _sync = ActivitySyncService();
 
   EventsProvider({ActiveSessionStorage? storage})
       : _storage = storage ?? ActiveSessionStorage();
 
   Future<List<AssigmentModel>> fetchEvents() async {
+    await _sync.syncIfPossible();
     return await GetAssigned.fetchAssignment();
   }
 
@@ -36,7 +40,7 @@ class EventsProvider {
     }
 
     // 2) marca la nueva entrada
-    await CreateActivity.storeEntry(
+    await ActivityRegistrar.registerEntryWithGPS(
       assignment: assignment,
       task: task,
     );
@@ -48,11 +52,15 @@ class EventsProvider {
       task: task,
       serverId: newServerId,
     );
+
+    _sync.syncIfPossible();
   }
 
   Future<void> endAttendance({required int serverId}) async {
-    await CreateActivity.storeExit(serverId: serverId);
+    await ActivityRegistrar.registerExitWithGPS(serverId: serverId);
     await _storage.clear();
+
+    _sync.syncIfPossible();
   }
 
   Future<void> clearActiveSession() => _storage.clear();
