@@ -53,14 +53,14 @@ class EventsProvider {
       serverId: newServerId,
     );
 
-    _sync.syncIfPossible();
+    await _sync.syncIfPossible();
   }
 
   Future<void> endAttendance({required int serverId}) async {
     await ActivityRegistrar.registerExitWithGPS(serverId: serverId);
     await _storage.clear();
 
-    _sync.syncIfPossible();
+    await _sync.syncIfPossible();
   }
 
   Future<void> clearActiveSession() => _storage.clear();
