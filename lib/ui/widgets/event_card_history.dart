@@ -138,15 +138,17 @@ class EventCard extends StatelessWidget {
             // --- CAPA 2: CONTENIDO DE LA TARJETA ---
             Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              // CAMBIO PRINCIPAL: Usamos Column para estructurar verticalmente
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // COLUMNA IZQUIERDA: Datos
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
+                  // 1. FILA SUPERIOR: Título + Badge de Motivo (Entrada/Salida)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Título (Expandido para que ocupe el espacio disponible)
+                      Expanded(
+                        child: Text(
                           eventName,
                           style: const TextStyle(
                             color: Colors.white,
@@ -154,51 +156,61 @@ class EventCard extends StatelessWidget {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          companyName,
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          eventCode,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          dateTime,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
-                          ),
+                      ),
+                      // Badge de Entrada/Salida (Si existe motivo)
+                      if (motive != null) ...[
+                        const SizedBox(width: 8),
+                        _buildMotiveTag(), // AHORA ESTÁ ARRIBA A LA DERECHA
+                      ],
+                      // Ícono offline (Si aplica)
+                      if (hasPendingSync) ...[
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.cloud_off_outlined,
+                          color: Colors.orangeAccent,
+                          size: 20,
                         ),
                       ],
+                    ],
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  // 2. DATOS INTERMEDIOS
+                  Text(
+                    companyName,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    eventCode,
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 12,
                     ),
                   ),
 
-                  // ÍCONO DE SINCRONIZACIÓN PENDIENTE (Offline)
-                  if (hasPendingSync)
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8.0, bottom: 4.0),
-                      child: Icon(
-                        Icons.cloud_off_outlined,
-                        color: Colors.orangeAccent,
-                        size: 20,
-                      ),
-                    ),
+                  const SizedBox(height: 8),
 
-                  // COLUMNA DERECHA: La etiqueta (Tag)
-                  Column(
+                  // 3. FILA INFERIOR: Fecha + Badge de Tipo (Proyecto, Servicio...)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _buildMotiveTag(),                      
+                      // Fecha
+                      Text(
+                        dateTime,
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 12,
+                        ),
+                      ),
+                      // Badge de Tipo de Asignación (Abajo a la derecha)
                       _buildAssignmentTypeTag(),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -251,18 +263,21 @@ class EventCard extends StatelessWidget {
     final isEntry = motive == MotiveType.entry;
     print(motive.toString());
     final label = isEntry ? 'ENTRADA' : 'SALIDA';
-    final color = isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
+    // Colores: Verde para entrada, Rojo/Salmón para salida
+    final color =
+        isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color,
+        color: color.withOpacity(0.2), // Fondo suave
+        border: Border.all(color: color), // Borde sólido
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: color, // Texto del color del borde
           fontSize: 10,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,
