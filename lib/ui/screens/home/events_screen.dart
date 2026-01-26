@@ -374,11 +374,16 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
+  // --- MODIFICACIÓN AQUÍ ---
+  // Este widget ahora filtra la opción que ya está activa
   Widget _buildExitSessionModal(
     BuildContext context,
     AssigmentModel event,
     String eventKey,
   ) {
+    // Obtenemos el icono de la actividad actual para compararlo
+    final activeIcon = _participatingEvents[eventKey];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -406,18 +411,36 @@ class _EventsScreenState extends State<EventsScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        _buildActionOption(context, Icons.business, 'Oficina',
-            'Reuniones / Administrativo', event, eventKey),
-        const SizedBox(height: 10),
-        _buildActionOption(
-            context, Icons.build, 'Taller', 'Reparaciones', event, eventKey),
-        const SizedBox(height: 10),
-        _buildActionOption(context, Icons.local_shipping, 'Transporte',
-            'Traslados', event, eventKey),
-        const SizedBox(height: 10),
-        _buildActionOption(context, Icons.construction, 'Servicio',
-            'Visitas técnicas', event, eventKey),
-        const SizedBox(height: 24),
+
+        // Filtramos "Oficina" si ya está activa
+        if (activeIcon != Icons.business) ...[
+          _buildActionOption(context, Icons.business, 'Oficina',
+              'Reuniones / Administrativo', event, eventKey),
+          const SizedBox(height: 10),
+        ],
+
+        // Filtramos "Taller" si ya está activa
+        if (activeIcon != Icons.build) ...[
+          _buildActionOption(
+              context, Icons.build, 'Taller', 'Reparaciones', event, eventKey),
+          const SizedBox(height: 10),
+        ],
+
+        // Filtramos "Transporte" si ya está activa
+        if (activeIcon != Icons.local_shipping) ...[
+          _buildActionOption(context, Icons.local_shipping, 'Transporte',
+              'Traslados', event, eventKey),
+          const SizedBox(height: 10),
+        ],
+
+        // Filtramos "Servicio" si ya está activa
+        if (activeIcon != Icons.construction) ...[
+          _buildActionOption(context, Icons.construction, 'Servicio',
+              'Visitas técnicas', event, eventKey),
+          const SizedBox(height: 10),
+        ],
+
+        const SizedBox(height: 14),
         Row(
           children: [
             Expanded(
