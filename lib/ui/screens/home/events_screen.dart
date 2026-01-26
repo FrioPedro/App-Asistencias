@@ -440,7 +440,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Salida registrada'),
-                      backgroundColor: Colors.red,
+                      backgroundColor: Colors.green,
                     ),
                   );
                 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../models/user_model.dart';          // El modelo de tu compañero
-import '../../providers/profile_provider.dart'; // El provider adaptado
-import '../widgets/log_viewer_screen.dart';     // Pantalla de logs (Modo Dev)
+import 'package:animated_custom_dropdown/custom_dropdown.dart'; // <--- 1. IMPORTAR ESTO
+
+import '../../models/user_model.dart';          
+import '../../providers/profile_provider.dart'; 
+import '../widgets/log_viewer_screen.dart';     
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,7 +17,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   UserModel? _user;       
   bool _isLoading = true; 
-  bool isAutoExitEnabled = false; 
+  
+  // 2. Variable para la zona seleccionada
+  String? _selectedZone;
+  
+  // 3. Lista de opciones
+  static const List<String> _zones = ['Norte', 'Sur', 'Este', 'Oeste'];
 
   // Variables para el modo desarrollador (Triple Tap)
   int _tapCount = 0;
@@ -23,7 +30,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _handleSecretTap() {
     final now = DateTime.now();
-    // Si pasó más de 500ms desde el último toque, reiniciamos el contador
     if (_lastTapTime == null || now.difference(_lastTapTime!) > const Duration(milliseconds: 500)) {
       _tapCount = 0;
     }
@@ -32,7 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _lastTapTime = now;
 
     if (_tapCount == 3) {
-      _tapCount = 0; // Reiniciar
+      _tapCount = 0; 
       Navigator.push(context, MaterialPageRoute(builder: (_) => const LogViewerScreen()));
     }
   }
@@ -50,8 +56,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _user = userLoaded;
         _isLoading = false;
+        
+        // 4. Inicializar la zona seleccionada con la del usuario
+        // Aseguramos que coincida con la lista, o seleccionamos la primera si no coincide
+        if (userLoaded != null && _zones.contains(userLoaded.zone)) {
+          _selectedZone = userLoaded.zone;
+        } else {
+          _selectedZone = null; // O _zones.first por defecto
+        }
       });
     }
+  }
+
+  // Lógica para guardar el cambio de zona (Opcional: conectar con API)
+  Future<void> _updateZone(String newZone) async {
+    setState(() {
+      _selectedZone = newZone;
+    });
+    // AQUÍ: Podrías llamar a _profileService.updateZone(newZone) si existiera esa función
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Zona cambiada a: $newZone')),
+    );
   }
 
   @override
@@ -76,13 +101,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return const Center(child: Text("Error cargando perfil", style: TextStyle(color: Colors.white)));
     }
 
-    // LÓGICA DE VISUALIZACIÓN
-    // Concatenamos nombres y apellidos para mostrar el nombre completo
     final fullName = '${_user?.names ?? ''} ${_user?.lastNames ?? ''}'.trim();
-    // Obtenemos el DNI o mostramos guion si es nulo
     final document = _user?.nationalId ?? '-';
-    // Obtenemos la zona
-    final zone = _user?.zone ?? 'Sin zona';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -96,35 +116,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 40),
 
-          // Información Personal (Usando los datos procesados arriba)
+          // Información Personal
           _buildInfoTile('Nombres', fullName.isNotEmpty ? fullName : 'Sin Nombre'),
           const SizedBox(height: 16),
           _buildInfoTile('Documento', document),
           const SizedBox(height: 16),
-          _buildInfoTile('Zona', zone),
-          /* Toggle Salida Automática
-          const SizedBox(height: 16),
-
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2C),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: SwitchListTile(
-              title: const Text(
-                'SALIDA AUTOMÁTICA',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-              ),
-              value: isAutoExitEnabled,
-              activeColor: Theme.of(context).primaryColor,
-              onChanged: (bool value) {
-                setState(() {
-                  isAutoExitEnabled = value;
-                });
-              },
-            ),
-          ),
-          */
+          
+          // 5. Selector de Zona (Reemplaza al tile fijo)
+          _buildZoneSelector(),
           
           const SizedBox(height: 40),
 
@@ -154,10 +153,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           const SizedBox(height: 30),
 
-          // Texto de versión con secreto (Triple Tap)
+          // Texto de versión
           GestureDetector(
             onTap: _handleSecretTap,
-            behavior: HitTestBehavior.opaque, // Detecta toques aunque sea texto
+            behavior: HitTestBehavior.opaque, 
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Text(
@@ -171,6 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // Widget para campos de solo lectura
   Widget _buildInfoTile(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,6 +191,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
             value,
             style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
+        ),
+      ],
+    );
+  }
+
+  // 6. Nuevo Widget para el Dropdown de Zona
+  Widget _buildZoneSelector() {
+    const cardColor = Color(0xFF2C2C2C);
+    
+    // Configuración de estilo igual a tu app
+    final darkDropdownDecoration = CustomDropdownDecoration(
+      closedFillColor: cardColor,
+      expandedFillColor: cardColor,
+      closedBorderRadius: BorderRadius.circular(12),
+      hintStyle: TextStyle(color: Colors.grey[600]),
+      headerStyle: const TextStyle(color: Colors.white, fontSize: 16),
+      listItemStyle: const TextStyle(color: Colors.white),
+      listItemDecoration: ListItemDecoration(
+        selectedColor: Colors.white10,
+        highlightColor: Colors.white10,
+        splashColor: Colors.white10,
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Zona',
+          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+        ),
+        const SizedBox(height: 8),
+        CustomDropdown<String>(
+          items: _zones,
+          initialItem: _selectedZone,
+          hintText: 'Seleccione zona',
+          decoration: darkDropdownDecoration,
+          onChanged: (value) {
+            if (value != null) {
+              _updateZone(value);
+            }
+          },
         ),
       ],
     );
