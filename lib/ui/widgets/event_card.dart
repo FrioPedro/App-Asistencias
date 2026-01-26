@@ -194,7 +194,14 @@ class EventCard extends StatelessWidget {
 
                   // COLUMNA DERECHA: La etiqueta (Tag)
                   Column(
-                    children: [                      
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // --- CORRECCIÓN: Usamos la función si hay motivo ---
+                      if (motive != null) ...[
+                        _buildMotiveTag(),
+                        const SizedBox(height: 4),
+                      ],
+                      // ---------------------------------------------------
                       _buildAssignmentTypeTag(),
                     ],
                   )
@@ -246,6 +253,7 @@ class EventCard extends StatelessWidget {
   }
 
   /// Construye la etiqueta para el motivo del registro (Entrada/Salida)
+  /// --- CORRECCIÓN: Función descomentada ---
   Widget _buildMotiveTag() {
     final isEntry = motive == MotiveType.entry;
     final label = isEntry ? 'ENTRADA' : 'SALIDA';
