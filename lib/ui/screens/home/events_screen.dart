@@ -30,6 +30,9 @@ class _EventsScreenState extends State<EventsScreen> {
   late TextEditingController _searchController;
 
   final Map<String, IconData> _participatingEvents = {};
+  
+  // Mapa para guardar la hora de inicio de la sesión activa
+  final Map<String, DateTime> _activeStartTimes = {};
 
   @override
   void initState() {
@@ -42,15 +45,24 @@ class _EventsScreenState extends State<EventsScreen> {
   Future<void> _loadData() async {
     final loadedAssignments = await _eventsService.fetchEvents();
 
-    // ✅ restaurar turno activo (si existe)
+    // ✅ restaurar turno activo
     final active = await _eventsService.getActiveSession();
+    
     if (active != null) {
+      // Como ahora el storage sí devuelve el timestamp real, lo usamos:
       final icon = _iconFromTask(active.task);
-      _participatingEvents
-        ..clear()
-        ..[active.eventKey] = icon;
+      
+      _participatingEvents.clear();
+      _activeStartTimes.clear(); 
+
+      _participatingEvents[active.eventKey] = icon;
+      
+      // ✅ USAMOS LA HORA REAL RECUPERADA DEL STORAGE
+      _activeStartTimes[active.eventKey] = active.timestamp; 
+      
     } else {
       _participatingEvents.clear();
+      _activeStartTimes.clear();
     }
 
     if (mounted) {
@@ -115,12 +127,15 @@ class _EventsScreenState extends State<EventsScreen> {
   void _startSessionLocal(String eventKey, IconData icon) {
     setState(() {
       _participatingEvents[eventKey] = icon;
+      // Al iniciar nuevo turno, guardamos la hora actual
+      _activeStartTimes[eventKey] = DateTime.now();
     });
   }
 
   void _endSessionLocal(String eventKey) {
     setState(() {
       _participatingEvents.remove(eventKey);
+      _activeStartTimes.remove(eventKey);
     });
   }
 
@@ -193,11 +208,21 @@ class _EventsScreenState extends State<EventsScreen> {
         final bool isParticipating = _participatingEvents.containsKey(eventKey);
         final bool isAnyEventActive = _participatingEvents.isNotEmpty;
 
+        // Lógica de hora:
+        // Si tiene hora guardada, la mostramos. Si no, vacío.
+        String timeDisplay = '';
+        if (isParticipating && _activeStartTimes.containsKey(eventKey)) {
+          timeDisplay = _formatDate(_activeStartTimes[eventKey]!);
+        }
+
         return EventCard(
           eventName: event.description ?? 'Sin descripción',
           companyName: event.client ?? 'Sin cliente',
           eventCode: event.documentId ?? '---',
-          dateTime: _formatDate(event.updatedAt),
+          
+          // AQUÍ SE MUESTRA LA HORA RECUPERADA O VACÍO
+          dateTime: timeDisplay, 
+          
           assigmentType: event.assigmentType,
           isParticipating: isParticipating,
           actionIcon: _participatingEvents[eventKey],
@@ -374,14 +399,12 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  // --- MODIFICACIÓN AQUÍ ---
-  // Este widget ahora filtra la opción que ya está activa
   Widget _buildExitSessionModal(
     BuildContext context,
     AssigmentModel event,
     String eventKey,
   ) {
-    // Obtenemos el icono de la actividad actual para compararlo
+    // Obtenemos el icono activo para filtrar
     final activeIcon = _participatingEvents[eventKey];
 
     return Column(
@@ -412,28 +435,24 @@ class _EventsScreenState extends State<EventsScreen> {
         ),
         const SizedBox(height: 12),
 
-        // Filtramos "Oficina" si ya está activa
         if (activeIcon != Icons.business) ...[
           _buildActionOption(context, Icons.business, 'Oficina',
               'Reuniones / Administrativo', event, eventKey),
           const SizedBox(height: 10),
         ],
 
-        // Filtramos "Taller" si ya está activa
         if (activeIcon != Icons.build) ...[
           _buildActionOption(
               context, Icons.build, 'Taller', 'Reparaciones', event, eventKey),
           const SizedBox(height: 10),
         ],
 
-        // Filtramos "Transporte" si ya está activa
         if (activeIcon != Icons.local_shipping) ...[
           _buildActionOption(context, Icons.local_shipping, 'Transporte',
               'Traslados', event, eventKey),
           const SizedBox(height: 10),
         ],
 
-        // Filtramos "Servicio" si ya está activa
         if (activeIcon != Icons.construction) ...[
           _buildActionOption(context, Icons.construction, 'Servicio',
               'Visitas técnicas', event, eventKey),

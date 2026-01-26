@@ -18,7 +18,8 @@ class EventsProvider {
     return await GetAssigned.fetchAssignment();
   }
 
-  Future<({String eventKey, TaskType task, int serverId})?> getActiveSession() {
+  // ✅ CORREGIDO: Agregado DateTime timestamp al tipo de retorno
+  Future<({String eventKey, TaskType task, int serverId, DateTime timestamp})?> getActiveSession() {
     return _storage.read();
   }
 
@@ -51,6 +52,7 @@ class EventsProvider {
       eventKey: eventKey,
       task: task,
       serverId: newServerId,
+      timestamp: DateTime.now(),
     );
 
     await _sync.syncIfPossible();
