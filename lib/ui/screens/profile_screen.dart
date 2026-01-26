@@ -31,6 +31,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
   int _tapCount = 0;
   DateTime? _lastTapTime;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  // --- 1. FUNCIÓN DE SNACKBAR PERSONALIZADO ---
+  void _showCustomSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF252525), // Fondo Dark
+        behavior: SnackBarBehavior.floating,
+        elevation: 6,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)), // Borde 5px
+        content: Row(
+          children: [
+            // Esfera del ícono
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isError 
+                    ? const Color(0xFFFF5252).withOpacity(0.2) 
+                    : const Color(0xFF4CAF50).withOpacity(0.2),
+              ),
+              child: Icon(
+                isError ? Icons.close : Icons.check,
+                color: isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            // Texto
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _handleSecretTap() {
     final now = DateTime.now();
     if (_lastTapTime == null || now.difference(_lastTapTime!) > const Duration(milliseconds: 500)) {
@@ -46,12 +100,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadProfile();
-  }
-
   Future<void> _loadProfile() async {
     final userLoaded = await _profileService.getUserProfile();
     
@@ -62,7 +110,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         
         // Intentamos matchear la zona que viene del usuario con nuestras etiquetas
         if (userLoaded != null) {
-          // Asumiendo que userLoaded.zone trae algo como "norte" o "Norte"
           final zoneEnum = UserZoneX.fromString(userLoaded.zone);
           _selectedZoneLabel = zoneEnum?.label; 
         }
@@ -86,12 +133,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         await _profileService.updateZone(zoneEnum);
         
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Zona actualizada a: $newZoneLabel'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          // ✅ Mensaje de Éxito Personalizado
+          _showCustomSnackBar('Zona actualizada a: $newZoneLabel', isError: false);
         }
       }
       
@@ -100,12 +143,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al actualizar zona'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // ❌ Mensaje de Error Personalizado
+        _showCustomSnackBar('Error al actualizar zona', isError: true);
         setState(() => _isLoading = false);
       }
     }

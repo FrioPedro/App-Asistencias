@@ -29,13 +29,8 @@ class _EventsScreenState extends State<EventsScreen> {
 
   late TextEditingController _searchController;
 
-  // Mapa para los íconos de eventos activos
   final Map<String, IconData> _participatingEvents = {};
-  
-  // Mapa para guardar la hora de inicio de la sesión activa
   final Map<String, DateTime> _activeStartTimes = {};
-
-  // Mapa para guardar el NOMBRE de la actividad
   final Map<String, String> _activeTaskNames = {};
 
   @override
@@ -46,35 +41,111 @@ class _EventsScreenState extends State<EventsScreen> {
     _loadData();
   }
 
+  // --- 1. FUNCIÓN DE SNACKBAR PERSONALIZADO ---
+  void _showCustomSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: const Color(0xFF252525),
+        behavior: SnackBarBehavior.floating,
+        elevation: 6,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isError 
+                    ? const Color(0xFFFF5252).withOpacity(0.2) 
+                    : const Color(0xFF4CAF50).withOpacity(0.2),
+              ),
+              child: Icon(
+                isError ? Icons.close : Icons.check,
+                color: isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // --- LÓGICA DE VALIDACIÓN DE HORARIO ---
-  // Devuelve TRUE si se permite crear actividad.
   bool get _isCreationAllowed {
     final now = DateTime.now();
     
-    // 1. Si es fin de semana (Sábado=6, Domingo=7), siempre permitido.
     if (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday) {
       return true;
     }
 
-    // 2. Si es Lunes a Viernes, verificamos si estamos en el rango prohibido.
-    // Prohibido: de 06:00 a 19:59 (8 PM)
     final hour = now.hour;
     if (hour >= 6 && hour < 20) {
       return false; // Bloqueado
     }
 
-    return true; // Permitido (noche/madrugada)
+    return true; 
+  }
+
+  void _showRestrictedDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true, 
+      barrierColor: Colors.black.withOpacity(0.85),
+      builder: (context) {
+        return Material(
+          type: MaterialType.transparency,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.access_time_filled, size: 64, color: Colors.grey[400]),
+                  const SizedBox(height: 20),
+                  const Text('Horario Restringido', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  const SizedBox(height: 12),
+                  Text('No se pueden crear actividades en este horario.\n\nHorario permitido:\nLun - Vie: 8:00 PM - 6:00 AM\nSáb - Dom: Todo el día', style: TextStyle(color: Colors.grey[400], fontSize: 16, height: 1.5), textAlign: TextAlign.center),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2C2C2C), padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Entendido', style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _loadData() async {
     final loadedAssignments = await _eventsService.fetchEvents();
-
-    // ✅ restaurar turno activo
     final active = await _eventsService.getActiveSession();
     
     if (active != null) {
       final icon = _iconFromTask(active.task);
-      
       _participatingEvents.clear();
       _activeStartTimes.clear(); 
       _activeTaskNames.clear();
@@ -82,7 +153,6 @@ class _EventsScreenState extends State<EventsScreen> {
       _participatingEvents[active.eventKey] = icon;
       _activeStartTimes[active.eventKey] = active.timestamp; 
       _activeTaskNames[active.eventKey] = active.task.label;
-      
     } else {
       _participatingEvents.clear();
       _activeStartTimes.clear();
@@ -99,14 +169,10 @@ class _EventsScreenState extends State<EventsScreen> {
 
   IconData _iconFromTask(TaskType task) {
     switch (task) {
-      case TaskType.office:
-        return Icons.business;
-      case TaskType.workshop:
-        return Icons.build;
-      case TaskType.service:
-        return Icons.construction;
-      case TaskType.transport:
-        return Icons.local_shipping;
+      case TaskType.office: return Icons.business;
+      case TaskType.workshop: return Icons.build;
+      case TaskType.service: return Icons.construction;
+      case TaskType.transport: return Icons.local_shipping;
     }
   }
 
@@ -124,27 +190,21 @@ class _EventsScreenState extends State<EventsScreen> {
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
-    final isToday =
-        date.year == now.year && date.month == now.month && date.day == now.day;
+    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
     final amPm = date.hour >= 12 ? 'PM' : 'AM';
     final minute = date.minute.toString().padLeft(2, '0');
-
     final datePart = isToday ? 'Hoy' : '${date.day}/${date.month}';
     return '$datePart, $hour:$minute $amPm';
   }
 
   List<AssigmentModel> _filterAssignments() {
     if (_searchQuery.isEmpty) return _assignments;
-
     return _assignments.where((event) {
       final desc = (event.description ?? '').toLowerCase();
       final client = (event.client ?? '').toLowerCase();
       final docId = (event.documentId ?? '').toLowerCase();
-
-      return desc.contains(_searchQuery) ||
-          client.contains(_searchQuery) ||
-          docId.contains(_searchQuery);
+      return desc.contains(_searchQuery) || client.contains(_searchQuery) || docId.contains(_searchQuery);
     }).toList();
   }
 
@@ -229,7 +289,6 @@ class _EventsScreenState extends State<EventsScreen> {
     return ListView(
       children: events.map((event) {
         final String eventKey = event.documentId ?? event.id.toString();
-
         final bool isParticipating = _participatingEvents.containsKey(eventKey);
         final bool isAnyEventActive = _participatingEvents.isNotEmpty;
 
@@ -250,16 +309,9 @@ class _EventsScreenState extends State<EventsScreen> {
           
           onTap: () {
             if (isAnyEventActive && !isParticipating) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content:
-                      Text('Ya tienes un turno activo. Debes marcar salida.'),
-                  backgroundColor: Colors.orange,
-                ),
-              );
+              _showCustomSnackBar('Ya tienes un turno activo. Debes marcar salida.', isError: true);
               return;
             }
-
             _showActionModal(
               context,
               event,
@@ -297,30 +349,20 @@ class _EventsScreenState extends State<EventsScreen> {
             ),
             const SizedBox(width: 12),
             
-            // --- BOTÓN DE CREAR ACTIVIDAD (BLOQUEADO) ---
             _buildHeaderButton(
               Icons.add,
               () {
-                // Verificar si está permitido antes de navegar
                 if (!_isCreationAllowed) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Horario restringido (Lun-Vie 6AM - 8PM).'),
-                      backgroundColor: Colors.redAccent,
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                  return; // DETIENE LA EJECUCIÓN AQUÍ
+                  _showRestrictedDialog();
+                  return;
                 }
 
-                // Si pasa la validación, navega
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
                 );
               },
             ),
-            // --------------------------------------------
 
             const SizedBox(width: 12),
             _buildHeaderButton(
@@ -376,7 +418,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  // --- MODIFICADO: Usa StatefulBuilder para controlar el estado de carga (Loading) ---
+  // --- MODAL DE ACCIONES ---
   void _showActionModal(
     BuildContext context,
     AssigmentModel event,
@@ -387,7 +429,12 @@ class _EventsScreenState extends State<EventsScreen> {
       context: context,
       backgroundColor: const Color(0xFF1E1E1E),
       isScrollControlled: true,
-      // isDismissible: false, // Puedes descomentar esto para obligar a esperar
+      
+      // ✅ 1. BLOQUEAR CIERRE AL TOCAR AFUERA
+      isDismissible: false,
+      // ✅ 2. BLOQUEAR CIERRE AL DESLIZAR HACIA ABAJO
+      enableDrag: false,
+      
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -397,7 +444,6 @@ class _EventsScreenState extends State<EventsScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             
-            // Lógica para iniciar/cambiar actividad
             Future<void> onActivitySelected(String title, IconData icon) async {
               setModalState(() => isModalLoading = true); 
 
@@ -414,15 +460,13 @@ class _EventsScreenState extends State<EventsScreen> {
 
                 if (context.mounted) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Participando: $title')));
+                  _showCustomSnackBar('Participando: $title', isError: false);
                 }
               } catch (e) {
                 setModalState(() => isModalLoading = false); 
               }
             }
 
-            // Lógica para marcar salida
             Future<void> onExitSelected() async {
               setModalState(() => isModalLoading = true); 
 
@@ -437,12 +481,7 @@ class _EventsScreenState extends State<EventsScreen> {
                 
                 if (context.mounted) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Salida registrada'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                  _showCustomSnackBar('Salida registrada', isError: false);
                 }
               } catch (e) {
                 setModalState(() => isModalLoading = false);
@@ -457,7 +496,6 @@ class _EventsScreenState extends State<EventsScreen> {
                 bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
               ),
               child: SingleChildScrollView(
-                // Si carga, mostramos spinner y bloqueamos botones
                 child: isModalLoading
                     ? const SizedBox(
                         height: 200,
@@ -485,6 +523,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
+  // ✅ He añadido el botón de cerrar (X) en el Row del título
   Widget _buildStartSessionModal(
     BuildContext context,
     AssigmentModel event,
@@ -494,14 +533,26 @@ class _EventsScreenState extends State<EventsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Iniciar Turno',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
+        // --- CABECERA CON BOTÓN CERRAR ---
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Iniciar Turno',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey),
+              onPressed: () => Navigator.pop(context), // Permite cerrar manualmente
+            ),
+          ],
         ),
+        // ---------------------------------
+        
         const SizedBox(height: 16),
         _buildActionOption(Icons.business, 'Oficina',
             'Reuniones / Administrativo', onOptionSelected),
@@ -519,6 +570,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
+  // ✅ He añadido el botón de cerrar (X) en el Row del título
   Widget _buildExitSessionModal(
     BuildContext context,
     AssigmentModel event,
@@ -531,14 +583,26 @@ class _EventsScreenState extends State<EventsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Gestionar Turno',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
+        // --- CABECERA CON BOTÓN CERRAR ---
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Gestionar Turno',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
         ),
+        // ---------------------------------
+
         const SizedBox(height: 8),
         Text(
           'Puedes cambiar tu actividad actual o finalizar el turno.',
@@ -622,7 +686,6 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  // Este widget ahora es "tonto", solo recibe el tap y lo pasa arriba
   Widget _buildActionOption(
     IconData icon,
     String title,
