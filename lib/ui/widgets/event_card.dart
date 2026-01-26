@@ -31,6 +31,9 @@ class EventCard extends StatelessWidget {
   /// Icono grande difuminado de fondo (opcional, solo si participa)
   final IconData? actionIcon;
 
+  /// Nombre de la tarea activa (ej: "TRANSPORTE")
+  final String? activeTaskName;
+
   /// Indica si el registro está pendiente de sincronización (Offline)
   final bool hasPendingSync;
 
@@ -52,6 +55,7 @@ class EventCard extends StatelessWidget {
     this.onTap,
     this.isParticipating = false,
     this.actionIcon,
+    this.activeTaskName, // <--- NUEVO PARÁMETRO
     this.hasPendingSync = false,
     this.isLoading = false,
     this.motive,
@@ -170,6 +174,7 @@ class EventCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
+                        // La fecha (solo se muestra si se pasa, lógica controlada por el padre)
                         Text(
                           dateTime,
                           style: TextStyle(
@@ -192,17 +197,31 @@ class EventCard extends StatelessWidget {
                       ),
                     ),
 
-                  // COLUMNA DERECHA: La etiqueta (Tag)
+                  // COLUMNA DERECHA: Las etiquetas
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // --- CORRECCIÓN: Usamos la función si hay motivo ---
+                      // 1. Badge de Entrada/Salida (Historial) - Arriba de todo
                       if (motive != null) ...[
                         _buildMotiveTag(),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                       ],
-                      // ---------------------------------------------------
-                      _buildAssignmentTypeTag(),
+
+                      // 2. FILA DE ESTADO (Actividad + Tipo)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // A. Badge de Actividad actual (A la izquierda)
+                          if (isParticipating && activeTaskName != null) ...[
+                            _buildActiveTaskBadge(),
+                            const SizedBox(width: 6), // Espacio entre badges
+                          ],
+
+                          // B. Badge de Tipo de Asignación (A la derecha)
+                          _buildAssignmentTypeTag(),
+                        ],
+                      ),
                     ],
                   )
                 ],
@@ -231,6 +250,35 @@ class EventCard extends StatelessWidget {
     );
   }
 
+  /// Construye la etiqueta de "ACTIVIDAD EN CURSO" (ej: TALLER)
+  Widget _buildActiveTaskBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.4), // Fondo oscuro semitransparente
+        border: Border.all(color: const Color(0xFF4CAF50)), // Borde verde neón
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Pequeño punto indicador
+          const Icon(Icons.circle, size: 6, color: Color(0xFF4CAF50)),
+          const SizedBox(width: 4),
+          Text(
+            activeTaskName!.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w900, // Letra muy gruesa
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Construye la etiqueta para el tipo de asignación (proyectos, servicios, etc.)
   Widget _buildAssignmentTypeTag() {
     return Container(
@@ -253,22 +301,22 @@ class EventCard extends StatelessWidget {
   }
 
   /// Construye la etiqueta para el motivo del registro (Entrada/Salida)
-  /// --- CORRECCIÓN: Función descomentada ---
   Widget _buildMotiveTag() {
     final isEntry = motive == MotiveType.entry;
     final label = isEntry ? 'ENTRADA' : 'SALIDA';
     final color = isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: color.withOpacity(0.2),
+        border: Border.all(color: color),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: color,
           fontSize: 10,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.5,

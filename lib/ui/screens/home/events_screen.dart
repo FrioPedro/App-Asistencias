@@ -29,10 +29,14 @@ class _EventsScreenState extends State<EventsScreen> {
 
   late TextEditingController _searchController;
 
+  // Mapa para los íconos de eventos activos
   final Map<String, IconData> _participatingEvents = {};
   
   // Mapa para guardar la hora de inicio de la sesión activa
   final Map<String, DateTime> _activeStartTimes = {};
+
+  // ✅ NUEVO: Mapa para guardar el NOMBRE de la actividad (ej: "Taller")
+  final Map<String, String> _activeTaskNames = {};
 
   @override
   void initState() {
@@ -45,24 +49,25 @@ class _EventsScreenState extends State<EventsScreen> {
   Future<void> _loadData() async {
     final loadedAssignments = await _eventsService.fetchEvents();
 
-    // ✅ restaurar turno activo
     final active = await _eventsService.getActiveSession();
     
     if (active != null) {
-      // Como ahora el storage sí devuelve el timestamp real, lo usamos:
       final icon = _iconFromTask(active.task);
       
       _participatingEvents.clear();
       _activeStartTimes.clear(); 
+      _activeTaskNames.clear(); // Limpiamos nombres previos
 
       _participatingEvents[active.eventKey] = icon;
+      _activeStartTimes[active.eventKey] = active.timestamp;
       
-      // ✅ USAMOS LA HORA REAL RECUPERADA DEL STORAGE
-      _activeStartTimes[active.eventKey] = active.timestamp; 
+      // ✅ Recuperamos el nombre de la tarea (usando el getter .label del enum)
+      _activeTaskNames[active.eventKey] = active.task.label;
       
     } else {
       _participatingEvents.clear();
       _activeStartTimes.clear();
+      _activeTaskNames.clear();
     }
 
     if (mounted) {
@@ -124,18 +129,21 @@ class _EventsScreenState extends State<EventsScreen> {
     }).toList();
   }
 
-  void _startSessionLocal(String eventKey, IconData icon) {
+  // ✅ MODIFICADO: Ahora pide el nombre de la tarea (taskName)
+  void _startSessionLocal(String eventKey, IconData icon, String taskName) {
     setState(() {
       _participatingEvents[eventKey] = icon;
-      // Al iniciar nuevo turno, guardamos la hora actual
       _activeStartTimes[eventKey] = DateTime.now();
+      _activeTaskNames[eventKey] = taskName; // Guardamos el nombre
     });
   }
 
+  // ✅ MODIFICADO: Limpia también el nombre
   void _endSessionLocal(String eventKey) {
     setState(() {
       _participatingEvents.remove(eventKey);
       _activeStartTimes.remove(eventKey);
+      _activeTaskNames.remove(eventKey);
     });
   }
 
@@ -208,8 +216,6 @@ class _EventsScreenState extends State<EventsScreen> {
         final bool isParticipating = _participatingEvents.containsKey(eventKey);
         final bool isAnyEventActive = _participatingEvents.isNotEmpty;
 
-        // Lógica de hora:
-        // Si tiene hora guardada, la mostramos. Si no, vacío.
         String timeDisplay = '';
         if (isParticipating && _activeStartTimes.containsKey(eventKey)) {
           timeDisplay = _formatDate(_activeStartTimes[eventKey]!);
@@ -219,13 +225,14 @@ class _EventsScreenState extends State<EventsScreen> {
           eventName: event.description ?? 'Sin descripción',
           companyName: event.client ?? 'Sin cliente',
           eventCode: event.documentId ?? '---',
-          
-          // AQUÍ SE MUESTRA LA HORA RECUPERADA O VACÍO
-          dateTime: timeDisplay, 
-          
+          dateTime: timeDisplay,
           assigmentType: event.assigmentType,
           isParticipating: isParticipating,
           actionIcon: _participatingEvents[eventKey],
+          
+          // ✅ AQUÍ PASAMOS EL NOMBRE DE LA TAREA PARA QUE SALGA EL BADGE
+          activeTaskName: _activeTaskNames[eventKey], 
+          
           onTap: () {
             if (isAnyEventActive && !isParticipating) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -404,7 +411,6 @@ class _EventsScreenState extends State<EventsScreen> {
     AssigmentModel event,
     String eventKey,
   ) {
-    // Obtenemos el icono activo para filtrar
     final activeIcon = _participatingEvents[eventKey];
 
     return Column(
@@ -542,7 +548,9 @@ class _EventsScreenState extends State<EventsScreen> {
           task: task,
         );
 
-        _startSessionLocal(eventKey, _iconFromTask(task));
+        // ✅ AHORA PASAMOS EL 'title' (Nombre de la tarea)
+        _startSessionLocal(eventKey, _iconFromTask(task), title);
+        
         Navigator.pop(context);
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Participando: $title')));
