@@ -11,7 +11,7 @@ class LogViewerScreen extends StatefulWidget {
 
 class _LogViewerScreenState extends State<LogViewerScreen> {
   final LogProvider _logProvider = LogProvider();
-  
+
   List<LogModel> _allLogs = [];
   List<LogModel> _filteredLogs = [];
   bool _isLoading = true;
@@ -36,7 +36,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
 
   void _applyFilter() {
     setState(() {
-      _filteredLogs = _logProvider.filterLogsByDate(_allLogs, _selectedDateRange);
+      _filteredLogs =
+          _logProvider.filterLogsByDate(_allLogs, _selectedDateRange);
     });
   }
 
@@ -54,7 +55,14 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
               onPrimary: Colors.white,
               surface: Color(0xFF1E1E1E),
               onSurface: Colors.white,
+<<<<<<< HEAD
             ), dialogTheme: DialogTheme(backgroundColor: const Color(0xFF1E1E1E)),
+=======
+            ),
+            dialogTheme: const DialogTheme(
+              backgroundColor: Color(0xFF1E1E1E),
+            ),
+>>>>>>> bc4fd8576a347dba69cbfd012a6d70a1e0e77653
           ),
           child: child!,
         );
@@ -76,7 +84,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Logs del Sistema', style: TextStyle(color: Colors.white)),
+        title: const Text('Logs del Sistema',
+            style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -84,8 +93,12 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              _selectedDateRange != null ? Icons.filter_alt_off : Icons.filter_alt,
-              color: _selectedDateRange != null ? const Color(0xFF2E60C4) : Colors.grey,
+              _selectedDateRange != null
+                  ? Icons.filter_alt_off
+                  : Icons.filter_alt,
+              color: _selectedDateRange != null
+                  ? const Color(0xFF2E60C4)
+                  : Colors.grey,
             ),
             onPressed: () {
               if (_selectedDateRange != null) {
@@ -101,7 +114,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF2E60C4)))
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF2E60C4)))
           : Column(
               children: [
                 if (_selectedDateRange != null)
@@ -129,7 +143,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                         decoration: BoxDecoration(
                           color: const Color(0xFF1E1E1E),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border(left: BorderSide(color: color, width: 4)),
+                          border:
+                              Border(left: BorderSide(color: color, width: 4)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,17 +153,26 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  log.type.toString().split('.').last.toUpperCase(),
-                                  style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12),
+                                  log.type
+                                      .toString()
+                                      .split('.')
+                                      .last
+                                      .toUpperCase(),
+                                  style: TextStyle(
+                                      color: color,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12),
                                 ),
                                 Text(
                                   '${log.timestamp.hour}:${log.timestamp.minute}:${log.timestamp.second}',
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                  style: TextStyle(
+                                      color: Colors.grey[600], fontSize: 12),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 4),
-                            Text(log.message, style: const TextStyle(color: Colors.white)),
+                            Text(log.message,
+                                style: const TextStyle(color: Colors.white)),
                           ],
                         ),
                       );

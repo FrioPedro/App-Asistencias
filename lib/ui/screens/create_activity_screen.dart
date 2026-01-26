@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-// --- IMPORTS ---
-import '../../models/activity_model.dart';          // Modelo de datos
-import '../../providers/create_assignment_provider.dart'; // Lógica de negocio
+import 'package:animated_custom_dropdown/custom_dropdown.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class CreateActivityScreen extends StatefulWidget {
   const CreateActivityScreen({super.key});
@@ -11,35 +10,50 @@ class CreateActivityScreen extends StatefulWidget {
 }
 
 class _CreateActivityScreenState extends State<CreateActivityScreen> {
-  // 1. Instancia del Provider
-  final CreateAssignmentProvider _provider = CreateAssignmentProvider();
-
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _descriptionController;
+  final _descriptionController = TextEditingController();
 
-  // Variables de formulario
-  String _selectedClient = 'FRIOPACKING S.A.C.';
-  String _selectedActivityType = 'VISITA TÉCNICA';
-  String _selectedZone = 'SUR';
-  
-  // Estado de carga para el botón
-  bool _isLoading = false;
-
-  // OPTIMIZACIÓN: static const para evitar recrear la lista en memoria
-  static const List<String> _availableCollaborators = [
-    'Juan Pérez', 'María García', 'Carlos López', 
-    'Ana Martínez', 'Roberto Sánchez', 'Diana Flores',
+  // --- DATA DUMMY ---
+  static const List<String> _clients = [
+    'FRIOPACKING S.A.C.',
+    'SUPERMERCADOS MÉNDEZ',
+    'HOTEL COSTA',
+    'DISTRIBUIDOR ABC',
+    'FRIGOLATINA',
   ];
-  
-  late Map<String, bool> _selectedCollaborators;
+
+  static const List<String> _collaborators = [
+    'Juan Pérez',
+    'María García',
+    'Carlos López',
+    'Ana Martínez',
+    'Roberto Sánchez',
+    'Diana Flores',
+  ];
+
+  static const List<String> _zones = ['SUR', 'NORTE', 'ESTE', 'OESTE'];
+
+  static const List<String> _types = ['VST', 'EMG'];
+  static const Map<String, String> _typeLabel = {
+    'VST': 'VISITA TÉCNICA',
+    'EMG': 'EMERGENCIA',
+  };
+
+  // --- FORM STATE ---
+  String? _selectedClient;
+  String _selectedType = 'VST';
+  String? _selectedZone;
+  List<String> _selectedCollaborators = [];
+
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
-    _descriptionController = TextEditingController();
-    _selectedCollaborators = {
-      for (var c in _availableCollaborators) c: false
-    };
+    _selectedClient = _clients.first;
+    _selectedZone = _zones.first;
+
+    _showInternetRequirementPopup();
   }
 
   @override
@@ -48,54 +62,139 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     super.dispose();
   }
 
-  // --- LÓGICA DE CREACIÓN ---
-  Future<void> _submitForm() async {
-    // 1. Validar colaboradores
-    final selectedList = _getSelectedCollaboratorsList();
-    if (selectedList.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona al menos un colaborador'), backgroundColor: Colors.orange),
-      );
+  Future<void> _showInternetRequirementPopup() async {
+    await Future.delayed(const Duration(milliseconds: 350));
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF2C2C2C),
+        title: const Text(
+          'Conexión requerida',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Para crear una asignación es necesario tener conexión a internet activa.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Entendido',
+              style: TextStyle(color: Color(0xFF2E60C4)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _onSubmit() async {
+    if (_isSubmitting) return;
+
+    if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedCollaborators.isEmpty) {
+      _snack('Selecciona al menos un colaborador',
+          color: Colors.orange);
       return;
     }
 
-    // 2. Activar carga
-    setState(() => _isLoading = true);
-
-    // 3. Crear el objeto Modelo
-    final newActivity = ActivityModel(
-      client: _selectedClient,
-      description: _descriptionController.text,
-      collaborator: selectedList.join(', '), // Guardamos como string para el modelo
-      timestamp: DateTime.now(),
-      isSynced: false,
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: const Color(0xFF2C2C2C),
+        title: const Text(
+          'Confirmar envío',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          '¿Deseas crear esta asignación? Asegúrate de que los datos sean correctos.',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E60C4),
+              elevation: 0,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Sí, continuar',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
 
-    // 4. Llamar al Provider
-    final success = await _provider.createAssignment(newActivity);
+    if (confirmed != true) return;
 
-    if (mounted) {
-      setState(() => _isLoading = false); // Apagar carga
-
-      if (success) {
-        // ÉXITO
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('¡Asignación creada exitosamente!'), backgroundColor: Colors.green),
-        );
-        Navigator.pop(context); // Volver atrás
-      } else {
-        // ERROR
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al crear. Intente nuevamente.'), backgroundColor: Colors.red),
-        );
-      }
+    final connectivity = await Connectivity().checkConnectivity();
+    if (connectivity == ConnectivityResult.none) {
+      _snack('❌ No hay conexión a internet', color: Colors.red);
+      return;
     }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      // 🔹 SIMULACIÓN (DATA DUMMY)
+      await Future.delayed(const Duration(milliseconds: 900));
+
+      if (!mounted) return;
+
+      _snack('✅ Asignación creada correctamente',
+          color: Colors.green);
+      Navigator.pop(context);
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  void _snack(String msg, {Color? color}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: color),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    const bg = Color(0xFF121212);
+    const card = Color(0xFF2C2C2C);
+    const primary = Color(0xFF2E60C4);
+
+    final darkDropdownDecoration = CustomDropdownDecoration(
+      closedFillColor: card,
+      expandedFillColor: card,
+      closedBorder: Border.all(color: Colors.white12),
+      closedBorderRadius: BorderRadius.circular(12),
+      hintStyle: TextStyle(color: Colors.grey[600]),
+      headerStyle: const TextStyle(color: Colors.white),
+      listItemStyle: const TextStyle(color: Colors.white),
+      listItemDecoration: ListItemDecoration(
+        selectedColor: Colors.white10,
+        highlightColor: Colors.white10,
+        splashColor: Colors.white10,
+      ),
+      searchFieldDecoration: SearchFieldDecoration(
+        fillColor: card,
+        textStyle: const TextStyle(color: Colors.white),
+        hintStyle: TextStyle(color: Colors.grey[600]),
+      ),
+    );
+
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: bg,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -104,126 +203,162 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Crear actividad',
-          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          'Crear Actividad',
+          style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
         ),
+        centerTitle: true,
       ),
       body: SafeArea(
-        child: AbsorbPointer(
-          absorbing: _isLoading, // Bloquea toda interacción si está cargando
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // CLIENTE
-                  _buildFormField(
-                    label: 'Cliente',
-                    child: _buildDropdown(
-                      value: _selectedClient,
-                      // OPTIMIZACIÓN: const para no recrear la lista en cada build
-                      items: const ['FRIOPACKING S.A.C.', 'SUPERMERCADOS MÉNDEZ', 'HOTEL COSTA', 'DISTRIBUIDOR ABC', 'FRIGOLATINA'],
-                      onChanged: (val) => setState(() => _selectedClient = val!),
+        child: SingleChildScrollView(
+          padding:
+              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildFormField(
+                  label: 'Cliente',
+                  child: CustomDropdown<String>.search(
+                    items: _clients,
+                    initialItem: _selectedClient,
+                    hintText: 'Seleccione cliente',
+                    decoration: darkDropdownDecoration,
+                    overlayHeight: 450,
+                    onChanged: (value) =>
+                        setState(() => _selectedClient = value),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                _buildFormField(
+                  label: 'Descripción',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: card,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextFormField(
+                      controller: _descriptionController,
+                      style: const TextStyle(color: Colors.white),
+                      maxLines: 4,
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty)
+                              ? 'Ingrese una descripción'
+                              : null,
+                      decoration: InputDecoration(
+                        hintText: 'Ingrese detalles...',
+                        hintStyle: TextStyle(color: Colors.grey[600]),
+                        border: InputBorder.none,
+                        contentPadding:
+                            const EdgeInsets.all(16.0),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 20),
 
-                  // DESCRIPCIÓN
-                  _buildFormField(
-                    label: 'Descripción',
-                    child: Container(
-                      decoration: BoxDecoration(color: const Color(0xFF2C2C2C), borderRadius: BorderRadius.circular(12)),
-                      child: TextField(
-                        controller: _descriptionController,
-                        style: const TextStyle(color: Colors.white),
-                        maxLines: 4,
-                        decoration: InputDecoration(
-                          hintText: 'Ingrese detalles...',
-                          hintStyle: TextStyle(color: Colors.grey[600]),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.all(16.0),
+                _buildFormField(
+                  label: 'Colaboradores',
+                  child:
+                      CustomDropdown<String>.multiSelectSearch(
+                    hintText: 'Seleccionar colaboradores',
+                    items: _collaborators,
+                    decoration: darkDropdownDecoration,
+                    overlayHeight: 420,
+                    onListChanged: (values) =>
+                        setState(() => _selectedCollaborators = values),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                _buildFormField(
+                  label: 'Tipo de actividad',
+                  child: CustomDropdown<String>(
+                    items: _types,
+                    initialItem: _selectedType,
+                    decoration: darkDropdownDecoration,
+                    onChanged: (v) =>
+                        setState(() => _selectedType = v!),
+                    headerBuilder:
+                        (context, selectedItem, enabled) {
+                      return Text(
+                        _typeLabel[selectedItem] ?? selectedItem,
+                        style:
+                            const TextStyle(color: Colors.white),
+                      );
+                    },
+                    listItemBuilder:
+                        (context, item, isSelected, onSelect) {
+                      return InkWell(
+                        onTap: onSelect,
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12),
+                          child: Text(
+                            _typeLabel[item] ?? item,
+                            style: const TextStyle(
+                                color: Colors.white),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
-                  const SizedBox(height: 20),
+                ),
+                const SizedBox(height: 20),
 
-                  // COLABORADORES
-                  _buildFormField(
-                    label: 'Colaboradores',
-                    child: GestureDetector(
-                      onTap: _showCollaboratorsDialog,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                        decoration: BoxDecoration(color: const Color(0xFF2C2C2C), borderRadius: BorderRadius.circular(12)),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _getSelectedCollaboratorsText(),
-                                style: TextStyle(
-                                  color: _getSelectedCollaboratorsList().isEmpty ? Colors.grey[600] : Colors.white,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                _buildFormField(
+                  label: 'Zona',
+                  child: CustomDropdown<String>(
+                    items: _zones,
+                    initialItem: _selectedZone,
+                    decoration: darkDropdownDecoration,
+                    onChanged: (v) =>
+                        setState(() => _selectedZone = v),
+                  ),
+                ),
+                const SizedBox(height: 40),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed:
+                        _isSubmitting ? null : _onSubmit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primary,
+                      disabledBackgroundColor: Colors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
                             ),
-                            Icon(Icons.arrow_drop_down, color: Colors.grey[600], size: 24),
-                          ],
-                        ),
-                      ),
-                    ),
+                          )
+                        : const Text(
+                            'CREAR ACTIVIDAD',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight:
+                                    FontWeight.bold),
+                          ),
                   ),
-                  const SizedBox(height: 20),
-
-                  // TIPO
-                  _buildFormField(
-                    label: 'Tipo de actividad',
-                    child: _buildDropdown(
-                      value: _selectedActivityType,
-                      items: const ['VISITA TÉCNICA', 'MANTENIMIENTO', 'REPARACIÓN', 'INSTALACIÓN'],
-                      onChanged: (val) => setState(() => _selectedActivityType = val!),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // ZONA
-                  _buildFormField(
-                    label: 'Zona',
-                    child: _buildDropdown(
-                      value: _selectedZone,
-                      items: const ['SUR', 'NORTE', 'ESTE', 'OESTE'],
-                      onChanged: (val) => setState(() => _selectedZone = val!),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // BOTÓN CREAR
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _submitForm, // Deshabilitar si carga
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2E60C4), // Azul corporativo
-                        disabledBackgroundColor: Colors.grey,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: _isLoading 
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text(
-                              'CREAR ACTIVIDAD',
-                              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -231,87 +366,21 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     );
   }
 
-  // --- WIDGETS AUXILIARES ---
-
-  Widget _buildFormField({required String label, required Widget child}) {
+  Widget _buildFormField(
+      {required String label, required Widget child}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 12,
+              fontWeight: FontWeight.w500),
+        ),
         const SizedBox(height: 8),
         child,
       ],
     );
-  }
-
-  // Helper para crear Dropdowns genéricos con estilo oscuro
-  Widget _buildDropdown({required String value, required List<String> items, required ValueChanged<String?> onChanged}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(color: const Color(0xFF2C2C2C), borderRadius: BorderRadius.circular(12)),
-      child: DropdownButton<String>(
-        value: value,
-        isExpanded: true,
-        underline: const SizedBox.shrink(),
-        dropdownColor: const Color(0xFF2C2C2C),
-        items: items.map((item) => DropdownMenuItem(value: item, child: Text(item, style: const TextStyle(color: Colors.white, fontSize: 14)))).toList(),
-        onChanged: onChanged,
-      ),
-    );
-  }
-
-  // --- LÓGICA DE COLABORADORES ---
-
-  void _showCollaboratorsDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFF2C2C2C),
-              title: const Text('Seleccionar colaboradores', style: TextStyle(color: Colors.white)),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: _availableCollaborators.map((collaborator) {
-                    return CheckboxListTile(
-                      value: _selectedCollaborators[collaborator] ?? false,
-                      onChanged: (value) {
-                        setStateDialog(() {
-                          _selectedCollaborators[collaborator] = value ?? false;
-                        });
-                        // OPTIMIZACIÓN: No llamamos a setState() aquí para evitar reconstruir la pantalla de fondo en cada click
-                      },
-                      title: Text(collaborator, style: const TextStyle(color: Colors.white)),
-                      checkColor: Colors.white,
-                      activeColor: const Color(0xFF2E60C4),
-                      controlAffinity: ListTileControlAffinity.leading,
-                    );
-                  }).toList(),
-                ),
-              ),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(context), child: const Text('Listo', style: TextStyle(color: Color(0xFF2E60C4)))),
-              ],
-            );
-          },
-        );
-      },
-    ).then((_) {
-      // OPTIMIZACIÓN: Actualizamos la pantalla principal SOLO cuando se cierra el diálogo
-      setState(() {});
-    });
-  }
-
-  String _getSelectedCollaboratorsText() {
-    final list = _getSelectedCollaboratorsList();
-    if (list.isEmpty) return 'Seleccionar colaboradores';
-    if (list.length == 1) return list.first;
-    return '${list.length} colaboradores seleccionados';
-  }
-
-  List<String> _getSelectedCollaboratorsList() {
-    return _selectedCollaborators.entries.where((e) => e.value).map((e) => e.key).toList();
   }
 }
