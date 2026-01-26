@@ -29,13 +29,12 @@ class _EventsScreenState extends State<EventsScreen> {
 
   late TextEditingController _searchController;
 
-  // Mapa para los íconos de eventos activos
   final Map<String, IconData> _participatingEvents = {};
   
   // Mapa para guardar la hora de inicio de la sesión activa
   final Map<String, DateTime> _activeStartTimes = {};
 
-  // ✅ NUEVO: Mapa para guardar el NOMBRE de la actividad (ej: "Taller")
+  // Mapa para guardar el NOMBRE de la actividad
   final Map<String, String> _activeTaskNames = {};
 
   @override
@@ -49,6 +48,7 @@ class _EventsScreenState extends State<EventsScreen> {
   Future<void> _loadData() async {
     final loadedAssignments = await _eventsService.fetchEvents();
 
+    // ✅ restaurar turno activo
     final active = await _eventsService.getActiveSession();
     
     if (active != null) {
@@ -56,12 +56,10 @@ class _EventsScreenState extends State<EventsScreen> {
       
       _participatingEvents.clear();
       _activeStartTimes.clear(); 
-      _activeTaskNames.clear(); // Limpiamos nombres previos
+      _activeTaskNames.clear();
 
       _participatingEvents[active.eventKey] = icon;
-      _activeStartTimes[active.eventKey] = active.timestamp;
-      
-      // ✅ Recuperamos el nombre de la tarea (usando el getter .label del enum)
+      _activeStartTimes[active.eventKey] = active.timestamp; 
       _activeTaskNames[active.eventKey] = active.task.label;
       
     } else {
@@ -129,16 +127,14 @@ class _EventsScreenState extends State<EventsScreen> {
     }).toList();
   }
 
-  // ✅ MODIFICADO: Ahora pide el nombre de la tarea (taskName)
   void _startSessionLocal(String eventKey, IconData icon, String taskName) {
     setState(() {
       _participatingEvents[eventKey] = icon;
       _activeStartTimes[eventKey] = DateTime.now();
-      _activeTaskNames[eventKey] = taskName; // Guardamos el nombre
+      _activeTaskNames[eventKey] = taskName;
     });
   }
 
-  // ✅ MODIFICADO: Limpia también el nombre
   void _endSessionLocal(String eventKey) {
     setState(() {
       _participatingEvents.remove(eventKey);
@@ -229,8 +225,6 @@ class _EventsScreenState extends State<EventsScreen> {
           assigmentType: event.assigmentType,
           isParticipating: isParticipating,
           actionIcon: _participatingEvents[eventKey],
-          
-          // ✅ AQUÍ PASAMOS EL NOMBRE DE LA TAREA PARA QUE SALGA EL BADGE
           activeTaskName: _activeTaskNames[eventKey], 
           
           onTap: () {
@@ -342,6 +336,7 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
+  // --- MODIFICADO: Usa StatefulBuilder para controlar el estado de carga (Loading) ---
   void _showActionModal(
     BuildContext context,
     AssigmentModel event,
@@ -352,22 +347,100 @@ class _EventsScreenState extends State<EventsScreen> {
       context: context,
       backgroundColor: const Color(0xFF1E1E1E),
       isScrollControlled: true,
+      // isDismissible: false, // Puedes descomentar esto para obligar a esperar
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24.0,
-            right: 24.0,
-            top: 20.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
-          ),
-          child: SingleChildScrollView(
-            child: isActiveSession
-                ? _buildExitSessionModal(context, event, eventKey)
-                : _buildStartSessionModal(context, event, eventKey),
-          ),
+        bool isModalLoading = false;
+
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            
+            // Lógica para iniciar/cambiar actividad
+            Future<void> onActivitySelected(String title, IconData icon) async {
+              setModalState(() => isModalLoading = true); // 1. Activar carga
+
+              try {
+                final task = _taskFromTitle(title);
+                await _eventsService.startAttendance(
+                  assignment: event,
+                  task: task,
+                );
+
+                if (mounted) {
+                  _startSessionLocal(eventKey, icon, title);
+                }
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Participando: $title')));
+                }
+              } catch (e) {
+                setModalState(() => isModalLoading = false); // Error: Quitar carga
+                // Aquí podrías mostrar un error
+              }
+            }
+
+            // Lógica para marcar salida
+            Future<void> onExitSelected() async {
+              setModalState(() => isModalLoading = true); // 1. Activar carga
+
+              try {
+                final sid = event.serverId;
+                if (sid != null) {
+                  await _eventsService.endAttendance(serverId: sid);
+                  if (mounted) {
+                    _endSessionLocal(eventKey);
+                  }
+                }
+                
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Salida registrada'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                setModalState(() => isModalLoading = false);
+              }
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24.0,
+                right: 24.0,
+                top: 20.0,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+              ),
+              child: SingleChildScrollView(
+                // Si carga, mostramos spinner y bloqueamos botones
+                child: isModalLoading
+                    ? const SizedBox(
+                        height: 200,
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircularProgressIndicator(color: Color(0xFF4CAF50)),
+                              SizedBox(height: 16),
+                              Text("Procesando...", style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      )
+                    : isActiveSession
+                        ? _buildExitSessionModal(
+                            context, event, eventKey, onActivitySelected, onExitSelected)
+                        : _buildStartSessionModal(
+                            context, event, eventKey, onActivitySelected),
+              ),
+            );
+          },
         );
       },
     );
@@ -377,6 +450,7 @@ class _EventsScreenState extends State<EventsScreen> {
     BuildContext context,
     AssigmentModel event,
     String eventKey,
+    Function(String, IconData) onOptionSelected, // Recibe callback
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,17 +464,17 @@ class _EventsScreenState extends State<EventsScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        _buildActionOption(context, Icons.business, 'Oficina',
-            'Reuniones / Administrativo', event, eventKey),
+        _buildActionOption(Icons.business, 'Oficina',
+            'Reuniones / Administrativo', onOptionSelected),
         const SizedBox(height: 10),
-        _buildActionOption(
-            context, Icons.build, 'Taller', 'Reparaciones', event, eventKey),
+        _buildActionOption(Icons.build, 'Taller', 
+            'Reparaciones', onOptionSelected),
         const SizedBox(height: 10),
-        _buildActionOption(context, Icons.local_shipping, 'Transporte',
-            'Traslados', event, eventKey),
+        _buildActionOption(Icons.local_shipping, 'Transporte', 
+            'Traslados', onOptionSelected),
         const SizedBox(height: 10),
-        _buildActionOption(context, Icons.construction, 'Servicio',
-            'Visitas técnicas', event, eventKey),
+        _buildActionOption(Icons.construction, 'Servicio', 
+            'Visitas técnicas', onOptionSelected),
         const SizedBox(height: 20),
       ],
     );
@@ -410,6 +484,8 @@ class _EventsScreenState extends State<EventsScreen> {
     BuildContext context,
     AssigmentModel event,
     String eventKey,
+    Function(String, IconData) onOptionSelected, // Recibe callback
+    VoidCallback onExitSelected,                 // Recibe callback salida
   ) {
     final activeIcon = _participatingEvents[eventKey];
 
@@ -442,26 +518,26 @@ class _EventsScreenState extends State<EventsScreen> {
         const SizedBox(height: 12),
 
         if (activeIcon != Icons.business) ...[
-          _buildActionOption(context, Icons.business, 'Oficina',
-              'Reuniones / Administrativo', event, eventKey),
+          _buildActionOption(Icons.business, 'Oficina',
+              'Reuniones / Administrativo', onOptionSelected),
           const SizedBox(height: 10),
         ],
 
         if (activeIcon != Icons.build) ...[
-          _buildActionOption(
-              context, Icons.build, 'Taller', 'Reparaciones', event, eventKey),
+          _buildActionOption(Icons.build, 'Taller', 
+              'Reparaciones', onOptionSelected),
           const SizedBox(height: 10),
         ],
 
         if (activeIcon != Icons.local_shipping) ...[
-          _buildActionOption(context, Icons.local_shipping, 'Transporte',
-              'Traslados', event, eventKey),
+          _buildActionOption(Icons.local_shipping, 'Transporte',
+              'Traslados', onOptionSelected),
           const SizedBox(height: 10),
         ],
 
         if (activeIcon != Icons.construction) ...[
-          _buildActionOption(context, Icons.construction, 'Servicio',
-              'Visitas técnicas', event, eventKey),
+          _buildActionOption(Icons.construction, 'Servicio',
+              'Visitas técnicas', onOptionSelected),
           const SizedBox(height: 10),
         ],
 
@@ -497,31 +573,8 @@ class _EventsScreenState extends State<EventsScreen> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: () async {
-                  final sid = event.serverId;
-                  if (sid == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content:
-                            Text('No se puede marcar salida: serverId es null'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                    return;
-                  }
-
-                  await _eventsService.endAttendance(serverId: sid);
-
-                  _endSessionLocal(eventKey);
-                  Navigator.pop(context);
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Salida registrada'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                },
+                // Ejecuta el callback que activa la carga
+                onPressed: onExitSelected, 
               ),
             ),
           ],
@@ -531,30 +584,15 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
+  // Este widget ahora es "tonto", solo recibe el tap y lo pasa arriba
   Widget _buildActionOption(
-    BuildContext context,
     IconData icon,
     String title,
     String subtitle,
-    AssigmentModel event,
-    String eventKey,
+    Function(String, IconData) onTap,
   ) {
     return GestureDetector(
-      onTap: () async {
-        final task = _taskFromTitle(title);
-
-        await _eventsService.startAttendance(
-          assignment: event,
-          task: task,
-        );
-
-        // ✅ AHORA PASAMOS EL 'title' (Nombre de la tarea)
-        _startSessionLocal(eventKey, _iconFromTask(task), title);
-        
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Participando: $title')));
-      },
+      onTap: () => onTap(title, icon),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
