@@ -55,14 +55,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
               onPrimary: Colors.white,
               surface: Color(0xFF1E1E1E),
               onSurface: Colors.white,
-<<<<<<< HEAD
-            ), dialogTheme: DialogTheme(backgroundColor: const Color(0xFF1E1E1E)),
-=======
             ),
-            dialogTheme: const DialogTheme(
-              backgroundColor: Color(0xFF1E1E1E),
-            ),
->>>>>>> bc4fd8576a347dba69cbfd012a6d70a1e0e77653
+
           ),
           child: child!,
         );
@@ -164,7 +158,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                                       fontSize: 12),
                                 ),
                                 Text(
-                                  '${log.timestamp.hour}:${log.timestamp.minute}:${log.timestamp.second}',
+                                  '${log.timestamp.hour.toString().padLeft(2, '0')}:${log.timestamp.minute.toString().padLeft(2, '0')}:${log.timestamp.second.toString().padLeft(2, '0')}',
                                   style: TextStyle(
                                       color: Colors.grey[600], fontSize: 12),
                                 ),
