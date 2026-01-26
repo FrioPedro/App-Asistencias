@@ -112,7 +112,8 @@ class EventCard extends StatelessWidget {
                         // 1.1 Versión Borrosa (Glow)
                         Center(
                           child: ImageFiltered(
-                            imageFilter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                            imageFilter:
+                                ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
                             child: Icon(
                               actionIcon,
                               size: 120,
@@ -192,7 +193,12 @@ class EventCard extends StatelessWidget {
                     ),
 
                   // COLUMNA DERECHA: La etiqueta (Tag)
-                  if (motive != null) _buildMotiveTag() else _buildAssignmentTypeTag(),
+                  Column(
+                    children: [
+                      _buildMotiveTag(),
+                      _buildAssignmentTypeTag(),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -269,21 +275,21 @@ class EventCard extends StatelessWidget {
     switch (assigmentType) {
       case AssigmentType.emergency:
         return const Color(0xFFFF6B6B); // Rojo (Emergencia)
-      
+
       case AssigmentType.technicalVisit:
       case AssigmentType.serviceProject:
         return const Color(0xFF2E60C4); // Azul (Servicios)
-      
+
       case AssigmentType.projectOrder:
       case AssigmentType.projectAdditional:
         return const Color(0xFF4CAF50); // Verde (Proyectos)
-      
+
       case AssigmentType.warrantyProject:
         return const Color(0xFFFFC107); // Amarillo (Garantía)
-      
+
       case AssigmentType.transfer:
         return const Color(0xFF9C27B0); // Morado (Traslados)
-      
+
       case AssigmentType.officeAssistance:
       case AssigmentType.other:
         return Colors.white.withOpacity(0.1); // Gris (Otros)
