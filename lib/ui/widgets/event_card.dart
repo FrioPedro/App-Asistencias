@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
 
 // --- IMPORTANTE: Importamos el nuevo modelo con el Enum 'AssigmentType' ---
+import '../../models/activity_model.dart';
 import '../../models/assigment_model.dart';
 
 /// Widget que muestra una tarjeta de evento/asignación
@@ -36,6 +37,9 @@ class EventCard extends StatelessWidget {
   /// Indica si se está procesando una acción (Bloquea clicks y muestra carga)
   final bool isLoading;
 
+  /// Motivo del registro (entrada/salida), para vistas de historial.
+  final MotiveType? motive;
+
   /// Constructor del EventCard
   const EventCard({
     super.key,
@@ -50,6 +54,7 @@ class EventCard extends StatelessWidget {
     this.actionIcon,
     this.hasPendingSync = false,
     this.isLoading = false,
+    this.motive,
   });
 
   @override
@@ -187,23 +192,7 @@ class EventCard extends StatelessWidget {
                     ),
 
                   // COLUMNA DERECHA: La etiqueta (Tag)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: _getTagColor(),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    // Usamos .label de tu extensión en assigment_model.dart
-                    child: Text(
-                      assigmentType.label.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
+                  if (motive != null) _buildMotiveTag() else _buildAssignmentTypeTag(),
                 ],
               ),
             ),
@@ -225,6 +214,51 @@ class EventCard extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Construye la etiqueta para el tipo de asignación (proyectos, servicios, etc.)
+  Widget _buildAssignmentTypeTag() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: _getTagColor(),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      // Usamos .label de tu extensión en assigment_model.dart
+      child: Text(
+        assigmentType.label.toUpperCase(),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  /// Construye la etiqueta para el motivo del registro (Entrada/Salida)
+  Widget _buildMotiveTag() {
+    final isEntry = motive == MotiveType.entry;
+    final label = isEntry ? 'ENTRADA' : 'SALIDA';
+    final color = isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
         ),
       ),
     );

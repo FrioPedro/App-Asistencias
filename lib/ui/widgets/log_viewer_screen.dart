@@ -54,7 +54,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
               onPrimary: Colors.white,
               surface: Color(0xFF1E1E1E),
               onSurface: Colors.white,
-            ), dialogTheme: DialogThemeData(backgroundColor: const Color(0xFF1E1E1E)),
+            ), dialogTheme: DialogTheme(backgroundColor: const Color(0xFF1E1E1E)),
           ),
           child: child!,
         );
