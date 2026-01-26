@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../models/activity_model.dart';
 import '../../providers/history_provider.dart';
