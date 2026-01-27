@@ -19,7 +19,8 @@ class EventsProvider {
   }
 
   // ✅ CORREGIDO: Agregado DateTime timestamp al tipo de retorno
-  Future<({String eventKey, TaskType task, int serverId, DateTime timestamp})?> getActiveSession() {
+  Future<({String eventKey, TaskType task, int serverId, DateTime timestamp})?>
+      getActiveSession() {
     return _storage.read();
   }
 
@@ -72,4 +73,29 @@ class EventsProvider {
   }
 
   Future<void> clearActiveSession() => _storage.clear();
+
+  // --- Logic Helpers ---
+
+  bool isCreationAllowed() {
+    final now = DateTime.now();
+    if (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday) {
+      return true;
+    }
+    final hour = now.hour;
+    // Bloqueado entre 6 AM y 8 PM (20:00)
+    if (hour >= 6 && hour < 20) {
+      return false;
+    }
+    return true;
+  }
+
+  // Helper estático o de instancia
+  static TaskType taskFromTitle(String title) {
+    final s = title.trim().toLowerCase();
+    if (s == 'oficina') return TaskType.office;
+    if (s == 'taller') return TaskType.workshop;
+    if (s == 'servicio') return TaskType.service;
+    if (s == 'transporte') return TaskType.transport;
+    return TaskType.office; // Default
+  }
 }

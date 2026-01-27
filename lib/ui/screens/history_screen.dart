@@ -5,6 +5,7 @@ import '../../models/activity_model.dart'; // Usamos ActivityModel para el histo
 import '../../providers/history_provider.dart'; // Provider actualizado
 import 'home/card.dart'; // Widget principal con soporte para iconos de actividad
 import '../widgets/event_card_skeleton.dart';
+import '../widgets/custom_search_bar.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -182,32 +183,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
+                    child: CustomSearchBar(
                       controller: _searchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.04),
-                        hintText: 'Buscar actividad...',
-                        hintStyle: TextStyle(color: Colors.grey[600]),
-                        prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon:
-                                    Icon(Icons.clear, color: Colors.grey[600]),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _searchQuery = '');
-                                },
-                              )
-                            : null,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 12),
-                      ),
+                      hintText: 'Buscar actividad...',
+                      onChanged: (val) =>
+                          setState(() => _searchQuery = val.toLowerCase()),
                     ),
                   ),
                   const SizedBox(width: 12),
