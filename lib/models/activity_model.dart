@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'assigment_model.dart';
 
@@ -42,6 +43,19 @@ extension TaskTypeX on TaskType {
     if (s == 'servicio') return TaskType.service;
     if (s == 'transporte') return TaskType.transport;
     return TaskType.office;
+  }
+
+  Color get color {
+    switch (this) {
+      case TaskType.office:
+        return Colors.grey;
+      case TaskType.workshop:
+        return Colors.blue;
+      case TaskType.service:
+        return Colors.orange;
+      case TaskType.transport:
+        return Colors.green;
+    }
   }
 }
 

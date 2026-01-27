@@ -72,15 +72,15 @@ class EventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF1F1F1F), // Gris oscuro
           borderRadius: BorderRadius.circular(16),
-          // Borde condicional: verde si participa
+          // Borde condicional: del color de la actividad si participa
           border: isParticipating
-              ? Border.all(color: const Color(0xFF4CAF50), width: 2.0)
+              ? Border.all(color: _getActiveColor(), width: 2.0)
               : null,
-          // Sombra verde difuminada opcional
+          // Sombra difuminada del color de la actividad opcional
           boxShadow: isParticipating
               ? [
                   BoxShadow(
-                    color: const Color(0xFF4CAF50).withOpacity(0.2),
+                    color: _getActiveColor().withOpacity(0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   )
@@ -121,7 +121,7 @@ class EventCard extends StatelessWidget {
                             child: Icon(
                               actionIcon,
                               size: 120,
-                              color: Colors.white.withOpacity(0.3),
+                              color: _getActiveColor().withOpacity(0.5),
                             ),
                           ),
                         ),
@@ -130,7 +130,7 @@ class EventCard extends StatelessWidget {
                           child: Icon(
                             actionIcon,
                             size: 120,
-                            color: Colors.white.withOpacity(0.2),
+                            color: _getActiveColor().withOpacity(0.3),
                           ),
                         ),
                       ],
@@ -152,6 +152,8 @@ class EventCard extends StatelessWidget {
                       children: [
                         Text(
                           eventName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -161,6 +163,8 @@ class EventCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           companyName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.grey[400],
                             fontSize: 14,
@@ -168,6 +172,8 @@ class EventCard extends StatelessWidget {
                         ),
                         Text(
                           eventCode,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.grey[500],
                             fontSize: 12,
@@ -177,6 +183,8 @@ class EventCard extends StatelessWidget {
                         // La fecha (solo se muestra si se pasa, lógica controlada por el padre)
                         Text(
                           dateTime,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.grey[500],
                             fontSize: 12,
@@ -252,18 +260,19 @@ class EventCard extends StatelessWidget {
 
   /// Construye la etiqueta de "ACTIVIDAD EN CURSO" (ej: TALLER)
   Widget _buildActiveTaskBadge() {
+    final color = _getActiveColor();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.4), // Fondo oscuro semitransparente
-        border: Border.all(color: const Color(0xFF4CAF50)), // Borde verde neón
+        border: Border.all(color: color), // Borde del color de la actividad
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Pequeño punto indicador
-          const Icon(Icons.circle, size: 6, color: Color(0xFF4CAF50)),
+          Icon(Icons.circle, size: 6, color: color),
           const SizedBox(width: 4),
           Text(
             activeTaskName!.toUpperCase(),
@@ -277,6 +286,13 @@ class EventCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _getActiveColor() {
+    if (activeTaskName != null) {
+      return TaskTypeX.fromLabel(activeTaskName).color;
+    }
+    return const Color(0xFF4CAF50); // Default Green
   }
 
   /// Construye la etiqueta para el tipo de asignación (proyectos, servicios, etc.)
