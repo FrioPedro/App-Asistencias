@@ -1,0 +1,408 @@
+import 'package:flutter/material.dart';
+import 'dart:ui';
+import '../../models/log_model.dart';
+import '../../providers/log_provider.dart';
+
+class LogViewerScreen extends StatefulWidget {
+  const LogViewerScreen({super.key});
+
+  @override
+  State<LogViewerScreen> createState() => _LogViewerScreenState();
+}
+
+class _LogViewerScreenState extends State<LogViewerScreen> {
+  final LogProvider _logProvider = LogProvider();
+
+  List<LogModel> _allLogs = [];
+  List<LogModel> _filteredLogs = [];
+  bool _isLoading = true;
+  DateTimeRange? _selectedDateRange;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLogs();
+  }
+
+  Future<void> _loadLogs() async {
+    final logs = await _logProvider.fetchLogs();
+    if (mounted) {
+      setState(() {
+        _allLogs = logs;
+        _filteredLogs = logs;
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _applyFilter() {
+    setState(() {
+      _filteredLogs =
+          _logProvider.filterLogsByDate(_allLogs, _selectedDateRange);
+    });
+  }
+
+  Future<void> _pickDateRange() async {
+    final DateTimeRange? newDateRange = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2023),
+      lastDate: DateTime.now(),
+      initialDateRange: _selectedDateRange,
+      saveText: 'FILTRAR',
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            primaryColor: const Color(0xFF4CAF50),
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF4CAF50),
+              onPrimary: Colors.white,
+              surface: Color(0xFF1E1E1E),
+              onSurface: Colors.white,
+              secondary: Color(0xFF4CAF50),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (newDateRange != null) {
+      setState(() {
+        _selectedDateRange = newDateRange;
+      });
+      _applyFilter();
+    }
+  }
+
+  IconData _getIconByType(LogType type) {
+    switch (type) {
+      case LogType.error:
+        return Icons.error_outline;
+      case LogType.warning:
+        return Icons.warning_amber;
+      case LogType.info:
+        return Icons.info_outline;
+    }
+  }
+
+  String _getTypeLabel(LogType type) {
+    switch (type) {
+      case LogType.error:
+        return 'ERROR';
+      case LogType.warning:
+        return 'WARN';
+      case LogType.info:
+        return 'INFO';
+    }
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final isToday = timestamp.year == now.year &&
+        timestamp.month == now.month &&
+        timestamp.day == now.day;
+
+    final hour = timestamp.hour > 12 ? timestamp.hour - 12 : timestamp.hour;
+    final amPm = timestamp.hour >= 12 ? 'PM' : 'AM';
+    final minute = timestamp.minute.toString().padLeft(2, '0');
+    final second = timestamp.second.toString().padLeft(2, '0');
+
+    if (isToday) {
+      return 'Hoy, $hour:$minute:$second $amPm';
+    } else {
+      return '${timestamp.day}/${timestamp.month}/${timestamp.year}, $hour:$minute:$second $amPm';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDateFilterActive = _selectedDateRange != null;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF121212),
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        toolbarHeight: 20,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              _buildHeader(context),
+              const SizedBox(height: 16),
+
+              // Chip de filtro
+              if (isDateFilterActive) ...[
+                _buildFilterChip(),
+                const SizedBox(height: 12),
+              ],
+
+              // Lista de logs
+              Expanded(
+                child: _isLoading
+                    ? _buildLoadingState()
+                    : _filteredLogs.isEmpty
+                        ? _buildEmptyState()
+                        : _buildLogsList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Expanded(
+          child: Text(
+            'Logs del Sistema',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            _buildHeaderButton(
+              _selectedDateRange != null
+                  ? Icons.event_available
+                  : Icons.date_range,
+              () => _pickDateRange(),
+              isActive: _selectedDateRange != null,
+            ),
+            const SizedBox(width: 12),
+            _buildHeaderButton(
+              Icons.arrow_back,
+              () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeaderButton(IconData icon, VoidCallback onTap,
+      {bool isActive = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isActive ? const Color(0xFF4CAF50) : const Color(0xFF2C2C2C),
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white, size: 24),
+        onPressed: onTap,
+      ),
+    );
+  }
+
+  Widget _buildFilterChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF4CAF50).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Filtrando: ${_selectedDateRange!.start.day}/${_selectedDateRange!.start.month} - ${_selectedDateRange!.end.day}/${_selectedDateRange!.end.month}',
+            style: const TextStyle(
+                color: Color(0xFF4CAF50),
+                fontSize: 12,
+                fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () {
+              setState(() => _selectedDateRange = null);
+              _applyFilter();
+            },
+            child: const Icon(Icons.close, color: Color(0xFF4CAF50), size: 18),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: CircularProgressIndicator(
+        color: Color(0xFF4CAF50),
+        strokeWidth: 3,
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.description_outlined, size: 60, color: Colors.grey[800]),
+          const SizedBox(height: 16),
+          Text(
+            'No se encontraron logs',
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogsList() {
+    return ListView.builder(
+      itemCount: _filteredLogs.length,
+      itemBuilder: (context, index) {
+        final log = _filteredLogs[index];
+        return _buildLogCard(log);
+      },
+    );
+  }
+
+  Widget _buildLogCard(LogModel log) {
+    final color = _logProvider.getColorByType(log.type);
+    final icon = _getIconByType(log.type);
+    final typeLabel = _getTypeLabel(log.type);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1F1F1F),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Icono de fondo difuminado
+          Positioned(
+            right: -20,
+            top: -10,
+            bottom: -10,
+            child: SizedBox(
+              width: 120,
+              child: ShaderMask(
+                shaderCallback: (rect) {
+                  return const LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.transparent,
+                      Colors.transparent,
+                      Colors.black,
+                    ],
+                    stops: [0.0, 0.3, 1.0],
+                  ).createShader(rect);
+                },
+                blendMode: BlendMode.dstIn,
+                child: Stack(
+                  children: [
+                    // Versión borrosa
+                    Center(
+                      child: ImageFiltered(
+                        imageFilter: ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+                        child: Icon(
+                          icon,
+                          size: 80,
+                          color: color.withOpacity(0.4),
+                        ),
+                      ),
+                    ),
+                    // Versión nítida
+                    Center(
+                      child: Icon(
+                        icon,
+                        size: 80,
+                        color: color.withOpacity(0.25),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Contenido
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Fila superior: Tipo y Timestamp
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Badge de tipo
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.2),
+                        border: Border.all(color: color),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(icon, size: 14, color: color),
+                          const SizedBox(width: 4),
+                          Text(
+                            typeLabel,
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Timestamp
+                    Text(
+                      _formatTimestamp(log.timestamp),
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // Mensaje
+                Text(
+                  log.message,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

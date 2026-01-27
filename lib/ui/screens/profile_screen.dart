@@ -3,7 +3,7 @@ import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
 import '../../models/user_model.dart';          
 import '../../providers/profile_provider.dart'; 
-import '../widgets/log_viewer_screen.dart';     
+import 'log_viewer_screen.dart'; // Ahora en screens     
 
 // ✅ Importamos el modelo y la extensión
 import '../../models/user_zone.dart'; 
