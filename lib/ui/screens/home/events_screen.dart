@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // --- IMPORTS ---
 import '../../../models/assigment_model.dart';
 import '../../../providers/events_provider.dart';
-import '../../widgets/event_card.dart';
+import 'card.dart';
 import '../../widgets/event_card_skeleton.dart';
 import '../profile_screen.dart';
 import '../create_activity_screen.dart';

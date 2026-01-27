@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
 
 // --- IMPORTANTE: Importamos el nuevo modelo con el Enum 'AssigmentType' ---
-import '../../models/activity_model.dart';
-import '../../models/assigment_model.dart';
+import '../../../models/activity_model.dart';
+import '../../../models/assigment_model.dart';
 
 /// Widget que muestra una tarjeta de evento/asignación
 class EventCard extends StatelessWidget {
