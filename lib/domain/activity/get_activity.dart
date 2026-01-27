@@ -102,13 +102,61 @@ class GetActivity {
         for (final activity in online) {
           if (activity.timestamp == null) continue;
 
-          // Si existe por timestamp, se reemplaza automáticamente
+          // ESTRATEGIA: Buscar por VENTANA DE TIEMPO primero, no por ID.
+          // Esto es más robusto si el ServerID o Motive difieren ligeramente (case sensitive, nulls, etc).
+          final windowStart =
+              activity.timestamp!.subtract(const Duration(hours: 6));
+          final windowEnd = activity.timestamp!.add(const Duration(hours: 6));
+
+          final candidates = await isar.activityModels
+              .filter()
+              .timestampBetween(windowStart, windowEnd)
+              .findAll();
+
+          ActivityModel? match;
+
+          // Buscamos el mejor candidato dentro de los encontrados por fecha
+          for (final c in candidates) {
+            // Prioridad 1: Coincide DocumentID (si existe)
+            if (c.documentId != null &&
+                activity.documentId != null &&
+                c.documentId == activity.documentId) {
+              match = c;
+              break;
+            }
+
+            // Prioridad 2: Coincide ServerID y Motive
+            // Usamos OR para ser más laxos si ServerID falta en local
+            bool sameServerId =
+                (c.serverId != null && c.serverId == activity.serverId);
+            bool sameMotive = (c.motive == activity.motive);
+
+            if (sameServerId && sameMotive) {
+              match = c;
+              break;
+            }
+
+            // Prioridad 3: Solo coincide Motive y está muy cerca en el tiempo
+            if (sameMotive) {
+              // Si es el mismo motivo y está en la ventana de tiempo, asumimos que es el mismo
+              // (Asumiendo que no haces 2 entradas en < 6 horas, que es lógico)
+              match = c;
+              break;
+            }
+          }
+
+          // Si encontramos match, actualizamos el existente
+          if (match != null) {
+            activity.id = match.id;
+          }
+
           await isar.activityModels.put(activity);
         }
       });
 
       return await getLocalData();
     } catch (e) {
+      print("[SYNC ERROR] $e");
       return await getLocalData();
     }
   }

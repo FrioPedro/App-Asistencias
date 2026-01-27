@@ -9,29 +9,42 @@ enum TaskType { office, workshop, service, transport }
 extension TaskTypeX on TaskType {
   int get id {
     switch (this) {
-      case TaskType.office: return 1;
-      case TaskType.workshop: return 2;
-      case TaskType.service: return 3;
-      case TaskType.transport: return 4;
+      case TaskType.office:
+        return 1;
+      case TaskType.workshop:
+        return 2;
+      case TaskType.service:
+        return 3;
+      case TaskType.transport:
+        return 4;
     }
   }
 
   String get label {
     switch (this) {
-      case TaskType.office: return 'Oficina';
-      case TaskType.workshop: return 'Taller';
-      case TaskType.service: return 'Servicio';
-      case TaskType.transport: return 'Transporte';
+      case TaskType.office:
+        return 'Oficina';
+      case TaskType.workshop:
+        return 'Taller';
+      case TaskType.service:
+        return 'Servicio';
+      case TaskType.transport:
+        return 'Transporte';
     }
   }
 
   static TaskType fromId(int? id) {
     switch (id) {
-      case 1: return TaskType.office;
-      case 2: return TaskType.workshop;
-      case 3: return TaskType.service;
-      case 4: return TaskType.transport;
-      default: return TaskType.office;
+      case 1:
+        return TaskType.office;
+      case 2:
+        return TaskType.workshop;
+      case 3:
+        return TaskType.service;
+      case 4:
+        return TaskType.transport;
+      default:
+        return TaskType.office;
     }
   }
 
@@ -50,11 +63,11 @@ extension TaskTypeX on TaskType {
       case TaskType.office:
         return Colors.grey;
       case TaskType.workshop:
-        return Colors.blue;
-      case TaskType.service:
-        return Colors.orange;
-      case TaskType.transport:
         return Colors.green;
+      case TaskType.service:
+        return Colors.blue;
+      case TaskType.transport:
+        return Colors.orange;
     }
   }
 }
@@ -65,23 +78,30 @@ enum MotiveType { entry, exit }
 extension MotiveTypeX on MotiveType {
   int get id {
     switch (this) {
-      case MotiveType.entry: return 1;
-      case MotiveType.exit: return 2;
+      case MotiveType.entry:
+        return 1;
+      case MotiveType.exit:
+        return 2;
     }
   }
 
   String get label {
     switch (this) {
-      case MotiveType.entry: return 'Entrada';
-      case MotiveType.exit: return 'Salida';
+      case MotiveType.entry:
+        return 'Entrada';
+      case MotiveType.exit:
+        return 'Salida';
     }
   }
 
   static MotiveType fromId(int? id) {
     switch (id) {
-      case 1: return MotiveType.entry;
-      case 2: return MotiveType.exit;
-      default: return MotiveType.entry;
+      case 1:
+        return MotiveType.entry;
+      case 2:
+        return MotiveType.exit;
+      default:
+        return MotiveType.entry;
     }
   }
 
@@ -117,8 +137,6 @@ DateTime _parseServerTimestamp(dynamic v) {
 
   return fallback;
 }
-
-
 
 @collection
 class ActivityModel {
@@ -208,7 +226,11 @@ class ActivityModel {
     required String collaboratorId,
     required String zone,
   }) {
-    final ts = (timestamp ?? DateTime.now()).toIso8601String().replaceFirst('T', ' ').split('.').first;
+    final ts = (timestamp ?? DateTime.now())
+        .toIso8601String()
+        .replaceFirst('T', ' ')
+        .split('.')
+        .first;
 
     return {
       'project': project,
