@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/assigment_model.dart';
 import '../../providers/events_provider.dart';
+import '../widgets/custom_snackbar.dart';
 
 class ServiceExitFormScreen extends StatefulWidget {
   final AssigmentModel event;
@@ -57,12 +58,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al finalizar: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        CustomSnackBar.show(context, 'Error al finalizar: $e', isError: true);
       }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -195,9 +191,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   Widget _buildPhotoBox(String label) {
     return InkWell(
       onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Funcionalidad de cámara pendiente de configurar')),
-        );
+        CustomSnackBar.show(context, 'Funcionalidad de cámara pendiente de configurar', isError: true);
       },
       child: Container(
         height: 120,

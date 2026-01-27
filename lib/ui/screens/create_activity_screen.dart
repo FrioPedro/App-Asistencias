@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../widgets/custom_snackbar.dart';
 
 class CreateActivityScreen extends StatefulWidget {
   const CreateActivityScreen({super.key});
@@ -162,9 +163,10 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
   }
 
   void _snack(String msg, {Color? color}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: color),
-    );
+    // Usamos el CustomSnackBar para mantener el estilo
+    // Si el color es rojo/naranja, asumimos error.
+    final isError = color == Colors.red || color == Colors.orange;
+    CustomSnackBar.show(context, msg, isError: isError);
   }
 
   @override
