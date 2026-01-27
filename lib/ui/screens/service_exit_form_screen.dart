@@ -107,7 +107,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   ],
                 ),
                 
-                const SizedBox(height: 24),
+                const SizedBox(height: 12),
                 
                 _buildFormField(
                   label: 'INCIDENCIAS',
@@ -116,7 +116,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   cardColor: cardColor,
                 ),
                 
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 
                 _buildFormField(
                   label: 'CONCLUSIONES',
@@ -125,7 +125,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   cardColor: cardColor,
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 
                 _buildFormField(
                   label: 'RECOMENDACIONES',
@@ -134,11 +134,11 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   cardColor: cardColor,
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 12),
 
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 40,
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _onSubmit,
                     style: ElevatedButton.styleFrom(
@@ -194,7 +194,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         CustomSnackBar.show(context, 'Funcionalidad de cámara pendiente de configurar', isError: true);
       },
       child: Container(
-        height: 120,
+        height: 100,
         decoration: BoxDecoration(
           color: const Color(0xFF2C2C2C),
           borderRadius: BorderRadius.circular(12),
