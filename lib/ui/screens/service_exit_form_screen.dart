@@ -24,7 +24,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final _recomendacionesController = TextEditingController();
 
   final EventsProvider _eventsService = EventsProvider();
-  
+
   bool _isSubmitting = false;
 
   @override
@@ -51,10 +51,10 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       if (sid != null) {
         await _eventsService.endAttendance(serverId: sid);
       }
-      
+
       if (mounted) {
         // Retornamos 'true' para indicar que se finalizó con éxito
-        Navigator.pop(context, true); 
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -69,7 +69,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   Widget build(BuildContext context) {
     const bg = Color(0xFF121212);
     const cardColor = Color(0xFF2C2C2C);
-    const primary = Color(0xFF2E60C4); // Azul corporativo (o el que corresponda)
+    // const primary = Color(0xFF2E60C4); // Azul corporativo (o el que corresponda)
 
     return Scaffold(
       backgroundColor: bg,
@@ -83,9 +83,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         title: const Text(
           'Finalizar Servicio',
           style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -106,43 +104,36 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                     Expanded(child: _buildPhotoBox('DESPUÉS')),
                   ],
                 ),
-                
                 const SizedBox(height: 12),
-                
                 _buildFormField(
                   label: 'INCIDENCIAS',
                   controller: _incidenciasController,
                   hint: 'Describa las incidencias encontradas...',
                   cardColor: cardColor,
                 ),
-                
                 const SizedBox(height: 12),
-                
                 _buildFormField(
                   label: 'CONCLUSIONES',
                   controller: _conclusionesController,
                   hint: 'Conclusiones del servicio...',
                   cardColor: cardColor,
                 ),
-
                 const SizedBox(height: 12),
-                
                 _buildFormField(
                   label: 'RECOMENDACIONES',
                   controller: _recomendacionesController,
                   hint: 'Recomendaciones para el cliente...',
                   cardColor: cardColor,
                 ),
-
                 const SizedBox(height: 12),
-
                 SizedBox(
                   width: double.infinity,
                   height: 40,
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _onSubmit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFEF5350), // Rojo para salida
+                      backgroundColor:
+                          const Color(0xFFEF5350), // Rojo para salida
                       disabledBackgroundColor: Colors.grey,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -191,7 +182,9 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   Widget _buildPhotoBox(String label) {
     return InkWell(
       onTap: () {
-        CustomSnackBar.show(context, 'Funcionalidad de cámara pendiente de configurar', isError: true);
+        CustomSnackBar.show(
+            context, 'Funcionalidad de cámara pendiente de configurar',
+            isError: true);
       },
       child: Container(
         height: 100,
