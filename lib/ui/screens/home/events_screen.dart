@@ -652,17 +652,19 @@ class _EventsScreenState extends State<EventsScreen> {
                 icon: const Icon(Icons.assignment),
                 label: const Text("REPORTE"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C2C2C),
-                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF2C2C2C).withOpacity(0.5), // Más gris/bloqueado
+                  foregroundColor: Colors.grey,
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
                 ),
                 onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const ReportSelectionScreen()),
-                  );
+                  // Bloqueado temporalmente
+                  // Navigator.pop(context);
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (_) => const ReportSelectionScreen()),
+                  // );
                 },
               ),
             ),
