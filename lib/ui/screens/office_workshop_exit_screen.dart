@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async'; 
 import '../../models/assigment_model.dart';
 import '../../models/activity_model.dart';
 import '../../providers/events_provider.dart';
@@ -30,13 +31,82 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
     super.dispose();
   }
 
+  // --- LÓGICA DE MENSAJE FLOTANTE ---
+  void _showOverlayToast(String message, {bool isError = false}) {
+    final overlay = Overlay.of(context);
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    late OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        // ✅ 1. EL MENSAJE SE QUEDA ABAJO (Posición original)
+        bottom: bottomInset + 20, 
+        left: 20,
+        right: 20,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF252525), 
+              borderRadius: BorderRadius.circular(5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isError
+                        ? const Color(0xFFFF5252).withOpacity(0.2)
+                        : const Color(0xFF4CAF50).withOpacity(0.2),
+                  ),
+                  child: Icon(
+                    isError ? Icons.close : Icons.check,
+                    color: isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    overlay.insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 3), () {
+      if (overlayEntry.mounted) {
+        overlayEntry.remove();
+      }
+    });
+  }
+
   Future<void> _handleSubmit() async {
     if (_descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, ingresa una descripción de la tarea.'),
-          backgroundColor: Colors.orange,
-        ),
+      _showOverlayToast(
+        'Por favor, ingresa una descripción de la tarea.',
+        isError: true,
       );
       return;
     }
@@ -53,15 +123,13 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
       }
 
       if (mounted) {
-        Navigator.pop(context, true); // Retorna true para indicar éxito
+        Navigator.pop(context, true); 
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al finalizar: $e'),
-            backgroundColor: Colors.red,
-          ),
+        _showOverlayToast(
+          'Error al finalizar: $e',
+          isError: true,
         );
       }
     } finally {
@@ -73,7 +141,6 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
 
   @override
   Widget build(BuildContext context) {
-    // Usamos padding inferior para el teclado
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     
     return Padding(
@@ -81,13 +148,15 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         left: 24.0,
         right: 24.0,
         top: 20.0,
-        bottom: bottomInset + 16.0,
+        // ✅ 2. SUBIMOS EL CONTENIDO DEL MODAL
+        // Aumentamos de 40 a 100. Esto empuja el botón hacia arriba
+        // dejando espacio vacío abajo para que el mensaje no lo tape.
+        bottom: bottomInset + 100.0, 
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Modal se ajusta al contenido
+        mainAxisSize: MainAxisSize.min, 
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // --- HEADER CON TÍTULO Y CERRAR ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -106,10 +175,9 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
             ],
           ),
           const SizedBox(height: 16),
-          // ----------------------------------
-
+          
           Container(
-            height: 150, // Altura fija para el área de texto
+            height: 150, 
             decoration: BoxDecoration(
               color: const Color(0xFF2C2C2C),
               borderRadius: BorderRadius.circular(12),
@@ -134,7 +202,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleSubmit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF5350), // Rojo para salida
+                backgroundColor: const Color(0xFFEF5350), 
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
