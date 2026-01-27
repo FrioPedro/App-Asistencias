@@ -10,6 +10,7 @@ import '../create_activity_screen.dart';
 import '../history_screen.dart';
 import '../report_selection_screen.dart';
 import '../service_exit_form_screen.dart';
+import '../office_workshop_exit_screen.dart';
 import '../../widgets/custom_snackbar.dart';
 
 // Necesario para TaskType
@@ -407,8 +408,9 @@ class _EventsScreenState extends State<EventsScreen> {
           builder: (context, setModalState) {
             
             Future<void> onActivitySelected(String title, IconData icon) async {
+              // --- LÓGICA ORIGINAL: Inicio directo ---
               setModalState(() => isModalLoading = true); 
-
+              
               try {
                 final task = _taskFromTitle(title);
                 await _eventsService.startAttendance(
@@ -430,11 +432,13 @@ class _EventsScreenState extends State<EventsScreen> {
             }
 
             Future<void> onExitSelected() async {
-              // --- NUEVA LÓGICA: SI ES SERVICIO, IR AL FORMULARIO ---
               final activeIcon = _participatingEvents[eventKey];
-              // Usamos el icono que definimos para Servicio (Icons.construction)
-              if (activeIcon == Icons.construction) {
-                if (context.mounted) Navigator.pop(context); // Cierra el modal
+              final taskName = _activeTaskNames[eventKey] ?? '';
+              final currentTask = _taskFromTitle(taskName);
+
+              // 1. SI ES SERVICIO (Icons.construction) -> Formulario de Servicio
+              if (activeIcon == Icons.construction || currentTask == TaskType.service) {
+                if (context.mounted) Navigator.pop(context);
 
                 final result = await Navigator.push(
                   context,
@@ -446,15 +450,42 @@ class _EventsScreenState extends State<EventsScreen> {
                   ),
                 );
 
-                // Si retornó true, es que finalizó correctamente
                 if (result == true && mounted) {
                   _endSessionLocal(eventKey);
                   _showCustomSnackBar('Salida de Servicio registrada', isError: false);
                 }
                 return;
               }
-              // ------------------------------------------------------
 
+              // 2. NUEVA LÓGICA: SI ES OFICINA O TALLER -> Modal de Reporte de Salida
+              if (currentTask == TaskType.office || currentTask == TaskType.workshop) {
+                if (context.mounted) Navigator.pop(context); // Cierra el modal anterior
+
+                final result = await showModalBottomSheet(
+                  context: context,
+                  backgroundColor: const Color(0xFF1E1E1E),
+                  isScrollControlled: true,
+                  isDismissible: false,
+                  enableDrag: false,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  builder: (_) => OfficeWorkshopExitModal(
+                    event: event,
+                    task: currentTask,
+                    eventKey: eventKey,
+                  ),
+                );
+
+                if (result == true && mounted) {
+                  _endSessionLocal(eventKey);
+                  _showCustomSnackBar('Salida de ${currentTask.label} registrada', isError: false);
+                }
+                return;
+              }
+              // -------------------------------------------------------------
+
+              // 3. RESTO (Transporte o genérico) -> Salida directa
               setModalState(() => isModalLoading = true); 
               
               try {

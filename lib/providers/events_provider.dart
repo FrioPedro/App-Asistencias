@@ -58,8 +58,14 @@ class EventsProvider {
     await _sync.syncIfPossible();
   }
 
-  Future<void> endAttendance({required int serverId}) async {
-    await ActivityRegistrar.registerExitWithGPS(serverId: serverId);
+  Future<void> endAttendance({
+    required int serverId,
+    String? description,
+  }) async {
+    await ActivityRegistrar.registerExitWithGPS(
+      serverId: serverId,
+      description: description,
+    );
     await _storage.clear();
 
     await _sync.syncIfPossible();
