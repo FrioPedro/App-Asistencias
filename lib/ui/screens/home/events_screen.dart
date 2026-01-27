@@ -9,6 +9,7 @@ import '../profile_screen.dart';
 import '../create_activity_screen.dart';
 import '../history_screen.dart';
 import '../report_selection_screen.dart';
+import '../service_exit_form_screen.dart';
 
 // Necesario para TaskType
 import '../../../models/activity_model.dart';
@@ -468,8 +469,33 @@ class _EventsScreenState extends State<EventsScreen> {
             }
 
             Future<void> onExitSelected() async {
-              setModalState(() => isModalLoading = true); 
+              // --- NUEVA LÓGICA: SI ES SERVICIO, IR AL FORMULARIO ---
+              final activeIcon = _participatingEvents[eventKey];
+              // Usamos el icono que definimos para Servicio (Icons.construction)
+              if (activeIcon == Icons.construction) {
+                if (context.mounted) Navigator.pop(context); // Cierra el modal
 
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ServiceExitFormScreen(
+                      event: event,
+                      eventKey: eventKey,
+                    ),
+                  ),
+                );
+
+                // Si retornó true, es que finalizó correctamente
+                if (result == true && mounted) {
+                  _endSessionLocal(eventKey);
+                  _showCustomSnackBar('Salida de Servicio registrada', isError: false);
+                }
+                return;
+              }
+              // ------------------------------------------------------
+
+              setModalState(() => isModalLoading = true); 
+              
               try {
                 final sid = event.serverId;
                 if (sid != null) {
