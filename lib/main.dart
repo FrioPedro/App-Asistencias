@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workmanager/workmanager.dart';
+import 'package:flutter/services.dart';
 
 import 'package:app_asistencias/core/appRouter.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
@@ -27,6 +28,18 @@ Future<void> main() async {
       networkType: NetworkType.connected, // ✅ wifi o datos móviles
     ),
   );
+
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+
+    systemNavigationBarColor: Color(0xFF121212),
+
+    systemNavigationBarIconBrightness: Brightness.light,
+
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+  ));
 
   runApp(const MyApp());
 }
