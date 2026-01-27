@@ -53,7 +53,7 @@ class _EventsScreenState extends State<EventsScreen> {
   // --- LÓGICA DE VALIDACIÓN DE HORARIO ---
   bool get _isCreationAllowed {
     final now = DateTime.now();
-    
+
     if (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday) {
       return true;
     }
@@ -63,13 +63,13 @@ class _EventsScreenState extends State<EventsScreen> {
       return false; // Bloqueado
     }
 
-    return true; 
+    return true;
   }
 
   void _showRestrictedDialog() {
     showDialog(
       context: context,
-      barrierDismissible: true, 
+      barrierDismissible: true,
       barrierColor: Colors.black.withOpacity(0.85),
       builder: (context) {
         return Material(
@@ -80,18 +80,33 @@ class _EventsScreenState extends State<EventsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.access_time_filled, size: 64, color: Colors.grey[400]),
+                  Icon(Icons.access_time_filled,
+                      size: 64, color: Colors.grey[400]),
                   const SizedBox(height: 20),
-                  const Text('Horario Restringido', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  const Text('Horario Restringido',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center),
                   const SizedBox(height: 12),
-                  Text('No se pueden crear actividades en este horario.\n\nHorario permitido:\nLun - Vie: 8:00 PM - 6:00 AM\nSáb - Dom: Todo el día', style: TextStyle(color: Colors.grey[400], fontSize: 16, height: 1.5), textAlign: TextAlign.center),
+                  Text(
+                      'No se pueden crear actividades en este horario.\n\nHorario permitido:\nLun - Vie: 8:00 PM - 6:00 AM\nSáb - Dom: Todo el día',
+                      style: TextStyle(
+                          color: Colors.grey[400], fontSize: 16, height: 1.5),
+                      textAlign: TextAlign.center),
                   const SizedBox(height: 30),
                   SizedBox(
                     width: 200,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2C2C2C), padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2C2C2C),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12))),
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Entendido', style: TextStyle(color: Colors.white)),
+                      child: const Text('Entendido',
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -106,15 +121,15 @@ class _EventsScreenState extends State<EventsScreen> {
   Future<void> _loadData() async {
     final loadedAssignments = await _eventsService.fetchEvents();
     final active = await _eventsService.getActiveSession();
-    
+
     if (active != null) {
       final icon = _iconFromTask(active.task);
       _participatingEvents.clear();
-      _activeStartTimes.clear(); 
+      _activeStartTimes.clear();
       _activeTaskNames.clear();
 
       _participatingEvents[active.eventKey] = icon;
-      _activeStartTimes[active.eventKey] = active.timestamp; 
+      _activeStartTimes[active.eventKey] = active.timestamp;
       _activeTaskNames[active.eventKey] = active.task.label;
     } else {
       _participatingEvents.clear();
@@ -132,10 +147,14 @@ class _EventsScreenState extends State<EventsScreen> {
 
   IconData _iconFromTask(TaskType task) {
     switch (task) {
-      case TaskType.office: return Icons.business;
-      case TaskType.workshop: return Icons.build;
-      case TaskType.service: return Icons.construction;
-      case TaskType.transport: return Icons.local_shipping;
+      case TaskType.office:
+        return Icons.business;
+      case TaskType.workshop:
+        return Icons.build;
+      case TaskType.service:
+        return Icons.construction;
+      case TaskType.transport:
+        return Icons.local_shipping;
     }
   }
 
@@ -153,7 +172,8 @@ class _EventsScreenState extends State<EventsScreen> {
 
   String _formatDate(DateTime date) {
     final now = DateTime.now();
-    final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+    final isToday =
+        date.year == now.year && date.month == now.month && date.day == now.day;
     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
     final amPm = date.hour >= 12 ? 'PM' : 'AM';
     final minute = date.minute.toString().padLeft(2, '0');
@@ -167,7 +187,9 @@ class _EventsScreenState extends State<EventsScreen> {
       final desc = (event.description ?? '').toLowerCase();
       final client = (event.client ?? '').toLowerCase();
       final docId = (event.documentId ?? '').toLowerCase();
-      return desc.contains(_searchQuery) || client.contains(_searchQuery) || docId.contains(_searchQuery);
+      return desc.contains(_searchQuery) ||
+          client.contains(_searchQuery) ||
+          docId.contains(_searchQuery);
     }).toList();
   }
 
@@ -226,6 +248,20 @@ class _EventsScreenState extends State<EventsScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (!_isCreationAllowed) {
+            _showRestrictedDialog();
+            return;
+          }
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
+          );
+        },
+        backgroundColor: const Color(0xFF2E60C4),
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
+      ),
     );
   }
 
@@ -268,11 +304,12 @@ class _EventsScreenState extends State<EventsScreen> {
           assigmentType: event.assigmentType,
           isParticipating: isParticipating,
           actionIcon: _participatingEvents[eventKey],
-          activeTaskName: _activeTaskNames[eventKey], 
-          
+          activeTaskName: _activeTaskNames[eventKey],
           onTap: () {
             if (isAnyEventActive && !isParticipating) {
-              _showCustomSnackBar('Ya tienes un turno activo. Debes marcar salida.', isError: true);
+              _showCustomSnackBar(
+                  'Ya tienes un turno activo. Debes marcar salida.',
+                  isError: true);
               return;
             }
             _showActionModal(
@@ -310,23 +347,6 @@ class _EventsScreenState extends State<EventsScreen> {
                 MaterialPageRoute(builder: (_) => const HistoryScreen()),
               ),
             ),
-            const SizedBox(width: 12),
-            
-            _buildHeaderButton(
-              Icons.add,
-              () {
-                if (!_isCreationAllowed) {
-                  _showRestrictedDialog();
-                  return;
-                }
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
-                );
-              },
-            ),
-
             const SizedBox(width: 12),
             _buildHeaderButton(
               Icons.person,
@@ -392,12 +412,12 @@ class _EventsScreenState extends State<EventsScreen> {
       context: context,
       backgroundColor: const Color(0xFF1E1E1E),
       isScrollControlled: true,
-      
+
       // ✅ 1. BLOQUEAR CIERRE AL TOCAR AFUERA
       isDismissible: false,
       // ✅ 2. BLOQUEAR CIERRE AL DESLIZAR HACIA ABAJO
       enableDrag: false,
-      
+
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -406,11 +426,10 @@ class _EventsScreenState extends State<EventsScreen> {
 
         return StatefulBuilder(
           builder: (context, setModalState) {
-            
             Future<void> onActivitySelected(String title, IconData icon) async {
               // --- LÓGICA ORIGINAL: Inicio directo ---
-              setModalState(() => isModalLoading = true); 
-              
+              setModalState(() => isModalLoading = true);
+
               try {
                 final task = _taskFromTitle(title);
                 await _eventsService.startAttendance(
@@ -427,7 +446,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   _showCustomSnackBar('Participando: $title', isError: false);
                 }
               } catch (e) {
-                setModalState(() => isModalLoading = false); 
+                setModalState(() => isModalLoading = false);
               }
             }
 
@@ -437,7 +456,8 @@ class _EventsScreenState extends State<EventsScreen> {
               final currentTask = _taskFromTitle(taskName);
 
               // 1. SI ES SERVICIO (Icons.construction) -> Formulario de Servicio
-              if (activeIcon == Icons.construction || currentTask == TaskType.service) {
+              if (activeIcon == Icons.construction ||
+                  currentTask == TaskType.service) {
                 if (context.mounted) Navigator.pop(context);
 
                 final result = await Navigator.push(
@@ -452,14 +472,17 @@ class _EventsScreenState extends State<EventsScreen> {
 
                 if (result == true && mounted) {
                   _endSessionLocal(eventKey);
-                  _showCustomSnackBar('Salida de Servicio registrada', isError: false);
+                  _showCustomSnackBar('Salida de Servicio registrada',
+                      isError: false);
                 }
                 return;
               }
 
               // 2. NUEVA LÓGICA: SI ES OFICINA O TALLER -> Modal de Reporte de Salida
-              if (currentTask == TaskType.office || currentTask == TaskType.workshop) {
-                if (context.mounted) Navigator.pop(context); // Cierra el modal anterior
+              if (currentTask == TaskType.office ||
+                  currentTask == TaskType.workshop) {
+                if (context.mounted)
+                  Navigator.pop(context); // Cierra el modal anterior
 
                 final result = await showModalBottomSheet(
                   context: context,
@@ -468,7 +491,8 @@ class _EventsScreenState extends State<EventsScreen> {
                   isDismissible: false,
                   enableDrag: false,
                   shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   builder: (_) => OfficeWorkshopExitModal(
                     event: event,
@@ -479,15 +503,17 @@ class _EventsScreenState extends State<EventsScreen> {
 
                 if (result == true && mounted) {
                   _endSessionLocal(eventKey);
-                  _showCustomSnackBar('Salida de ${currentTask.label} registrada', isError: false);
+                  _showCustomSnackBar(
+                      'Salida de ${currentTask.label} registrada',
+                      isError: false);
                 }
                 return;
               }
               // -------------------------------------------------------------
 
               // 3. RESTO (Transporte o genérico) -> Salida directa
-              setModalState(() => isModalLoading = true); 
-              
+              setModalState(() => isModalLoading = true);
+
               try {
                 final sid = event.serverId;
                 if (sid != null) {
@@ -496,7 +522,7 @@ class _EventsScreenState extends State<EventsScreen> {
                     _endSessionLocal(eventKey);
                   }
                 }
-                
+
                 if (context.mounted) {
                   Navigator.pop(context);
                   _showCustomSnackBar('Salida registrada', isError: false);
@@ -521,16 +547,18 @@ class _EventsScreenState extends State<EventsScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              CircularProgressIndicator(color: Color(0xFF4CAF50)),
+                              CircularProgressIndicator(
+                                  color: Color(0xFF4CAF50)),
                               SizedBox(height: 16),
-                              Text("Procesando...", style: TextStyle(color: Colors.white)),
+                              Text("Procesando...",
+                                  style: TextStyle(color: Colors.white)),
                             ],
                           ),
                         ),
                       )
                     : isActiveSession
-                        ? _buildExitSessionModal(
-                            context, event, eventKey, onActivitySelected, onExitSelected)
+                        ? _buildExitSessionModal(context, event, eventKey,
+                            onActivitySelected, onExitSelected)
                         : _buildStartSessionModal(
                             context, event, eventKey, onActivitySelected),
               ),
@@ -546,7 +574,7 @@ class _EventsScreenState extends State<EventsScreen> {
     BuildContext context,
     AssigmentModel event,
     String eventKey,
-    Function(String, IconData) onOptionSelected, 
+    Function(String, IconData) onOptionSelected,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -565,24 +593,25 @@ class _EventsScreenState extends State<EventsScreen> {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.grey),
-              onPressed: () => Navigator.pop(context), // Permite cerrar manualmente
+              onPressed: () =>
+                  Navigator.pop(context), // Permite cerrar manualmente
             ),
           ],
         ),
         // ---------------------------------
-        
+
         const SizedBox(height: 16),
         _buildActionOption(Icons.business, 'Oficina',
             'Reuniones / Administrativo', onOptionSelected),
         const SizedBox(height: 10),
-        _buildActionOption(Icons.build, 'Taller', 
-            'Reparaciones', onOptionSelected),
+        _buildActionOption(
+            Icons.build, 'Taller', 'Reparaciones', onOptionSelected),
         const SizedBox(height: 10),
-        _buildActionOption(Icons.local_shipping, 'Transporte', 
-            'Traslados', onOptionSelected),
+        _buildActionOption(
+            Icons.local_shipping, 'Transporte', 'Traslados', onOptionSelected),
         const SizedBox(height: 10),
-        _buildActionOption(Icons.construction, 'Servicio', 
-            'Visitas técnicas', onOptionSelected),
+        _buildActionOption(Icons.construction, 'Servicio', 'Visitas técnicas',
+            onOptionSelected),
         const SizedBox(height: 20),
       ],
     );
@@ -593,8 +622,8 @@ class _EventsScreenState extends State<EventsScreen> {
     BuildContext context,
     AssigmentModel event,
     String eventKey,
-    Function(String, IconData) onOptionSelected, 
-    VoidCallback onExitSelected,                 
+    Function(String, IconData) onOptionSelected,
+    VoidCallback onExitSelected,
   ) {
     final activeIcon = _participatingEvents[eventKey];
 
@@ -645,20 +674,20 @@ class _EventsScreenState extends State<EventsScreen> {
         ],
 
         if (activeIcon != Icons.build) ...[
-          _buildActionOption(Icons.build, 'Taller', 
-              'Reparaciones', onOptionSelected),
+          _buildActionOption(
+              Icons.build, 'Taller', 'Reparaciones', onOptionSelected),
           const SizedBox(height: 10),
         ],
 
         if (activeIcon != Icons.local_shipping) ...[
-          _buildActionOption(Icons.local_shipping, 'Transporte',
-              'Traslados', onOptionSelected),
+          _buildActionOption(Icons.local_shipping, 'Transporte', 'Traslados',
+              onOptionSelected),
           const SizedBox(height: 10),
         ],
 
         if (activeIcon != Icons.construction) ...[
-          _buildActionOption(Icons.construction, 'Servicio',
-              'Visitas técnicas', onOptionSelected),
+          _buildActionOption(Icons.construction, 'Servicio', 'Visitas técnicas',
+              onOptionSelected),
           const SizedBox(height: 10),
         ],
 
@@ -670,7 +699,8 @@ class _EventsScreenState extends State<EventsScreen> {
                 icon: const Icon(Icons.assignment),
                 label: const Text("REPORTE"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C2C2C).withOpacity(0.5), // Más gris/bloqueado
+                  backgroundColor: const Color(0xFF2C2C2C)
+                      .withOpacity(0.5), // Más gris/bloqueado
                   foregroundColor: Colors.grey,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   elevation: 0,
@@ -696,7 +726,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                onPressed: onExitSelected, 
+                onPressed: onExitSelected,
               ),
             ),
           ],
