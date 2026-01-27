@@ -43,6 +43,9 @@ class EventCard extends StatelessWidget {
   /// Motivo del registro (entrada/salida), para vistas de historial.
   final MotiveType? motive;
 
+  /// Controla si se muestra el badge de tipo de asignación
+  final bool showAssignmentTypeBadge;
+
   /// Constructor del EventCard
   const EventCard({
     super.key,
@@ -59,6 +62,7 @@ class EventCard extends StatelessWidget {
     this.hasPendingSync = false,
     this.isLoading = false,
     this.motive,
+    this.showAssignmentTypeBadge = true, // Por defecto se muestra
   });
 
   @override
@@ -210,24 +214,25 @@ class EventCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      // 1. Badge de Entrada/Salida (Historial) - Arriba de todo
-                      if (motive != null) ...[
-                        _buildMotiveTag(),
-                        const SizedBox(height: 6),
-                      ],
-
-                      // 2. FILA DE ESTADO (Actividad + Tipo)
+                      // FILA DE ESTADO (Motivo + Actividad + Tipo)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // A. Badge de Actividad actual (A la izquierda)
+                          // A. Badge de Entrada/Salida (Si existe)
+                          if (motive != null) ...[
+                            _buildMotiveTag(),
+                            const SizedBox(width: 6),
+                          ],
+
+                          // B. Badge de Actividad actual
                           if (isParticipating && activeTaskName != null) ...[
                             _buildActiveTaskBadge(),
                             const SizedBox(width: 6), // Espacio entre badges
                           ],
 
-                          // B. Badge de Tipo de Asignación (A la derecha)
-                          _buildAssignmentTypeTag(),
+                          // C. Badge de Tipo de Asignación
+                          if (showAssignmentTypeBadge)
+                            _buildAssignmentTypeTag(),
                         ],
                       ),
                     ],
@@ -261,6 +266,8 @@ class EventCard extends StatelessWidget {
   /// Construye la etiqueta de "ACTIVIDAD EN CURSO" (ej: TALLER)
   Widget _buildActiveTaskBadge() {
     final color = _getActiveColor();
+    // Versión corta del nombre de la tarea
+    final shortName = _getShortTaskName(activeTaskName!);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
@@ -275,7 +282,7 @@ class EventCard extends StatelessWidget {
           Icon(Icons.circle, size: 6, color: color),
           const SizedBox(width: 4),
           Text(
-            activeTaskName!.toUpperCase(),
+            shortName,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 10,
@@ -286,6 +293,16 @@ class EventCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Obtiene la versión corta del nombre de la tarea
+  String _getShortTaskName(String taskName) {
+    final name = taskName.toLowerCase();
+    if (name == 'oficina') return 'OFI';
+    if (name == 'taller') return 'TAL';
+    if (name == 'servicio') return 'SER';
+    if (name == 'transporte') return 'TRA';
+    return taskName.substring(0, 3).toUpperCase();
   }
 
   Color _getActiveColor() {
@@ -319,7 +336,7 @@ class EventCard extends StatelessWidget {
   /// Construye la etiqueta para el motivo del registro (Entrada/Salida)
   Widget _buildMotiveTag() {
     final isEntry = motive == MotiveType.entry;
-    final label = isEntry ? 'ENTRADA' : 'SALIDA';
+    final label = isEntry ? 'ENT' : 'SAL'; // Versión corta
     final color = isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
 
     return Container(

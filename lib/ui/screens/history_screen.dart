@@ -314,6 +314,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 // Estado de sincronización y motivo
                                 hasPendingSync: !(activity.isSynced ?? true),
                                 motive: activity.motive,
+
+                                // Ocultar badge de tipo de asignación para reducir sobrecarga visual
+                                showAssignmentTypeBadge: false,
                               );
                             }).toList(),
                           ),
