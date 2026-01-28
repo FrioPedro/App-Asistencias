@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../models/assigment_model.dart';
-import '../../../../models/activity_model.dart';
-import '../../../../providers/events_provider.dart';
-import '../../../widgets/custom_snackbar.dart';
-import '../../../widgets/action_option.dart';
-import '../../service_exit_form_screen.dart';
-import '../../office_workshop_exit_screen.dart';
+import '../../../models/assigment_model.dart';
+import '../../../models/activity_model.dart';
+import '../../../providers/events_provider.dart';
+import '../../widgets/custom_snackbar.dart';
+import '../../widgets/action_option.dart';
+import 'service_exit_form_sheet.dart';
+import 'office_workshop_exit_sheet.dart';
 
 class EventActionModal extends StatefulWidget {
   final AssigmentModel event;

@@ -7,7 +7,7 @@ import '../../widgets/custom_snackbar.dart';
 import '../../widgets/custom_search_bar.dart';
 import '../create_activity_screen.dart';
 import 'widgets/restricted_access_dialog.dart';
-import 'widgets/event_action_modal.dart';
+import '../sheets/event_action_sheet.dart';
 import 'widgets/home_header.dart';
 import '../../../models/activity_model.dart';
 

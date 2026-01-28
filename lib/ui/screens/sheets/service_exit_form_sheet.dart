@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../models/assigment_model.dart';
-import '../../providers/events_provider.dart';
-import '../widgets/custom_snackbar.dart';
+import '../../../models/assigment_model.dart';
+import '../../../providers/events_provider.dart';
+import '../../widgets/custom_snackbar.dart';
 
 class ServiceExitFormScreen extends StatefulWidget {
   final AssigmentModel event;

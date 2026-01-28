@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; 
-import '../../models/assigment_model.dart';
-import '../../models/activity_model.dart';
-import '../../providers/events_provider.dart';
+import 'dart:async';
+import '../../../models/assigment_model.dart';
+import '../../../models/activity_model.dart';
+import '../../../providers/events_provider.dart';
 
 class OfficeWorkshopExitModal extends StatefulWidget {
   final AssigmentModel event;
@@ -17,7 +17,8 @@ class OfficeWorkshopExitModal extends StatefulWidget {
   });
 
   @override
-  State<OfficeWorkshopExitModal> createState() => _OfficeWorkshopExitModalState();
+  State<OfficeWorkshopExitModal> createState() =>
+      _OfficeWorkshopExitModalState();
 }
 
 class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
@@ -41,7 +42,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
     overlayEntry = OverlayEntry(
       builder: (context) => Positioned(
         // ✅ 1. EL MENSAJE SE QUEDA ABAJO (Posición original)
-        bottom: bottomInset + 20, 
+        bottom: bottomInset + 20,
         left: 20,
         right: 20,
         child: Material(
@@ -49,7 +50,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
-              color: const Color(0xFF252525), 
+              color: const Color(0xFF252525),
               borderRadius: BorderRadius.circular(5),
               boxShadow: [
                 BoxShadow(
@@ -71,7 +72,9 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
                   ),
                   child: Icon(
                     isError ? Icons.close : Icons.check,
-                    color: isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
+                    color: isError
+                        ? const Color(0xFFFF5252)
+                        : const Color(0xFF4CAF50),
                     size: 20,
                   ),
                 ),
@@ -123,7 +126,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
       }
 
       if (mounted) {
-        Navigator.pop(context, true); 
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -142,7 +145,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    
+
     return Padding(
       padding: EdgeInsets.only(
         left: 24.0,
@@ -151,10 +154,10 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         // ✅ 2. SUBIMOS EL CONTENIDO DEL MODAL
         // Aumentamos de 40 a 100. Esto empuja el botón hacia arriba
         // dejando espacio vacío abajo para que el mensaje no lo tape.
-        bottom: bottomInset + 100.0, 
+        bottom: bottomInset + 100.0,
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min, 
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
@@ -175,9 +178,8 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
             ],
           ),
           const SizedBox(height: 16),
-          
           Container(
-            height: 150, 
+            height: 150,
             decoration: BoxDecoration(
               color: const Color(0xFF2C2C2C),
               borderRadius: BorderRadius.circular(12),
@@ -202,7 +204,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleSubmit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF5350), 
+                backgroundColor: const Color(0xFFEF5350),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
