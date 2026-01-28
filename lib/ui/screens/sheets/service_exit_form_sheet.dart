@@ -5,6 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 import '../../../core/enpoinService.dart';
+import '../../../core/picker_localization.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/events_provider.dart';
 import '../../widgets/custom_snackbar.dart';
@@ -41,6 +42,12 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
   static const int _maxPhotosPerSection = 20;
 
+  // Colores de la app
+  static const Color _bgColor = Color(0xFF121212);
+  static const Color _cardColor = Color(0xFF2C2C2C);
+  static const Color _primaryBlue = Color(0xFF2E60C4);
+  static const Color _exitRed = Color(0xFFEF5350);
+
   @override
   void dispose() {
     _incidenciasController.dispose();
@@ -49,29 +56,66 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     super.dispose();
   }
 
-  /// Convierte AssetEntity a File
-  Future<File?> _assetToFile(AssetEntity asset) async {
-    return await asset.file;
+  /// Tema personalizado para el picker de fotos
+  AssetPickerConfig _buildPickerConfig(int maxAssets) {
+    return AssetPickerConfig(
+      maxAssets: maxAssets,
+      selectedAssets: [],
+      requestType: RequestType.image,
+      textDelegate: const SpanishAssetPickerTextDelegate(),
+      // Eliminamos themeColor porque causa conflicto si se usa pickerTheme simultáneamente
+      pickerTheme: ThemeData.dark().copyWith(
+        primaryColor: _primaryBlue,
+        colorScheme: const ColorScheme.dark(
+          primary: _primaryBlue,
+          surface: _cardColor,
+        ),
+      ),
+    );
+  }
+
+  /// Tema personalizado para el picker de cámara
+  CameraPickerConfig _buildCameraConfig() {
+    return CameraPickerConfig(
+      enableRecording: false,
+      shouldDeletePreviewFile: true,
+      textDelegate: const SpanishCameraPickerTextDelegate(),
+      theme: ThemeData.dark().copyWith(
+        primaryColor: _primaryBlue,
+        colorScheme: const ColorScheme.dark(
+          primary: _primaryBlue,
+          secondary: _primaryBlue,
+          surface: _cardColor,
+          background: _bgColor,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: _bgColor,
+          elevation: 0,
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+    );
   }
 
   /// Solicita permisos de fotos
   Future<bool> _requestPermission() async {
     final PermissionState ps = await PhotoManager.requestPermissionExtend();
 
-    // Permitir si tiene acceso completo o limitado
     if (ps.isAuth || ps.hasAccess) {
       return true;
     }
 
-    // Si el permiso fue denegado permanentemente, ofrecer abrir configuración
     if (mounted) {
       final shouldOpenSettings = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF2C2C2C),
+          backgroundColor: _cardColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text(
             'Permisos requeridos',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           content: const Text(
             'Se necesitan permisos para acceder a las fotos. '
@@ -81,10 +125,20 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey,
+              ),
               child: const Text('Cancelar'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primaryBlue,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: const Text('Abrir Configuración'),
             ),
           ],
@@ -98,10 +152,14 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     return false;
   }
 
+  /// Convierte AssetEntity a File
+  Future<File?> _assetToFile(AssetEntity asset) async {
+    return await asset.file;
+  }
+
   /// Sube las fotos al servidor
   Future<bool> _uploadPhotos() async {
     try {
-      // Convertir AssetEntity a Files
       final antesFiles = <File>[];
       final despuesFiles = <File>[];
 
@@ -115,10 +173,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         if (file != null) despuesFiles.add(file);
       }
 
-      // Crear FormData con todas las fotos y datos del formulario
       final formData = FormData();
 
-      // Agregar ID del servicio
       formData.fields
           .add(MapEntry('serverId', widget.event.serverId.toString()));
       formData.fields
@@ -128,7 +184,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       formData.fields.add(
           MapEntry('recomendaciones', _recomendacionesController.text.trim()));
 
-      // Agregar fotos ANTES
       for (int i = 0; i < antesFiles.length; i++) {
         final file = antesFiles[i];
         formData.files.add(MapEntry(
@@ -141,7 +196,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         ));
       }
 
-      // Agregar fotos DESPUÉS
       for (int i = 0; i < despuesFiles.length; i++) {
         final file = despuesFiles[i];
         formData.files.add(MapEntry(
@@ -154,7 +208,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         ));
       }
 
-      // Enviar al servidor
       final response = await _api.postFormData(
         '/api/servicios/reporte',
         formData: formData,
@@ -181,7 +234,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
 
-    // Validar que haya al menos una foto en cada sección
     if (_photosAntes.isEmpty) {
       CustomSnackBar.show(context, 'Debe agregar al menos una foto ANTES',
           isError: true);
@@ -199,7 +251,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     });
 
     try {
-      // 1. Subir fotos y datos del formulario
       setState(() => _uploadProgress = 0.3);
       final uploadSuccess = await _uploadPhotos();
 
@@ -213,7 +264,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
       setState(() => _uploadProgress = 0.7);
 
-      // 2. Finalizar la asistencia
       final sid = widget.event.serverId;
       if (sid != null) {
         await _eventsService.endAttendance(serverId: sid);
@@ -235,11 +285,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     }
   }
 
-  Future<void> _pickPhotos({required bool isAntes}) async {
-    // Primero solicitar permisos
-    final hasPermission = await _requestPermission();
-    if (!hasPermission) return;
-
+  /// Muestra opciones para agregar fotos (galería o cámara)
+  Future<void> _showPhotoOptions({required bool isAntes}) async {
     final currentPhotos = isAntes ? _photosAntes : _photosDespues;
     final remaining = _maxPhotosPerSection - currentPhotos.length;
 
@@ -250,51 +297,130 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       return;
     }
 
-    try {
-      final AssetPickerConfig pickerConfig = AssetPickerConfig(
-        maxAssets: remaining,
-        selectedAssets: [],
-        requestType: RequestType.image,
-        specialPickerType: SpecialPickerType.noPreview,
-        specialItemPosition: SpecialItemPosition.prepend,
-        specialItemBuilder: (context, path, length) {
-          return GestureDetector(
-            onTap: () async {
-              try {
-                final AssetEntity? result = await CameraPicker.pickFromCamera(
-                  context,
-                  pickerConfig: const CameraPickerConfig(
-                    enableRecording: false,
-                    shouldDeletePreviewFile: true,
-                  ),
-                );
-                if (result != null && mounted) {
-                  Navigator.pop(context, [result]);
-                }
-              } catch (e) {
-                debugPrint('Error al abrir cámara: $e');
-              }
-            },
-            child: Container(
-              color: Colors.grey[900],
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+    final hasPermission = await _requestPermission();
+    if (!hasPermission) return;
+
+    if (!mounted) return;
+
+    // Obtenemos la acción del bottom sheet
+    final String? action = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: _cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[600],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Text(
+                isAntes ? 'Agregar fotos ANTES' : 'Agregar fotos DESPUÉS',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Puedes agregar hasta $remaining fotos más',
+                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Icon(Icons.camera_alt, color: Colors.white, size: 30),
-                  SizedBox(height: 4),
-                  Text("Cámara",
-                      style: TextStyle(color: Colors.white, fontSize: 12))
+                  _buildOptionButton(
+                    icon: Icons.photo_library_rounded,
+                    label: 'Galería',
+                    onTap: () => Navigator.pop(context, 'gallery'),
+                  ),
+                  _buildOptionButton(
+                    icon: Icons.camera_alt_rounded,
+                    label: 'Cámara',
+                    onTap: () => Navigator.pop(context, 'camera'),
+                  ),
                 ],
               ),
-            ),
-          );
-        },
-      );
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
 
+    if (action == 'gallery') {
+      await Future.delayed(const Duration(milliseconds: 200));
+      await _pickFromGallery(isAntes: isAntes, maxAssets: remaining);
+    } else if (action == 'camera') {
+      await Future.delayed(const Duration(milliseconds: 200));
+      await _pickFromCamera(isAntes: isAntes);
+    }
+  }
+
+  Widget _buildOptionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 120,
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: _bgColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _primaryBlue.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: _primaryBlue, size: 32),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Seleccionar fotos de la galería
+  Future<void> _pickFromGallery(
+      {required bool isAntes, required int maxAssets}) async {
+    debugPrint(
+        'DEBUG: _pickFromGallery iniciado. isAntes: $isAntes, maxAssets: $maxAssets');
+    try {
       final List<AssetEntity>? result = await AssetPicker.pickAssets(
         context,
-        pickerConfig: pickerConfig,
+        pickerConfig: _buildPickerConfig(maxAssets),
       );
+
+      debugPrint(
+          'DEBUG: Resultado del picker: ${result?.length ?? 0} fotos seleccionadas');
 
       if (result != null && result.isNotEmpty) {
         setState(() {
@@ -310,10 +436,39 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Error al abrir picker: $e');
+      debugPrint('Error crítico al abrir galería: $e');
       if (mounted) {
-        CustomSnackBar.show(context, 'Error al abrir selector de fotos: $e',
+        CustomSnackBar.show(context, 'Error al abrir galería: $e',
             isError: true);
+      }
+    }
+  }
+
+  /// Tomar foto con la cámara
+  Future<void> _pickFromCamera({required bool isAntes}) async {
+    try {
+      final AssetEntity? result = await CameraPicker.pickFromCamera(
+        context,
+        pickerConfig: _buildCameraConfig(),
+      );
+
+      if (result != null) {
+        setState(() {
+          if (isAntes) {
+            if (_photosAntes.length < _maxPhotosPerSection) {
+              _photosAntes = [..._photosAntes, result];
+            }
+          } else {
+            if (_photosDespues.length < _maxPhotosPerSection) {
+              _photosDespues = [..._photosDespues, result];
+            }
+          }
+        });
+      }
+    } catch (e) {
+      debugPrint('Error al abrir cámara: $e');
+      if (mounted) {
+        CustomSnackBar.show(context, 'Error al abrir cámara', isError: true);
       }
     }
   }
@@ -330,11 +485,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFF121212);
-    const cardColor = Color(0xFF2C2C2C);
-
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: _bgColor,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -357,101 +509,100 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Sección ANTES
                 _buildPhotoSection(
                   label: 'FOTOS ANTES',
                   photos: _photosAntes,
                   isAntes: true,
-                  cardColor: cardColor,
                 ),
-                const SizedBox(height: 16),
-
-                // Sección DESPUÉS
+                const SizedBox(height: 20),
                 _buildPhotoSection(
                   label: 'FOTOS DESPUÉS',
                   photos: _photosDespues,
                   isAntes: false,
-                  cardColor: cardColor,
                 ),
-                const SizedBox(height: 16),
-
+                const SizedBox(height: 20),
                 _buildFormField(
                   label: 'INCIDENCIAS',
                   controller: _incidenciasController,
                   hint: 'Describa las incidencias encontradas...',
-                  cardColor: cardColor,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 _buildFormField(
                   label: 'CONCLUSIONES',
                   controller: _conclusionesController,
                   hint: 'Conclusiones del servicio...',
-                  cardColor: cardColor,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 _buildFormField(
                   label: 'RECOMENDACIONES',
                   controller: _recomendacionesController,
                   hint: 'Recomendaciones para el cliente...',
-                  cardColor: cardColor,
                 ),
-                const SizedBox(height: 16),
-
-                // Barra de progreso durante la subida
+                const SizedBox(height: 24),
                 if (_isSubmitting)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Column(
                       children: [
-                        LinearProgressIndicator(
-                          value: _uploadProgress,
-                          backgroundColor: Colors.grey[800],
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                              Color(0xFF4CAF50)),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: _uploadProgress,
+                            backgroundColor: Colors.grey[800],
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF4CAF50)),
+                            minHeight: 8,
+                          ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Text(
-                          'Subiendo fotos... ${(_uploadProgress * 100).toInt()}%',
+                          'Subiendo ${_photosAntes.length + _photosDespues.length} fotos... ${(_uploadProgress * 100).toInt()}%',
                           style:
-                              TextStyle(color: Colors.grey[400], fontSize: 12),
+                              TextStyle(color: Colors.grey[400], fontSize: 13),
                         ),
                       ],
                     ),
                   ),
-
                 SizedBox(
                   width: double.infinity,
-                  height: 48,
+                  height: 54,
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _onSubmit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          const Color(0xFFEF5350), // Rojo para salida
-                      disabledBackgroundColor: Colors.grey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      backgroundColor: _exitRed,
+                      disabledBackgroundColor: Colors.grey[700],
                       elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
                     ),
                     child: _isSubmitting
                         ? const SizedBox(
-                            height: 20,
-                            width: 20,
+                            height: 24,
+                            width: 24,
                             child: CircularProgressIndicator(
                               color: Colors.white,
-                              strokeWidth: 2,
+                              strokeWidth: 2.5,
                             ),
                           )
-                        : Text(
-                            'FINALIZAR SERVICIO (${_photosAntes.length + _photosDespues.length} fotos)',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.check_circle_outline,
+                                  color: Colors.white, size: 22),
+                              const SizedBox(width: 10),
+                              Text(
+                                'FINALIZAR (${_photosAntes.length + _photosDespues.length} fotos)',
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
                           ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -464,7 +615,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     required String label,
     required List<AssetEntity> photos,
     required bool isAntes,
-    required Color cardColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -472,28 +622,43 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionTitle(label),
             Text(
-              '${photos.length}/$_maxPhotosPerSection',
-              style: TextStyle(
-                color: photos.isEmpty ? Colors.grey[600] : Colors.green[400],
-                fontSize: 12,
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: photos.isEmpty
+                    ? Colors.grey[800]
+                    : Colors.green.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${photos.length}/$_maxPhotosPerSection',
+                style: TextStyle(
+                  color: photos.isEmpty ? Colors.grey[500] : Colors.green[400],
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
-
-        // Grid de fotos seleccionadas
+        const SizedBox(height: 12),
         if (photos.isNotEmpty)
           Container(
-            height: 110,
+            height: 100,
             margin: const EdgeInsets.only(bottom: 12),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: photos.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 final asset = photos[index];
                 return Stack(
@@ -509,43 +674,41 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                         isOriginal: false,
                       ),
                     ),
-                    // Número de foto
                     Positioned(
-                      bottom: 4,
-                      left: 4,
+                      bottom: 6,
+                      left: 6,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                            horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           '${index + 1}',
                           style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 10,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
-                    // Botón eliminar
                     if (!_isSubmitting)
                       Positioned(
-                        top: -6,
-                        right: -6,
+                        top: -8,
+                        right: -8,
                         child: GestureDetector(
                           onTap: () => _removePhoto(asset, isAntes: isAntes),
                           child: Container(
-                            padding: const EdgeInsets.all(4),
+                            padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEF5350),
+                              color: _exitRed,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
                               boxShadow: [
                                 BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    blurRadius: 4)
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2))
                               ],
                             ),
                             child: const Icon(Icons.close,
@@ -558,30 +721,35 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               },
             ),
           ),
-
-        // Botón para agregar fotos
         if (photos.length < _maxPhotosPerSection && !_isSubmitting)
           GestureDetector(
-            onTap: () => _pickPhotos(isAntes: isAntes),
+            onTap: () => _showPhotoOptions(isAntes: isAntes),
             child: Container(
               width: double.infinity,
-              height: 50,
+              height: 56,
               decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[700]!),
+                color: _cardColor,
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add_a_photo, color: Colors.grey[400]),
-                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _primaryBlue.withOpacity(0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.add_a_photo_rounded,
+                        color: _primaryBlue, size: 20),
+                  ),
+                  const SizedBox(width: 12),
                   Text(
-                    photos.isEmpty
-                        ? "Subir Fotos (Máx $_maxPhotosPerSection)"
-                        : "Agregar más fotos",
+                    photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
                     style: TextStyle(
-                        color: Colors.grey[400], fontWeight: FontWeight.bold),
+                        color: Colors.grey[300],
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -591,45 +759,40 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        color: Colors.grey[400],
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-        letterSpacing: 1.0,
-      ),
-    );
-  }
-
   Widget _buildFormField({
     required String label,
     required TextEditingController controller,
     required String hint,
-    required Color cardColor,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionTitle(label),
-        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: cardColor,
-            borderRadius: BorderRadius.circular(12),
+            color: _cardColor,
+            borderRadius: BorderRadius.circular(14),
           ),
           child: TextFormField(
             controller: controller,
-            style: const TextStyle(color: Colors.white),
-            maxLines: 4,
+            style: const TextStyle(color: Colors.white, fontSize: 15),
+            maxLines: 3,
             enabled: !_isSubmitting,
             validator: (v) => (v == null || v.trim().isEmpty)
                 ? 'Este campo es obligatorio'
                 : null,
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey[600]),
+              hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.all(16.0),
             ),
