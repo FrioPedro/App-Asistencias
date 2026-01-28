@@ -69,6 +69,7 @@ class ActivitySyncService {
           project: a.serverId ?? 0,
           collaboratorId: user.nationalId ?? '',
           zone: user.zone ?? '',
+          timestamp: a.timestamp,
         );
 
         print('[SYNC] Payload: $payload');

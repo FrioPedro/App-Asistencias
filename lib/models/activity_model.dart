@@ -174,7 +174,7 @@ class ActivityModel {
   double? latitude;
   double? longitude;
 
-  DateTime? timestamp;
+  late DateTime timestamp;
 
   @Index(unique: true, replace: true)
   late String dedupKey;
@@ -195,7 +195,7 @@ class ActivityModel {
     this.activityType = AssigmentType.other,
     this.latitude,
     this.longitude,
-    this.timestamp,
+    required this.timestamp,
     this.isSynced = false,
   }){
     // 🔐 SE CONSTRUYE AUTOMÁTICAMENTE
@@ -228,7 +228,7 @@ class ActivityModel {
 
     latitude = (json['Latitude'] as num?)?.toDouble();
     longitude = (json['Longitude'] as num?)?.toDouble();
-    timestamp = _parseServerTimestamp(json['Timestamp']);
+    timestamp = _parseServerTimestamp(json['Timestamp'] ?? DateTime.now() );
 
     isSynced = true; // viene del server → sincronizado
 
@@ -245,8 +245,9 @@ class ActivityModel {
     required int project,
     required String collaboratorId,
     required String zone,
+    required DateTime timestamp,
   }) {
-    final ts = (timestamp ?? DateTime.now())
+    final ts = (timestamp)
         .toIso8601String()
         .replaceFirst('T', ' ')
         .split('.')
@@ -277,6 +278,7 @@ class ActivityModel {
       'm:${motive.index}',
       't:${task.index}',
       'a:${activityType.index}',
+      'dt:${timestamp.toString()}',
     ].join('|');
   }
 }

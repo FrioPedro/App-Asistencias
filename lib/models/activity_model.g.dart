@@ -296,7 +296,7 @@ ActivityModel _activityModelDeserialize(
     serverId: reader.readLongOrNull(offsets[11]),
     task: _ActivityModeltaskValueEnumMap[reader.readByteOrNull(offsets[12])] ??
         TaskType.office,
-    timestamp: reader.readDateTimeOrNull(offsets[13]),
+    timestamp: reader.readDateTime(offsets[13]),
   );
   object.dedupKey = reader.readString(offsets[3]);
   object.id = id;
@@ -341,7 +341,7 @@ P _activityModelDeserializeProp<P>(
       return (_ActivityModeltaskValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskType.office) as P;
     case 13:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -2612,25 +2612,7 @@ extension ActivityModelQueryFilter
   }
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      timestampIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'timestamp',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      timestampIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'timestamp',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      timestampEqualTo(DateTime? value) {
+      timestampEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'timestamp',
@@ -2641,7 +2623,7 @@ extension ActivityModelQueryFilter
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
       timestampGreaterThan(
-    DateTime? value, {
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -2655,7 +2637,7 @@ extension ActivityModelQueryFilter
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
       timestampLessThan(
-    DateTime? value, {
+    DateTime value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -2669,8 +2651,8 @@ extension ActivityModelQueryFilter
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
       timestampBetween(
-    DateTime? lower,
-    DateTime? upper, {
+    DateTime lower,
+    DateTime upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -3254,7 +3236,7 @@ extension ActivityModelQueryProperty
     });
   }
 
-  QueryBuilder<ActivityModel, DateTime?, QQueryOperations> timestampProperty() {
+  QueryBuilder<ActivityModel, DateTime, QQueryOperations> timestampProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'timestamp');
     });
