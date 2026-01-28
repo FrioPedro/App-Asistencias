@@ -653,25 +653,38 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         const SizedBox(height: 12),
         if (photos.isNotEmpty)
           Container(
-            height: 100,
+            height: 120,
             margin: const EdgeInsets.only(bottom: 12),
             child: ListView.separated(
+              padding: const EdgeInsets.symmetric(vertical: 10),
               scrollDirection: Axis.horizontal,
               itemCount: photos.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final asset = photos[index];
                 return Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: AssetEntityImage(
-                        asset,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                        isOriginal: false,
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: AssetEntityImage(
+                          asset,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          isOriginal: false,
+                        ),
                       ),
                     ),
                     Positioned(
@@ -695,19 +708,19 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                     ),
                     if (!_isSubmitting)
                       Positioned(
-                        top: -8,
-                        right: -8,
+                        top: -5,
+                        right: -5,
                         child: GestureDetector(
                           onTap: () => _removePhoto(asset, isAntes: isAntes),
                           child: Container(
-                            padding: const EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: _exitRed,
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
                                     color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 6,
+                                    blurRadius: 4,
                                     offset: const Offset(0, 2))
                               ],
                             ),
