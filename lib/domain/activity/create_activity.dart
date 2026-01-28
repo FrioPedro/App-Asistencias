@@ -14,7 +14,6 @@ class CreateActivity {
     double? latitude,
     double? longitude,
     DateTime? timestamp,
-    String? description,
   }) async {
     final isar = await Database.instance();
 
@@ -22,7 +21,7 @@ class CreateActivity {
       serverId: assignment.serverId,
       documentId: assignment.documentId,
       client: assignment.client,
-      description: description ?? assignment.description,
+      description: assignment.description,
       collaborator: null,
       motiveText: motive.label, // opcional (puedes poner null si no lo usas)
       motive: motive,
