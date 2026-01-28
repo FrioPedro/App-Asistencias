@@ -65,7 +65,6 @@ class EventsProvider {
   }) async {
     await ActivityRegistrar.registerExitWithGPS(
       serverId: serverId,
-      description: description,
     );
     await _storage.clear();
 

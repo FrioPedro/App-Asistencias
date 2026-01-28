@@ -118,7 +118,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
       if (sid != null) {
         await _eventsService.endAttendance(
           serverId: sid,
-          description: _descriptionController.text.trim(),
+          //description: _descriptionController.text.trim(),
         );
       }
 
