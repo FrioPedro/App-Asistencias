@@ -108,7 +108,6 @@ extension MotiveTypeX on MotiveType {
   /// (Opcional) si el server a veces manda "Entrada"/"Salida" como texto
   static MotiveType? fromLabel(String? label) {
     final s = (label ?? '').trim().toLowerCase();
-    print(s);
     if (s == 'inicio de labores') return MotiveType.entry;
     if (s == 'fin de labores') return MotiveType.exit;
     return null;
@@ -215,8 +214,6 @@ class ActivityModel {
     collaborator = json['Collaborator'] as String?;
     motiveText = json['Motive'] as String?;
 
-    print(motiveText);
-    print(MotiveTypeX.fromLabel(motiveText));
     final maybeMotive = MotiveTypeX.fromLabel(motiveText);
     if (maybeMotive != null) motive = maybeMotive;
 
