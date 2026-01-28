@@ -201,20 +201,27 @@ class _EventActionModalState extends State<EventActionModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Stack(
+          alignment: Alignment.centerLeft,
           children: [
-            const Text(
-              'Iniciar Turno',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+            const Padding(
+              padding: EdgeInsets.only(right: 48.0),
+              child: Text(
+                'Iniciar Turno',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.grey),
-              onPressed: () => Navigator.pop(context),
+            Positioned(
+              right: -12,
+              top: -8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ],
         ),
@@ -254,20 +261,27 @@ class _EventActionModalState extends State<EventActionModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Stack(
+          alignment: Alignment.centerLeft,
           children: [
-            const Text(
-              'Gestionar Turno',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+            const Padding(
+              padding: EdgeInsets.only(right: 48.0),
+              child: Text(
+                'Gestionar Turno',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.grey),
-              onPressed: () => Navigator.pop(context),
+            Positioned(
+              right: -12,
+              top: -8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ],
         ),

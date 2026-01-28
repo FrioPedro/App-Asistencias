@@ -160,20 +160,27 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Stack(
+            alignment: Alignment.centerLeft,
             children: [
-              Text(
-                'Reporte de ${widget.task.label}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+              Padding(
+                padding: const EdgeInsets.only(right: 48.0),
+                child: Text(
+                  'Reporte de ${widget.task.label}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey),
-                onPressed: () => Navigator.pop(context),
+              Positioned(
+                right: -12,
+                top: -8,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
             ],
           ),
