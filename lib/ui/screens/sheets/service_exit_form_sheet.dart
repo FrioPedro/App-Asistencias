@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
+import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/events_provider.dart';
 import '../../widgets/custom_snackbar.dart';
@@ -27,6 +29,12 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
   bool _isSubmitting = false;
 
+  // Listas separadas para fotos ANTES y DESPUÉS
+  List<AssetEntity> _photosAntes = [];
+  List<AssetEntity> _photosDespues = [];
+
+  static const int _maxPhotosPerSection = 3;
+
   @override
   void dispose() {
     _incidenciasController.dispose();
@@ -39,21 +47,37 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
 
+    // Validar que haya al menos una foto en cada sección
+    if (_photosAntes.isEmpty) {
+      CustomSnackBar.show(context, 'Debe agregar al menos una foto ANTES',
+          isError: true);
+      return;
+    }
+    if (_photosDespues.isEmpty) {
+      CustomSnackBar.show(context, 'Debe agregar al menos una foto DESPUÉS',
+          isError: true);
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
-      // 1. Aquí iría la lógica para subir las fotos y el reporte
-      // Como no tenemos el endpoint aún, simulamos el envío.
+      // 1. Convertir AssetEntity a archivos para subir
+      // TODO: Implementar la lógica de subida de fotos al servidor
+      // Ejemplo:
+      // final antesFiles = await Future.wait(_photosAntes.map((e) => e.file));
+      // final despuesFiles = await Future.wait(_photosDespues.map((e) => e.file));
+
+      // 2. Simular envío (reemplazar con lógica real)
       await Future.delayed(const Duration(seconds: 1));
 
-      // 2. Finalizar la asistencia
+      // 3. Finalizar la asistencia
       final sid = widget.event.serverId;
       if (sid != null) {
         await _eventsService.endAttendance(serverId: sid);
       }
 
       if (mounted) {
-        // Retornamos 'true' para indicar que se finalizó con éxito
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -65,11 +89,86 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     }
   }
 
+  Future<void> _pickPhotos({required bool isAntes}) async {
+    final currentPhotos = isAntes ? _photosAntes : _photosDespues;
+    final remaining = _maxPhotosPerSection - currentPhotos.length;
+
+    if (remaining <= 0) {
+      CustomSnackBar.show(
+          context, 'Máximo $_maxPhotosPerSection fotos permitidas',
+          isError: true);
+      return;
+    }
+
+    final AssetPickerConfig pickerConfig = AssetPickerConfig(
+      maxAssets: remaining,
+      selectedAssets: [],
+      requestType: RequestType.image,
+      specialPickerType: SpecialPickerType.noPreview,
+      specialItemPosition: SpecialItemPosition.prepend,
+      specialItemBuilder: (context, path, length) {
+        return GestureDetector(
+          onTap: () async {
+            final AssetEntity? result = await CameraPicker.pickFromCamera(
+              context,
+              pickerConfig: const CameraPickerConfig(
+                enableRecording: false,
+                shouldDeletePreviewFile: true,
+              ),
+            );
+            if (result != null && mounted) {
+              Navigator.pop(context, [result]);
+            }
+          },
+          child: Container(
+            color: Colors.grey[900],
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.camera_alt, color: Colors.white, size: 30),
+                SizedBox(height: 4),
+                Text("Cámara",
+                    style: TextStyle(color: Colors.white, fontSize: 12))
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    final List<AssetEntity>? result = await AssetPicker.pickAssets(
+      context,
+      pickerConfig: pickerConfig,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      setState(() {
+        if (isAntes) {
+          _photosAntes =
+              [..._photosAntes, ...result].take(_maxPhotosPerSection).toList();
+        } else {
+          _photosDespues = [..._photosDespues, ...result]
+              .take(_maxPhotosPerSection)
+              .toList();
+        }
+      });
+    }
+  }
+
+  void _removePhoto(AssetEntity asset, {required bool isAntes}) {
+    setState(() {
+      if (isAntes) {
+        _photosAntes.remove(asset);
+      } else {
+        _photosDespues.remove(asset);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     const bg = Color(0xFF121212);
     const cardColor = Color(0xFF2C2C2C);
-    // const primary = Color(0xFF2E60C4); // Azul corporativo (o el que corresponda)
 
     return Scaffold(
       backgroundColor: bg,
@@ -95,16 +194,24 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle('FOTOGRAFÍAS'),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(child: _buildPhotoBox('ANTES')),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildPhotoBox('DESPUÉS')),
-                  ],
+                // Sección ANTES
+                _buildPhotoSection(
+                  label: 'FOTOS ANTES',
+                  photos: _photosAntes,
+                  isAntes: true,
+                  cardColor: cardColor,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
+
+                // Sección DESPUÉS
+                _buildPhotoSection(
+                  label: 'FOTOS DESPUÉS',
+                  photos: _photosDespues,
+                  isAntes: false,
+                  cardColor: cardColor,
+                ),
+                const SizedBox(height: 16),
+
                 _buildFormField(
                   label: 'INCIDENCIAS',
                   controller: _incidenciasController,
@@ -125,10 +232,10 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   hint: 'Recomendaciones para el cliente...',
                   cardColor: cardColor,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  height: 40,
+                  height: 48,
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _onSubmit,
                     style: ElevatedButton.styleFrom(
@@ -167,6 +274,102 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     );
   }
 
+  Widget _buildPhotoSection({
+    required String label,
+    required List<AssetEntity> photos,
+    required bool isAntes,
+    required Color cardColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(label),
+        const SizedBox(height: 8),
+
+        // Grid de fotos seleccionadas
+        if (photos.isNotEmpty)
+          Container(
+            height: 110,
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: photos.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final asset = photos[index];
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: AssetEntityImage(
+                        asset,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        isOriginal: false,
+                      ),
+                    ),
+                    Positioned(
+                      top: -6,
+                      right: -6,
+                      child: GestureDetector(
+                        onTap: () => _removePhoto(asset, isAntes: isAntes),
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF5350),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4)
+                            ],
+                          ),
+                          child: const Icon(Icons.close,
+                              color: Colors.white, size: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+
+        // Botón para agregar fotos
+        if (photos.length < _maxPhotosPerSection)
+          GestureDetector(
+            onTap: () => _pickPhotos(isAntes: isAntes),
+            child: Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[700]!),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add_a_photo, color: Colors.grey[400]),
+                  const SizedBox(width: 8),
+                  Text(
+                    photos.isEmpty
+                        ? "Subir Fotos (Máx $_maxPhotosPerSection)"
+                        : "Agregar más (${photos.length}/$_maxPhotosPerSection)",
+                    style: TextStyle(
+                        color: Colors.grey[400], fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -175,34 +378,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         fontSize: 12,
         fontWeight: FontWeight.bold,
         letterSpacing: 1.0,
-      ),
-    );
-  }
-
-  Widget _buildPhotoBox(String label) {
-    return InkWell(
-      onTap: () {
-        CustomSnackBar.show(
-            context, 'Funcionalidad de cámara pendiente de configurar',
-            isError: true);
-      },
-      child: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.camera_alt, color: Colors.grey, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ],
-        ),
       ),
     );
   }
