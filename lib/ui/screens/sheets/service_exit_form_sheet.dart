@@ -1,13 +1,12 @@
-import 'dart:io';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
-import '../../../core/enpoinService.dart';
+
 import '../../../core/picker_localization.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/events_provider.dart';
+import '../../../providers/report_form_provider.dart';
 import '../../widgets/custom_snackbar.dart';
 
 class ServiceExitFormScreen extends StatefulWidget {
@@ -31,7 +30,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final _recomendacionesController = TextEditingController();
 
   final EventsProvider _eventsService = EventsProvider();
-  final EndpointService _api = EndpointService.instance;
+  final ReportFormProvider _reportService = ReportFormProvider();
 
   bool _isSubmitting = false;
   double _uploadProgress = 0.0;
@@ -152,84 +151,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     return false;
   }
 
-  /// Convierte AssetEntity a File
-  Future<File?> _assetToFile(AssetEntity asset) async {
-    return await asset.file;
-  }
-
-  /// Sube las fotos al servidor
-  Future<bool> _uploadPhotos() async {
-    try {
-      final antesFiles = <File>[];
-      final despuesFiles = <File>[];
-
-      for (final asset in _photosAntes) {
-        final file = await _assetToFile(asset);
-        if (file != null) antesFiles.add(file);
-      }
-
-      for (final asset in _photosDespues) {
-        final file = await _assetToFile(asset);
-        if (file != null) despuesFiles.add(file);
-      }
-
-      final formData = FormData();
-
-      formData.fields
-          .add(MapEntry('serverId', widget.event.serverId.toString()));
-      formData.fields
-          .add(MapEntry('incidencias', _incidenciasController.text.trim()));
-      formData.fields
-          .add(MapEntry('conclusiones', _conclusionesController.text.trim()));
-      formData.fields.add(
-          MapEntry('recomendaciones', _recomendacionesController.text.trim()));
-
-      for (int i = 0; i < antesFiles.length; i++) {
-        final file = antesFiles[i];
-        formData.files.add(MapEntry(
-          'fotos_antes',
-          await MultipartFile.fromFile(
-            file.path,
-            filename:
-                'antes_${i + 1}_${DateTime.now().millisecondsSinceEpoch}.jpg',
-          ),
-        ));
-      }
-
-      for (int i = 0; i < despuesFiles.length; i++) {
-        final file = despuesFiles[i];
-        formData.files.add(MapEntry(
-          'fotos_despues',
-          await MultipartFile.fromFile(
-            file.path,
-            filename:
-                'despues_${i + 1}_${DateTime.now().millisecondsSinceEpoch}.jpg',
-          ),
-        ));
-      }
-
-      final response = await _api.postFormData(
-        '/api/servicios/reporte',
-        formData: formData,
-        options: Options(
-          sendTimeout: const Duration(minutes: 5),
-          receiveTimeout: const Duration(minutes: 5),
-        ),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
-      } else {
-        debugPrint(
-            'Error en subida: ${response.statusCode} - ${response.data}');
-        return false;
-      }
-    } catch (e) {
-      debugPrint('Error al subir fotos: $e');
-      return false;
-    }
-  }
-
   Future<void> _onSubmit() async {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
@@ -252,7 +173,16 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
     try {
       setState(() => _uploadProgress = 0.3);
-      final uploadSuccess = await _uploadPhotos();
+
+      // Llamada al provider refactorizado
+      final uploadSuccess = await _reportService.submitServiceExitReport(
+        serverId: widget.event.serverId ?? 0,
+        incidencias: _incidenciasController.text,
+        conclusiones: _conclusionesController.text,
+        recomendaciones: _recomendacionesController.text,
+        photosAntes: _photosAntes,
+        photosDespues: _photosDespues,
+      );
 
       if (!uploadSuccess && mounted) {
         CustomSnackBar.show(
