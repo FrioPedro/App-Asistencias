@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/events_provider.dart';
 import '../../widgets/custom_snackbar.dart';
+import '../../widgets/photos_input_wrapper.dart';
 
 class ServiceExitFormScreen extends StatefulWidget {
   final AssigmentModel event;
@@ -26,6 +28,10 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final EventsProvider _eventsService = EventsProvider();
 
   bool _isSubmitting = false;
+
+  // Estado para las fotos
+  List<AssetEntity> _fotosAntes = [];
+  List<AssetEntity> _fotosDespues = [];
 
   @override
   void dispose() {
@@ -96,13 +102,23 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSectionTitle('FOTOGRAFÍAS'),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(child: _buildPhotoBox('ANTES')),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildPhotoBox('DESPUÉS')),
-                  ],
+                const SizedBox(height: 8),
+                _buildSectionTitle('ANTES'),
+                const SizedBox(height: 8),
+                PhotosInputWrapper(
+                  maxPhotos: 5,
+                  onSelectionChanged: (photos) {
+                    setState(() => _fotosAntes = photos);
+                  },
+                ),
+                const SizedBox(height: 16),
+                _buildSectionTitle('DESPUÉS'),
+                const SizedBox(height: 8),
+                PhotosInputWrapper(
+                  maxPhotos: 5,
+                  onSelectionChanged: (photos) {
+                    setState(() => _fotosDespues = photos);
+                  },
                 ),
                 const SizedBox(height: 12),
                 _buildFormField(
@@ -175,34 +191,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         fontSize: 12,
         fontWeight: FontWeight.bold,
         letterSpacing: 1.0,
-      ),
-    );
-  }
-
-  Widget _buildPhotoBox(String label) {
-    return InkWell(
-      onTap: () {
-        CustomSnackBar.show(
-            context, 'Funcionalidad de cámara pendiente de configurar',
-            isError: true);
-      },
-      child: Container(
-        height: 100,
-        decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.camera_alt, color: Colors.grey, size: 32),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ],
-        ),
       ),
     );
   }
