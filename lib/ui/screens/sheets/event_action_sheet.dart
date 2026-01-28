@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/permission_guard.dart';
 import '../../../models/assigment_model.dart';
 import '../../../models/activity_model.dart';
 import '../../../providers/events_provider.dart';
@@ -73,6 +74,11 @@ class _EventActionModalState extends State<EventActionModal> {
   }
 
   Future<void> _onActivitySelected(String title, IconData icon) async {
+    // Verificar permisos antes de procesar
+    final hasPermission =
+        await PermissionGuard.checkLocationPermission(context);
+    if (!hasPermission) return;
+
     setState(() => _isLoading = true);
 
     try {

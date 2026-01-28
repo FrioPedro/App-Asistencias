@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/permission_guard.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
@@ -227,9 +228,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       return;
     }
 
-    final hasPermission = await _requestPermission();
-    if (!hasPermission) return;
-
     if (!mounted) return;
 
     // Obtenemos la acción del bottom sheet
@@ -291,11 +289,20 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     );
 
     if (action == 'gallery') {
-      await Future.delayed(const Duration(milliseconds: 200));
-      await _pickFromGallery(isAntes: isAntes, maxAssets: remaining);
+      // Para galería usamos PhotoManager (lógica existente)
+      final hasGalleryAccess = await _requestPermission();
+      if (hasGalleryAccess) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        await _pickFromGallery(isAntes: isAntes, maxAssets: remaining);
+      }
     } else if (action == 'camera') {
-      await Future.delayed(const Duration(milliseconds: 200));
-      await _pickFromCamera(isAntes: isAntes);
+      // Para cámara usamos el nuevo PermissionGuard
+      final hasCameraAccess =
+          await PermissionGuard.checkCameraPermission(context);
+      if (hasCameraAccess) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        await _pickFromCamera(isAntes: isAntes);
+      }
     }
   }
 
