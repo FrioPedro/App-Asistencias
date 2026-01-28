@@ -1,4 +1,3 @@
-
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/models/activity_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
@@ -64,6 +63,7 @@ class CreateActivity {
   /// - Solo valida que exista un "activo" (último motive = entry) y crea 1 salida.
   static Future<ActivityModel?> storeExit({
     required int serverId,
+    String? description,
     double? latitude,
     double? longitude,
     DateTime? timestamp,
@@ -77,7 +77,7 @@ class CreateActivity {
       serverId: active.serverId,
       documentId: active.documentId,
       client: active.client,
-      description: active.description,
+      description: description ?? active.description,
       collaborator: active.collaborator,
       motiveText: MotiveType.exit.label, // opcional
       motive: MotiveType.exit,

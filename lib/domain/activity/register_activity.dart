@@ -22,7 +22,8 @@ class ActivityRegistrar {
     if (gps == null) {
       print('[ACTIVITY] GPS not available, saving entry WITHOUT coordinates');
     } else {
-      print('[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
+      print(
+          '[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
     }
 
     await CreateActivity.storeEntry(
@@ -39,10 +40,12 @@ class ActivityRegistrar {
   /// Registra SALIDA tomando GPS internamente (sin params lat/lng)
   static Future<void> registerExitWithGPS({
     required int serverId,
+    String? description,
     DateTime? timestamp,
   }) async {
     print('[ACTIVITY] registerExitWithGPS called');
     print('[ACTIVITY] ServerId: $serverId');
+    print('[ACTIVITY] Description: $description');
     print('[ACTIVITY] Timestamp override: $timestamp');
 
     final gps = await _getGpsOrNull();
@@ -50,11 +53,13 @@ class ActivityRegistrar {
     if (gps == null) {
       print('[ACTIVITY] GPS not available, saving exit WITHOUT coordinates');
     } else {
-      print('[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
+      print(
+          '[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
     }
 
     await CreateActivity.storeExit(
       serverId: serverId,
+      description: description,
       latitude: gps?.latitude,
       longitude: gps?.longitude,
       timestamp: timestamp,

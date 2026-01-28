@@ -1,6 +1,5 @@
 import 'package:app_asistencias/domain/assigment/get_assigned.dart';
 import 'package:app_asistencias/domain/activity/register_activity.dart';
-import 'package:app_asistencias/domain/activity/create_activity.dart';
 import 'package:app_asistencias/domain/session/active_session_storage.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/activity_model.dart';
@@ -37,7 +36,7 @@ class EventsProvider {
     // 1) si hay activo, ciérralo
     final active = await _storage.read();
     if (active != null) {
-      await CreateActivity.storeExit(serverId: active.serverId);
+      await ActivityRegistrar.registerExitWithGPS(serverId: active.serverId);
       await _storage.clear();
     }
 
@@ -65,6 +64,7 @@ class EventsProvider {
   }) async {
     await ActivityRegistrar.registerExitWithGPS(
       serverId: serverId,
+      description: description,
     );
     await _storage.clear();
 
