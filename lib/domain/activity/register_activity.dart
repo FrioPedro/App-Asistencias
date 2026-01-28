@@ -40,12 +40,10 @@ class ActivityRegistrar {
   static Future<void> registerExitWithGPS({
     required int serverId,
     DateTime? timestamp,
-    String? description,
   }) async {
     print('[ACTIVITY] registerExitWithGPS called');
     print('[ACTIVITY] ServerId: $serverId');
     print('[ACTIVITY] Timestamp override: $timestamp');
-    print('[ACTIVITY] Description: $description');
 
     final gps = await _getGpsOrNull();
 
@@ -60,7 +58,6 @@ class ActivityRegistrar {
       latitude: gps?.latitude,
       longitude: gps?.longitude,
       timestamp: timestamp,
-      description: description,
     );
 
     print('[ACTIVITY] Exit stored locally');

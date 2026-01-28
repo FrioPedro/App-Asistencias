@@ -108,8 +108,9 @@ extension MotiveTypeX on MotiveType {
   /// (Opcional) si el server a veces manda "Entrada"/"Salida" como texto
   static MotiveType? fromLabel(String? label) {
     final s = (label ?? '').trim().toLowerCase();
-    if (s == 'entrada') return MotiveType.entry;
-    if (s == 'salida') return MotiveType.exit;
+    print(s);
+    if (s == 'inicio de labores') return MotiveType.entry;
+    if (s == 'fin de labores') return MotiveType.exit;
     return null;
   }
 }
@@ -173,8 +174,10 @@ class ActivityModel {
   double? latitude;
   double? longitude;
 
-  @Index(unique: true, replace: true)
   DateTime? timestamp;
+
+  @Index(unique: true, replace: true)
+  late String dedupKey;
 
   /// Estado de sincronización
   @Index()
@@ -194,7 +197,15 @@ class ActivityModel {
     this.longitude,
     this.timestamp,
     this.isSynced = false,
-  });
+  }){
+    // 🔐 SE CONSTRUYE AUTOMÁTICAMENTE
+    dedupKey = buildDedupKey(
+                documentId: documentId,
+                motive: motive,
+                task: task,
+                activityType: activityType,
+              );
+  }
 
   /// ✅ Del server (evento / historial)
   ActivityModel.fromServer(Map<String, dynamic> json) {
@@ -204,6 +215,8 @@ class ActivityModel {
     collaborator = json['Collaborator'] as String?;
     motiveText = json['Motive'] as String?;
 
+    print(motiveText);
+    print(MotiveTypeX.fromLabel(motiveText));
     final maybeMotive = MotiveTypeX.fromLabel(motiveText);
     if (maybeMotive != null) motive = maybeMotive;
 
@@ -218,6 +231,13 @@ class ActivityModel {
     timestamp = _parseServerTimestamp(json['Timestamp']);
 
     isSynced = true; // viene del server → sincronizado
+
+    dedupKey = buildDedupKey(
+      documentId: documentId,
+      motive: motive,
+      task: task,
+      activityType: activityType,
+    );
   }
 
   /// Payload para enviar marcación (NO incluye client)
@@ -242,5 +262,21 @@ class ActivityModel {
       'zone': zone,
       'task': task.id,
     };
+  }
+
+  String _norm(String? s) => (s ?? '').trim().toLowerCase();
+
+  String buildDedupKey({
+    required String? documentId,
+    required MotiveType motive,
+    required TaskType task,
+    required AssigmentType activityType,
+  }) {
+    return [
+      'doc:${_norm(documentId)}',
+      'm:${motive.index}',
+      't:${task.index}',
+      'a:${activityType.index}',
+    ].join('|');
   }
 }

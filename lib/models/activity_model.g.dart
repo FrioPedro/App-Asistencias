@@ -33,55 +33,60 @@ const ActivityModelSchema = CollectionSchema(
       name: r'collaborator',
       type: IsarType.string,
     ),
-    r'description': PropertySchema(
+    r'dedupKey': PropertySchema(
       id: 3,
+      name: r'dedupKey',
+      type: IsarType.string,
+    ),
+    r'description': PropertySchema(
+      id: 4,
       name: r'description',
       type: IsarType.string,
     ),
     r'documentId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'documentId',
       type: IsarType.string,
     ),
     r'isSynced': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'latitude': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'latitude',
       type: IsarType.double,
     ),
     r'longitude': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'longitude',
       type: IsarType.double,
     ),
     r'motive': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'motive',
       type: IsarType.byte,
       enumMap: _ActivityModelmotiveEnumValueMap,
     ),
     r'motiveText': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'motiveText',
       type: IsarType.string,
     ),
     r'serverId': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'serverId',
       type: IsarType.long,
     ),
     r'task': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'task',
       type: IsarType.byte,
       enumMap: _ActivityModeltaskEnumValueMap,
     ),
     r'timestamp': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'timestamp',
       type: IsarType.dateTime,
     )
@@ -170,16 +175,16 @@ const ActivityModelSchema = CollectionSchema(
         )
       ],
     ),
-    r'timestamp': IndexSchema(
-      id: 1852253767416892198,
-      name: r'timestamp',
+    r'dedupKey': IndexSchema(
+      id: 2124236096506660101,
+      name: r'dedupKey',
       unique: true,
       replace: true,
       properties: [
         IndexPropertySchema(
-          name: r'timestamp',
-          type: IndexType.value,
-          caseSensitive: false,
+          name: r'dedupKey',
+          type: IndexType.hash,
+          caseSensitive: true,
         )
       ],
     ),
@@ -223,6 +228,7 @@ int _activityModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.dedupKey.length * 3;
   {
     final value = object.description;
     if (value != null) {
@@ -253,16 +259,17 @@ void _activityModelSerialize(
   writer.writeByte(offsets[0], object.activityType.index);
   writer.writeString(offsets[1], object.client);
   writer.writeString(offsets[2], object.collaborator);
-  writer.writeString(offsets[3], object.description);
-  writer.writeString(offsets[4], object.documentId);
-  writer.writeBool(offsets[5], object.isSynced);
-  writer.writeDouble(offsets[6], object.latitude);
-  writer.writeDouble(offsets[7], object.longitude);
-  writer.writeByte(offsets[8], object.motive.index);
-  writer.writeString(offsets[9], object.motiveText);
-  writer.writeLong(offsets[10], object.serverId);
-  writer.writeByte(offsets[11], object.task.index);
-  writer.writeDateTime(offsets[12], object.timestamp);
+  writer.writeString(offsets[3], object.dedupKey);
+  writer.writeString(offsets[4], object.description);
+  writer.writeString(offsets[5], object.documentId);
+  writer.writeBool(offsets[6], object.isSynced);
+  writer.writeDouble(offsets[7], object.latitude);
+  writer.writeDouble(offsets[8], object.longitude);
+  writer.writeByte(offsets[9], object.motive.index);
+  writer.writeString(offsets[10], object.motiveText);
+  writer.writeLong(offsets[11], object.serverId);
+  writer.writeByte(offsets[12], object.task.index);
+  writer.writeDateTime(offsets[13], object.timestamp);
 }
 
 ActivityModel _activityModelDeserialize(
@@ -277,20 +284,21 @@ ActivityModel _activityModelDeserialize(
         AssigmentType.other,
     client: reader.readStringOrNull(offsets[1]),
     collaborator: reader.readStringOrNull(offsets[2]),
-    description: reader.readStringOrNull(offsets[3]),
-    documentId: reader.readStringOrNull(offsets[4]),
-    isSynced: reader.readBoolOrNull(offsets[5]),
-    latitude: reader.readDoubleOrNull(offsets[6]),
-    longitude: reader.readDoubleOrNull(offsets[7]),
+    description: reader.readStringOrNull(offsets[4]),
+    documentId: reader.readStringOrNull(offsets[5]),
+    isSynced: reader.readBoolOrNull(offsets[6]),
+    latitude: reader.readDoubleOrNull(offsets[7]),
+    longitude: reader.readDoubleOrNull(offsets[8]),
     motive:
-        _ActivityModelmotiveValueEnumMap[reader.readByteOrNull(offsets[8])] ??
+        _ActivityModelmotiveValueEnumMap[reader.readByteOrNull(offsets[9])] ??
             MotiveType.entry,
-    motiveText: reader.readStringOrNull(offsets[9]),
-    serverId: reader.readLongOrNull(offsets[10]),
-    task: _ActivityModeltaskValueEnumMap[reader.readByteOrNull(offsets[11])] ??
+    motiveText: reader.readStringOrNull(offsets[10]),
+    serverId: reader.readLongOrNull(offsets[11]),
+    task: _ActivityModeltaskValueEnumMap[reader.readByteOrNull(offsets[12])] ??
         TaskType.office,
-    timestamp: reader.readDateTimeOrNull(offsets[12]),
+    timestamp: reader.readDateTimeOrNull(offsets[13]),
   );
+  object.dedupKey = reader.readString(offsets[3]);
   object.id = id;
   return object;
 }
@@ -311,26 +319,28 @@ P _activityModelDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 7:
       return (reader.readDoubleOrNull(offset)) as P;
     case 8:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 9:
       return (_ActivityModelmotiveValueEnumMap[reader.readByteOrNull(offset)] ??
           MotiveType.entry) as P;
-    case 9:
-      return (reader.readStringOrNull(offset)) as P;
     case 10:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 11:
+      return (reader.readLongOrNull(offset)) as P;
+    case 12:
       return (_ActivityModeltaskValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskType.office) as P;
-    case 12:
+    case 13:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -394,58 +404,57 @@ void _activityModelAttach(
 }
 
 extension ActivityModelByIndex on IsarCollection<ActivityModel> {
-  Future<ActivityModel?> getByTimestamp(DateTime? timestamp) {
-    return getByIndex(r'timestamp', [timestamp]);
+  Future<ActivityModel?> getByDedupKey(String dedupKey) {
+    return getByIndex(r'dedupKey', [dedupKey]);
   }
 
-  ActivityModel? getByTimestampSync(DateTime? timestamp) {
-    return getByIndexSync(r'timestamp', [timestamp]);
+  ActivityModel? getByDedupKeySync(String dedupKey) {
+    return getByIndexSync(r'dedupKey', [dedupKey]);
   }
 
-  Future<bool> deleteByTimestamp(DateTime? timestamp) {
-    return deleteByIndex(r'timestamp', [timestamp]);
+  Future<bool> deleteByDedupKey(String dedupKey) {
+    return deleteByIndex(r'dedupKey', [dedupKey]);
   }
 
-  bool deleteByTimestampSync(DateTime? timestamp) {
-    return deleteByIndexSync(r'timestamp', [timestamp]);
+  bool deleteByDedupKeySync(String dedupKey) {
+    return deleteByIndexSync(r'dedupKey', [dedupKey]);
   }
 
-  Future<List<ActivityModel?>> getAllByTimestamp(
-      List<DateTime?> timestampValues) {
-    final values = timestampValues.map((e) => [e]).toList();
-    return getAllByIndex(r'timestamp', values);
+  Future<List<ActivityModel?>> getAllByDedupKey(List<String> dedupKeyValues) {
+    final values = dedupKeyValues.map((e) => [e]).toList();
+    return getAllByIndex(r'dedupKey', values);
   }
 
-  List<ActivityModel?> getAllByTimestampSync(List<DateTime?> timestampValues) {
-    final values = timestampValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'timestamp', values);
+  List<ActivityModel?> getAllByDedupKeySync(List<String> dedupKeyValues) {
+    final values = dedupKeyValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'dedupKey', values);
   }
 
-  Future<int> deleteAllByTimestamp(List<DateTime?> timestampValues) {
-    final values = timestampValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'timestamp', values);
+  Future<int> deleteAllByDedupKey(List<String> dedupKeyValues) {
+    final values = dedupKeyValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'dedupKey', values);
   }
 
-  int deleteAllByTimestampSync(List<DateTime?> timestampValues) {
-    final values = timestampValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'timestamp', values);
+  int deleteAllByDedupKeySync(List<String> dedupKeyValues) {
+    final values = dedupKeyValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'dedupKey', values);
   }
 
-  Future<Id> putByTimestamp(ActivityModel object) {
-    return putByIndex(r'timestamp', object);
+  Future<Id> putByDedupKey(ActivityModel object) {
+    return putByIndex(r'dedupKey', object);
   }
 
-  Id putByTimestampSync(ActivityModel object, {bool saveLinks = true}) {
-    return putByIndexSync(r'timestamp', object, saveLinks: saveLinks);
+  Id putByDedupKeySync(ActivityModel object, {bool saveLinks = true}) {
+    return putByIndexSync(r'dedupKey', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByTimestamp(List<ActivityModel> objects) {
-    return putAllByIndex(r'timestamp', objects);
+  Future<List<Id>> putAllByDedupKey(List<ActivityModel> objects) {
+    return putAllByIndex(r'dedupKey', objects);
   }
 
-  List<Id> putAllByTimestampSync(List<ActivityModel> objects,
+  List<Id> putAllByDedupKeySync(List<ActivityModel> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'timestamp', objects, saveLinks: saveLinks);
+    return putAllByIndexSync(r'dedupKey', objects, saveLinks: saveLinks);
   }
 }
 
@@ -485,14 +494,6 @@ extension ActivityModelQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'activityType'),
-      );
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhere> anyTimestamp() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'timestamp'),
       );
     });
   }
@@ -1098,118 +1099,48 @@ extension ActivityModelQueryWhere
     });
   }
 
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      timestampIsNull() {
+  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> dedupKeyEqualTo(
+      String dedupKey) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'timestamp',
-        value: [null],
+        indexName: r'dedupKey',
+        value: [dedupKey],
       ));
     });
   }
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      timestampIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'timestamp',
-        lower: [null],
-        includeLower: false,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      timestampEqualTo(DateTime? timestamp) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'timestamp',
-        value: [timestamp],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      timestampNotEqualTo(DateTime? timestamp) {
+      dedupKeyNotEqualTo(String dedupKey) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'timestamp',
+              indexName: r'dedupKey',
               lower: [],
-              upper: [timestamp],
+              upper: [dedupKey],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'timestamp',
-              lower: [timestamp],
+              indexName: r'dedupKey',
+              lower: [dedupKey],
               includeLower: false,
               upper: [],
             ));
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'timestamp',
-              lower: [timestamp],
+              indexName: r'dedupKey',
+              lower: [dedupKey],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'timestamp',
+              indexName: r'dedupKey',
               lower: [],
-              upper: [timestamp],
+              upper: [dedupKey],
               includeUpper: false,
             ));
       }
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      timestampGreaterThan(
-    DateTime? timestamp, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'timestamp',
-        lower: [timestamp],
-        includeLower: include,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      timestampLessThan(
-    DateTime? timestamp, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'timestamp',
-        lower: [],
-        upper: [timestamp],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      timestampBetween(
-    DateTime? lowerTimestamp,
-    DateTime? upperTimestamp, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'timestamp',
-        lower: [lowerTimestamp],
-        includeLower: includeLower,
-        upper: [upperTimestamp],
-        includeUpper: includeUpper,
-      ));
     });
   }
 
@@ -1642,6 +1573,142 @@ extension ActivityModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'collaborator',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dedupKey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dedupKey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dedupKey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dedupKey',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dedupKey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dedupKey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dedupKey',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dedupKey',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dedupKey',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      dedupKeyIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'dedupKey',
         value: '',
       ));
     });
@@ -2667,6 +2734,19 @@ extension ActivityModelQuerySortBy
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByDedupKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dedupKey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByDedupKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dedupKey', Sort.desc);
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -2838,6 +2918,19 @@ extension ActivityModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByDedupKey() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dedupKey', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByDedupKeyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dedupKey', Sort.desc);
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -3002,6 +3095,13 @@ extension ActivityModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByDedupKey(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dedupKey', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -3091,6 +3191,12 @@ extension ActivityModelQueryProperty
       collaboratorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'collaborator');
+    });
+  }
+
+  QueryBuilder<ActivityModel, String, QQueryOperations> dedupKeyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dedupKey');
     });
   }
 
