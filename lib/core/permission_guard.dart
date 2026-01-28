@@ -86,6 +86,92 @@ class PermissionGuard {
     return false;
   }
 
+  /// Solicita todos los permisos al inicio y BLOQUEA hasta que se acepten.
+  static Future<void> requestAllPermissions(BuildContext context) async {
+    bool allGranted = false;
+
+    while (!allGranted) {
+      // 1. Pedir Ubicación
+      LocationPermission locationStatus = await Geolocator.checkPermission();
+      if (locationStatus == LocationPermission.denied) {
+        locationStatus = await Geolocator.requestPermission();
+      }
+
+      // 2. Pedir Cámara y Storage
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.camera,
+        Permission.photos,
+        Permission.videos,
+        Permission.storage,
+      ].request();
+
+      // Verificar si todo está concedido
+      final bool isLocationOk = (locationStatus == LocationPermission.always ||
+          locationStatus == LocationPermission.whileInUse);
+
+      final bool isCameraOk = (statuses[Permission.camera]?.isGranted ?? false);
+
+      // Si todo está OK, salimos del bucle
+      if (isLocationOk && isCameraOk) {
+        allGranted = true;
+        break;
+      }
+
+      // Si falta algo, mostramos diálogo BLOQUEANTE y volvemos a intentar o ir a settings
+      if (context.mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false, // No se puede cerrar tocando afuera
+          builder: (ctx) => AlertDialog(
+            backgroundColor: const Color(0xFF2C2C2C),
+            title: const Text('Permisos Requeridos',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+            content: const Text(
+                'Para usar la app es OBLIGATORIO aceptar los permisos de:\n\n'
+                '📍 Ubicación (para marcar asistencia)\n'
+                '📷 Cámara (para evidencias)\n\n'
+                'Por favor, acepta los permisos para continuar.',
+                style: TextStyle(color: Colors.white70)),
+            actions: [
+              // No hay botón cancelar
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E60C4),
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  Navigator.pop(ctx);
+
+                  // Verificar estado de todos los permisos críticos
+                  final bool locDenied =
+                      locationStatus == LocationPermission.denied ||
+                          locationStatus == LocationPermission.deniedForever;
+
+                  final bool camDenied =
+                      statuses[Permission.camera]?.isDenied == true ||
+                          statuses[Permission.camera]?.isPermanentlyDenied ==
+                              true ||
+                          statuses[Permission.camera]?.isRestricted == true;
+
+                  // Si alguno sigue denegado, forzamos ir a configuración
+                  if (locDenied || camDenied) {
+                    await openAppSettings();
+                  }
+                  // El bucle while se volverá a ejecutar al volver de settings
+                },
+                child: const Text('Ir a Configuración'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        // En caso de que el contexto se pierda, salimos para evitar bucle infinito sin UI
+        break;
+      }
+    }
+  }
+
   static void _showDialog(
     BuildContext context, {
     required String title,

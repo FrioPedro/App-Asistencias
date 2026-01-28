@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/permission_guard.dart'; // <--- Importamos PermissionGuard
 import '../../providers/auth_provider.dart'; // <--- Importamos el provider
 
 class LoginScreen extends StatefulWidget {
@@ -36,12 +37,18 @@ class _LoginScreenState extends State<LoginScreen> {
     // Validaciones básicas antes de llamar al provider
     if (_userController.text.isEmpty || _passController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor ingrese usuario y contraseña'), backgroundColor: Colors.orange),
+        const SnackBar(
+            content: Text('Por favor ingrese usuario y contraseña'),
+            backgroundColor: Colors.orange),
       );
       return;
     }
 
+    // 1. Pedir permisos ANTES de intentar logear
+    await PermissionGuard.requestAllPermissions(context);
+
     // Activar estado de carga
+    if (!mounted) return;
     setState(() => _isLoading = true);
 
     // Llamar al provider
@@ -55,12 +62,13 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
 
       if (success) {
-        // ÉXITO: No es necesario navegar manualmente.
-        // El GoRouter detectará el cambio en 'session' y redirigirá a '/home' automáticamente.
+        // ÉXITO: El GoRouter redirigirá automáticamente
       } else {
         // ERROR: Mostrar mensaje
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Credenciales incorrectas'), backgroundColor: Colors.red),
+          const SnackBar(
+              content: Text('Credenciales incorrectas'),
+              backgroundColor: Colors.red),
         );
       }
     }
@@ -111,7 +119,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
-                      disabledBackgroundColor: Colors.grey, // Color cuando está deshabilitado
+                      disabledBackgroundColor:
+                          Colors.grey, // Color cuando está deshabilitado
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -121,7 +130,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? const SizedBox(
                             height: 24,
                             width: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2),
                           )
                         : const Text(
                             'Continuar',
@@ -142,7 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildTextField({
-    required TextEditingController controller, // <--- Nuevo parámetro obligatorio
+    required TextEditingController
+        controller, // <--- Nuevo parámetro obligatorio
     required String hintText,
     required IconData icon,
     bool isPassword = false,
