@@ -71,15 +71,11 @@ class EventCard extends StatelessWidget {
       onTap: isLoading ? null : onTap, // Bloquea el tap si está cargando
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        // Importante: clipBehavior recorta el ícono de fondo
-        clipBehavior: Clip.hardEdge,
+        // Importante: clipBehavior recorta la imagen de fondo
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: const Color(0xFF1F1F1F), // Gris oscuro
           borderRadius: BorderRadius.circular(16),
-          // Borde condicional: del color de la actividad si participa
-          border: isParticipating
-              ? Border.all(color: _getActiveColor(), width: 2.0)
-              : null,
           // Sombra difuminada del color de la actividad opcional
           boxShadow: isParticipating
               ? [
@@ -90,6 +86,13 @@ class EventCard extends StatelessWidget {
                   )
                 ]
               : const [],
+        ),
+        foregroundDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          // Borde condicional: del color de la actividad si participa
+          border: isParticipating
+              ? Border.all(color: _getActiveColor(), width: 2.0)
+              : null,
         ),
         child: Stack(
           children: [
