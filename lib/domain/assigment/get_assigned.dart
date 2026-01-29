@@ -49,6 +49,18 @@ class GetAssigned {
         print('Sincronización completada');
       } else {
         print('No se recibieron datos del servidor, usando cache local');
+        await isar.writeTxn(() async {
+          final actives =
+              await isar.assigmentModels.filter().activeEqualTo(true).findAll();
+          for (final a in actives) {
+            a.active = false;
+            a.updatedAt = DateTime.now();
+          }
+          await isar.assigmentModels.putAll(actives);
+        });
+
+        print(
+            '[SYNC ASSIGNMENTS] Server vacío: desactivados los locales activos.');
       }
     } catch (e) {
       print('Error al obtener datos online: $e');
