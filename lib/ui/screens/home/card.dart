@@ -136,38 +136,54 @@ class EventCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        displayTaskName.toUpperCase(),
-                        style: const TextStyle(
-                          color: Color(0xFF2E60C4), // Azul distintivo
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-
-                      // ALERTAS: Si es Emergencia, mostrar en ROJO al lado
-                      if (assigmentType == AssigmentType.emergency)
+                      if (activeTaskName == null &&
+                          assigmentType == AssigmentType.emergency)
+                        // CASO: Sin tarea activa y es Emergencia -> SOLO ROJO
+                        Text(
+                          assigmentType.label.toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xFFFF4C4C), // Rojo alerta
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        )
+                      else
+                        // CASO NORMAL: Azul + (Opcional Rojo)
                         Row(
                           children: [
-                            const SizedBox(width: 4),
                             Text(
-                              '- ',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 11,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                            Text(
-                              assigmentType.label.toUpperCase(),
+                              displayTaskName.toUpperCase(),
                               style: const TextStyle(
-                                color: Color(0xFFFF4C4C), // Rojo alerta
+                                color: Color(0xFF2E60C4), // Azul distintivo
                                 fontSize: 11,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 0.5,
                               ),
                             ),
+                            if (assigmentType == AssigmentType.emergency)
+                              Row(
+                                children: [
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '- ',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  Text(
+                                    assigmentType.label.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF4C4C), // Rojo alerta
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
                           ],
                         ),
 
