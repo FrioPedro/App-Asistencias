@@ -115,6 +115,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
       builder: (context) => CalendarModal(
         initialDate: _selectedDate ?? DateTime.now(),
         onDateSelected: (date) {

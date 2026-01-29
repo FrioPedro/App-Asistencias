@@ -64,6 +64,17 @@ class _CalendarModalState extends State<CalendarModal> {
       child: Column(
         mainAxisSize: MainAxisSize.min, // Sidebar del tamaño del contenido
         children: [
+          // Close Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.grey),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+
           // Header: Mes y Flechas
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
