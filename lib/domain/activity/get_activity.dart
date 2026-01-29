@@ -91,6 +91,35 @@ class GetActivity {
         .findAll();
   }
 
+static List<ActivityModel> dedupeActivities(List<ActivityModel> list) {
+  final Map<String, ActivityModel> byKey = {};
+
+  for (final a in list) {
+    final key = a.dedupKey;
+
+    if (!byKey.containsKey(key)) {
+      byKey[key] = a;
+      continue;
+    }
+
+    final existing = byKey[key]!;
+
+    // Prioridad: synced gana sobre pending
+    if (existing.isSynced != true && a.isSynced == true) {
+      byKey[key] = a;
+      continue;
+    }
+
+    if ((existing.isSynced == a.isSynced) &&
+        a.timestamp.isAfter(existing.timestamp)) {
+      byKey[key] = a;
+    }
+  }
+
+  return byKey.values.toList();
+}
+
+
   static Future<List<ActivityModel>> syncOnline() async {
     final online = await getOnlineData();
 
@@ -100,11 +129,13 @@ class GetActivity {
     final pendingSync = await getPendingSync();
 
      onlineRecent.addAll(pendingSync);
-     onlineRecent.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+     final deduped = dedupeActivities(onlineRecent);
+     deduped.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     
     final Map<int, List<ActivityModel>> RecentByService = {};
-    for (final _activity in onlineRecent) {
+    for (final _activity in deduped) {
       final sid = _activity.serverId!;
       (RecentByService[sid] ??= []).add(_activity);
     }

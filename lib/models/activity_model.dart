@@ -138,6 +138,10 @@ DateTime _parseServerTimestamp(dynamic v) {
   return fallback;
 }
 
+DateTime _floorToSecond(DateTime dt) =>
+    DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second);
+
+
 @collection
 class ActivityModel {
   Id id = Isar.autoIncrement;
@@ -271,12 +275,13 @@ class ActivityModel {
     required TaskType task,
     required AssigmentType activityType,
   }) {
+
     return [
       'id:${_norm(serverId.toString())}',
       'm:${motive.index}',
       't:${task.index}',
       'a:${activityType.index}',
-      'dt:${timestamp.toString()}',
+      'dt:${_floorToSecond(timestamp).toString()}',
     ].join('|');
   }
 }
