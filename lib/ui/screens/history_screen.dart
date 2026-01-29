@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
 import '../../models/activity_model.dart'; // Usamos ActivityModel para el historial
+import '../../models/assigment_model.dart'; // Import para AssigmentType
 import '../../providers/history_provider.dart'; // Provider actualizado
 import '../widgets/event_card_history.dart'; // Importamos la nueva tarjeta de historial
 import '../widgets/event_card_skeleton.dart';
 import '../widgets/custom_search_bar.dart';
+import '../widgets/calendar_modal.dart'; // Nuevo modal de calendario
 
 // --- MODELO AUXILIAR PARA AGRUPACIÓN (Clase Privada) ---
 class _HistorySession {
@@ -62,7 +64,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
   late TextEditingController _searchController;
   String _searchQuery = '';
   bool _isLoading = true;
-  DateTimeRange? _selectedDateRange;
+
+  // Filtro
+  DateTime?
+      _selectedDate; // Null = Sin filtro (o todos) o hoy? El user quiere filtro inicial? Asumamos null o hoy.
 
   // Lista de nuevos modelos
   List<ActivityModel> _allActivities = [];
@@ -72,6 +77,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.initState();
     _searchController = TextEditingController();
     _searchController.addListener(_onSearchChanged);
+
+    // Inicializar con la fecha de hoy por defecto si se desea, o null si quiere ver todo.
+    // El user dijo "a pena presionas el dia se filtre", asi que iniciamos con Hoy para ser útiles o todo?
+    // Generalmente historia es "todo", pero si filtramos por día, mejor null inicialmente o Hoy.
+    _selectedDate = DateTime.now();
 
     // Carga inicial
     _loadData();
@@ -97,6 +107,28 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text.toLowerCase();
+    });
+  }
+
+  void _openCalendarModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CalendarModal(
+        initialDate: _selectedDate ?? DateTime.now(),
+        onDateSelected: (date) {
+          setState(() {
+            _selectedDate = date;
+          });
+        },
+      ),
+    );
+  }
+
+  void _clearDateFilter() {
+    setState(() {
+      _selectedDate = null;
     });
   }
 
@@ -161,57 +193,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       if (!matchesText) return false;
 
-      // 2. Filtro de Fechas
-      if (_selectedDateRange != null) {
+      // 2. Filtro de Fecha (DÍA ÚNICO)
+      if (_selectedDate != null) {
         final activityDate = session.sortDate;
-        final start =
-            _selectedDateRange!.start.subtract(const Duration(seconds: 1));
-        final end = _selectedDateRange!.end.add(const Duration(days: 1));
 
-        final matchesDate =
-            activityDate.isAfter(start) && activityDate.isBefore(end);
-        if (!matchesDate) return false;
+        final isSameDay = activityDate.year == _selectedDate!.year &&
+            activityDate.month == _selectedDate!.month &&
+            activityDate.day == _selectedDate!.day;
+
+        if (!isSameDay) return false;
       }
 
       return true;
     }).toList();
   }
 
-  Future<void> _pickDateRange() async {
-    final DateTimeRange? newDateRange = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-      initialDateRange: _selectedDateRange,
-      saveText: 'FILTRAR',
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            primaryColor: const Color(0xFF4CAF50),
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF4CAF50),
-              onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
-              secondary: Color(0xFF4CAF50),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (newDateRange != null) {
-      setState(() {
-        _selectedDateRange = newDateRange;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final filteredSessions = _getFilteredSessions();
-    final isDateFilterActive = _selectedDateRange != null;
+    final isDateFilterActive = _selectedDate != null;
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -229,13 +229,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // --- BUSCADOR Y CALENDARIO ---
-              Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // --- BUSCADOR Y BOTÓN CALENDARIO ---
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+              child: Row(
                 children: [
                   Expanded(
                     child: CustomSearchBar(
@@ -246,6 +247,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
+                  // Botón Calendario Restaourado
                   Container(
                     decoration: BoxDecoration(
                       color: isDateFilterActive
@@ -254,109 +256,114 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      icon: Icon(
-                        isDateFilterActive
-                            ? Icons.event_available
-                            : Icons.date_range,
-                        color: Colors.white,
-                      ),
-                      onPressed: _pickDateRange,
+                      icon:
+                          const Icon(Icons.calendar_month, color: Colors.white),
+                      onPressed: _openCalendarModal,
                     ),
                   ),
                 ],
               ),
+            ),
 
-              // --- CHIP FILTRO ---
-              if (isDateFilterActive)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12.0),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: const Color(0xFF4CAF50).withOpacity(0.5)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Filtrando: ${_selectedDateRange!.start.day}/${_selectedDateRange!.start.month} - ${_selectedDateRange!.end.day}/${_selectedDateRange!.end.month}',
-                          style: const TextStyle(
-                              color: Color(0xFF4CAF50),
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () =>
-                              setState(() => _selectedDateRange = null),
-                          child: const Icon(Icons.close,
-                              color: Color(0xFF4CAF50), size: 18),
-                        )
-                      ],
+            // --- CHIP FILTRO (Solo si hay fecha seleccionada) ---
+            if (isDateFilterActive)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4CAF50).withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: const Color(0xFF4CAF50).withOpacity(0.5)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Filtrando: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                            style: const TextStyle(
+                                color: Color(0xFF4CAF50),
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: _clearDateFilter,
+                            child: const Icon(Icons.close,
+                                color: Color(0xFF4CAF50), size: 18),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
+              ),
 
-              const SizedBox(height: 16),
-
-              // --- LISTA ---
-              Expanded(
-                child: _isLoading
-                    ? _buildSkeletons()
-                    : RefreshIndicator(
-                        onRefresh: _loadData,
-                        color: const Color(0xFF2E60C4),
-                        backgroundColor: const Color(0xFF2C2C2C),
-                        child: filteredSessions.isEmpty
-                            ? ListView(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                children: [
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.6,
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.history_toggle_off,
-                                              size: 60,
-                                              color: Colors.grey[800]),
-                                          const SizedBox(height: 16),
-                                          Text('No se encontraron actividades',
-                                              style: TextStyle(
-                                                  color: Colors.grey[600])),
-                                        ],
-                                      ),
+            // --- LISTA ---
+            Expanded(
+              child: _isLoading
+                  ? _buildSkeletons()
+                  : RefreshIndicator(
+                      onRefresh: _loadData,
+                      color: const Color(0xFF2E60C4),
+                      backgroundColor: const Color(0xFF2C2C2C),
+                      child: filteredSessions.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.4,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.event_busy,
+                                            size: 60, color: Colors.grey[800]),
+                                        const SizedBox(height: 16),
+                                        Text(
+                                            isDateFilterActive
+                                                ? 'No hay actividades para esta fecha'
+                                                : 'No se encontraron actividades',
+                                            style: TextStyle(
+                                                color: Colors.grey[600])),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              )
-                            : ListView.builder(
-                                physics: const AlwaysScrollableScrollPhysics(),
-                                itemCount: filteredSessions.length,
-                                itemBuilder: (context, index) {
-                                  final session = filteredSessions[index];
+                                ),
+                              ],
+                            )
+                          : ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 24),
+                              itemCount: filteredSessions.length,
+                              itemBuilder: (context, index) {
+                                final session = filteredSessions[index];
 
-                                  return EventCard(
-                                    eventName: session.description,
-                                    companyName: session.client,
-                                    eventCode: session.documentId,
-                                    taskName: session.taskLabel,
-                                    entryTime: session.entryTime,
-                                    exitTime: session.exitTime,
-                                    hasPendingSync: session.hasPendingSync,
-                                  );
-                                },
-                              ),
-                      ),
-              ),
-            ],
-          ),
+                                return EventCard(
+                                  eventName: session.description,
+                                  companyName: session.client,
+                                  eventCode: session.documentId,
+                                  taskName: session.taskLabel,
+                                  entryTime: session.entryTime,
+                                  exitTime: session.exitTime,
+                                  hasPendingSync: session.hasPendingSync,
+                                  assigmentType: session.entry?.activityType ??
+                                      AssigmentType.other,
+                                );
+                              },
+                            ),
+                    ),
+            ),
+          ],
         ),
       ),
     );
