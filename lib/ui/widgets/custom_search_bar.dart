@@ -9,7 +9,7 @@ class CustomSearchBar extends StatefulWidget {
     super.key,
     required this.controller,
     required this.onChanged,
-    this.hintText = 'Buscar...',
+    this.hintText = 'Buscar',
   });
 
   @override

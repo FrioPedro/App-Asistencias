@@ -241,7 +241,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Expanded(
                     child: CustomSearchBar(
                       controller: _searchController,
-                      hintText: 'Buscar actividad...',
+                      hintText: 'Buscar actividad',
                       onChanged: (val) =>
                           setState(() => _searchQuery = val.toLowerCase()),
                     ),
