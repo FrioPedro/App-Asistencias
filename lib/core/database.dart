@@ -8,21 +8,27 @@ import 'package:app_asistencias/models/note_model.dart';
 
 class Database {
   static Isar? _instance;
+  static Future<Isar>? _opening; // ✅ lock contra doble open
 
-  /// Obtiene o crea la instancia única de Isar.
-  static Future<Isar> instance() async {
-    if (_instance != null && _instance!.isOpen) return _instance!;
+  static Future<Isar> instance() {
+    // ✅ si ya está abierta, devolver
+    if (_instance != null && _instance!.isOpen) return Future.value(_instance!);
 
+    // ✅ si ya se está abriendo en paralelo, esperar esa misma
+    _opening ??= _openInternal();
+    return _opening!;
+  }
+
+  static Future<Isar> _openInternal() async {
+    // 1) si Isar ya existe (hot restart / alguien lo abrió antes), reusar
     final existing = Isar.getInstance();
     if (existing != null && existing.isOpen) {
       _instance = existing;
-
-      // opcional: seed solo si necesitas (ver nota abajo)
       await _seedDefaultData(_instance!);
-
       return _instance!;
     }
 
+    // 2) abrir normalmente
     final dir = await getApplicationDocumentsDirectory();
 
     _instance = await Isar.open(
@@ -36,24 +42,20 @@ class Database {
       inspector: true,
     );
 
-    // Inicializar datos por defecto al abrir
     await _seedDefaultData(_instance!);
 
     return _instance!;
   }
 
-  /// Cierra la instancia actual de Isar (si está abierta)
   static Future<bool> close() async {
     if (_instance == null) return true;
     await _instance!.close();
     _instance = null;
+    _opening = null;
     return true;
   }
 
-  /// Carga datos iniciales si la base está vacía.
   static Future<void> _seedDefaultData(Isar isar) async {
-    // Aquí puedes agregar más "seed data" para otros modelos:
-    // await _seedUsers(isar);
-    // await _seedAppState(isar);
+    // IMPORTANTE: dejar esto idempotente si luego insertas cosas
   }
 }
