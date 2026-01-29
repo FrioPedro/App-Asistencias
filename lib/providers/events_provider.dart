@@ -40,7 +40,7 @@ class EventsProvider {
     // 1) si hay activo, ciérralo
     final active = await _storage.read();
     if (active != null) {
-      await CreateActivity.storeExit(serverId: active.serverId);
+      await ActivityRegistrar.registerExitWithGPS(serverId: active.serverId);
       await _storage.clear();
     }
 

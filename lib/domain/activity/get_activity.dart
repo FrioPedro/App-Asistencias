@@ -91,6 +91,41 @@ class GetActivity {
         .findAll();
   }
 
+  static Future<List<ActivityModel>> syncOnline() async {
+    final online = await getOnlineData();
+
+    final onlineRecent = online.where((a) => a.timestamp
+        .isAfter(DateTime.now().subtract(const Duration(hours: 24)))).toList();
+
+    final pendingSync = await getPendingSync();
+
+     onlineRecent.addAll(pendingSync);
+     onlineRecent.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    
+    final Map<int, List<ActivityModel>> RecentByService = {};
+    for (final _activity in onlineRecent) {
+      final sid = _activity.serverId!;
+      (RecentByService[sid] ??= []).add(_activity);
+    }
+    
+    
+
+    print('--- ONLINE RECENT BY SERVICE (24h) ---');
+    RecentByService.forEach((sid, activities) {
+      print('Servicio $sid → ${activities.length} actividades');
+
+      for (final a in activities) {
+        print(
+          '  • ${a.timestamp} | motive=${a.motive} | status=${a.isSynced} ', 
+        );
+      }
+    });
+
+
+    return [];
+  }
+
   static Future<List<ActivityModel>> syncOnlineToLocal() async {
     try {
       final online = await getOnlineData();
