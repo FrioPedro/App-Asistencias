@@ -11,7 +11,17 @@ class Database {
 
   /// Obtiene o crea la instancia única de Isar.
   static Future<Isar> instance() async {
-    if (_instance != null  && _instance!.isOpen) return _instance!;
+    if (_instance != null && _instance!.isOpen) return _instance!;
+
+    final existing = Isar.getInstance();
+    if (existing != null && existing.isOpen) {
+      _instance = existing;
+
+      // opcional: seed solo si necesitas (ver nota abajo)
+      await _seedDefaultData(_instance!);
+
+      return _instance!;
+    }
 
     final dir = await getApplicationDocumentsDirectory();
 
@@ -23,7 +33,7 @@ class Database {
         NoteModelSchema,
       ],
       directory: dir.path,
-      inspector: true, 
+      inspector: true,
     );
 
     // Inicializar datos por defecto al abrir
@@ -42,8 +52,6 @@ class Database {
 
   /// Carga datos iniciales si la base está vacía.
   static Future<void> _seedDefaultData(Isar isar) async {
-
-  
     // Aquí puedes agregar más "seed data" para otros modelos:
     // await _seedUsers(isar);
     // await _seedAppState(isar);
