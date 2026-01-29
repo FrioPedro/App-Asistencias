@@ -91,16 +91,6 @@ class EventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor, // Uso del color dinámico
           borderRadius: BorderRadius.circular(16),
-          // Sombra difuminada del color de la actividad opcional
-          boxShadow: isParticipating
-              ? [
-                  BoxShadow(
-                    color: _getActiveColor().withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  )
-                ]
-              : const [],
         ),
         foregroundDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
