@@ -104,14 +104,6 @@ class EventCard extends StatelessWidget {
         ),
         foregroundDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          // Borde condicional: del color de la actividad si participa
-          border: isParticipating
-              ? Border.all(
-                  color: (motive == MotiveType.exit)
-                      ? Color.lerp(_getActiveColor(), Colors.black, 0.6)!
-                      : _getActiveColor(),
-                  width: 2.0)
-              : null,
         ),
         child: Stack(
           children: [
