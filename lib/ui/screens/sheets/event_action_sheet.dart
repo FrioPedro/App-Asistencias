@@ -337,37 +337,21 @@ class _EventActionModalState extends State<EventActionModal> {
             onTap: () => _onActivitySelected('Servicio', Icons.construction),
           ),
         const SizedBox(height: 14),
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.assignment),
-                label: const Text("REPORTE"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2C2C2C).withOpacity(0.5),
-                  foregroundColor: Colors.grey,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                ),
-                onPressed: () {
-                  // Bloqueado temporalmente
-                },
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.logout),
+            label: const Text("SALIDA"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF5350),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.logout),
-                label: const Text("SALIDA"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF5350),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: _onExitSelected,
-              ),
-            ),
-          ],
+            onPressed: _onExitSelected,
+          ),
         ),
         const SizedBox(height: 30),
       ],

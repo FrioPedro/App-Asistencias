@@ -305,6 +305,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                         !(activity.isSynced ?? true),
                                     motive: activity.motive,
                                     showAssignmentTypeBadge: false,
+                                    showMotiveBadge: false,
+                                    showActiveTaskBadge: false,
                                   );
                                 },
                               ),

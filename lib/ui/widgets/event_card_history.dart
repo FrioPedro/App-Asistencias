@@ -68,10 +68,7 @@ class EventCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF1F1F1F), // Gris oscuro
           borderRadius: BorderRadius.circular(16),
-          // Borde condicional: verde si participa
-          border: isParticipating
-              ? Border.all(color: const Color(0xFF4CAF50), width: 2.0)
-              : null,
+
           // Sombra verde difuminada opcional
           boxShadow: isParticipating
               ? [
@@ -263,8 +260,7 @@ class EventCard extends StatelessWidget {
     final isEntry = motive == MotiveType.entry;
     final label = isEntry ? 'ENTRADA' : 'SALIDA';
     // Colores: Verde para entrada, Rojo/Salmón para salida
-    final color =
-        isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
+    final color = isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
