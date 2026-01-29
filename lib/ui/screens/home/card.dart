@@ -43,11 +43,6 @@ class EventCard extends StatelessWidget {
   /// Motivo del registro (entrada/salida)
   final MotiveType? motive;
 
-  /// Controla si se muestra el badge de tipo de asignación (Ignorado ahora para estética minimal)
-  final bool showAssignmentTypeBadge;
-  final bool showMotiveBadge;
-  final bool showActiveTaskBadge;
-
   /// Constructor del EventCard
   const EventCard({
     super.key,
@@ -64,9 +59,6 @@ class EventCard extends StatelessWidget {
     this.hasPendingSync = false,
     this.isLoading = false,
     this.motive,
-    this.showAssignmentTypeBadge = true,
-    this.showMotiveBadge = true,
-    this.showActiveTaskBadge = true,
   });
 
   @override
@@ -363,10 +355,4 @@ class EventCard extends StatelessWidget {
   }
 
   // --- Helpers de colores (mantenidos si se necesitan en futuro, o para fallbacks) ---
-  Color _getActiveColor() {
-    if (activeTaskName != null) {
-      return TaskTypeX.fromLabel(activeTaskName).color;
-    }
-    return const Color(0xFF4CAF50); // Default Green
-  }
 }
