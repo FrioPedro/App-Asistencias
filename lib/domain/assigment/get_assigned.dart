@@ -1,3 +1,4 @@
+import 'package:app_asistencias/domain/session/active_session_storage.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/core/enpoinService.dart';
@@ -48,7 +49,6 @@ class GetAssigned {
 
         print('Sincronización completada');
       } else {
-        print('No se recibieron datos del servidor, usando cache local');
         await isar.writeTxn(() async {
           final actives =
               await isar.assigmentModels.filter().activeEqualTo(true).findAll();
@@ -58,9 +58,10 @@ class GetAssigned {
           }
           await isar.assigmentModels.putAll(actives);
         });
+        ActiveSessionStorage().clear();
+        print("Borrando Actividad activa")
 
-        print(
-            '[SYNC ASSIGNMENTS] Server vacío: desactivados los locales activos.');
+        print('Server vacío: desactivados los locales activos.');
       }
     } catch (e) {
       print('Error al obtener datos online: $e');
