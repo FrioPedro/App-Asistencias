@@ -3,7 +3,7 @@ import '../../../core/permission_guard.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
-
+import 'package:app_asistencias/providers/notes_provider.dart';
 import '../../../core/picker_localization.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/events_provider.dart';
@@ -31,7 +31,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final _recomendacionesController = TextEditingController();
 
   final EventsProvider _eventsService = EventsProvider();
-  final ReportFormProvider _reportService = ReportFormProvider();
 
   bool _isSubmitting = false;
   double _uploadProgress = 0.0;
@@ -176,8 +175,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       setState(() => _uploadProgress = 0.3);
 
       // Llamada al provider refactorizado
-      final uploadSuccess = await _reportService.submitServiceExitReport(
-        serverId: widget.event.serverId ?? 0,
+      final uploadSuccess = await ServiceExitAsNotes.saveAll(
+        sid: widget.event.serverId ?? 0,
         incidencias: _incidenciasController.text,
         conclusiones: _conclusionesController.text,
         recomendaciones: _recomendacionesController.text,

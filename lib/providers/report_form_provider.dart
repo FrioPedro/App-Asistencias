@@ -1,31 +1,12 @@
 import 'dart:io';
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
-import '../core/enpoinService.dart';
-import '../models/report_model.dart';
+import 'package:app_asistencias/domain/note/sync_note.dart';
+import 'package:app_asistencias/models/note_model.dart';
+import 'package:app_asistencias/domain/note/create_note.dart';
 
-class ReportFormProvider {
-  final EndpointService _api = EndpointService.instance;
-
-  /// Envía el reporte general de actividades (usado en ReportFormScreen).
-  /// Retorna `true` si se guardó correctamente.
-  Future<bool> submitReport(ReportModel report) async {
-    try {
-      // Por ahora mantenemos la simulación para este flujo específico
-      // o podrías implementarlo real aquí.
-      await Future.delayed(const Duration(milliseconds: 2000));
-      debugPrint("Reporte general enviado: ${report.toJson()}");
-      return true;
-    } catch (e) {
-      debugPrint("Error enviando reporte general: $e");
-      return false;
-    }
-  }
-
-  /// Envía el reporte de salida de servicio con múltiples fotos y datos adicionales (Multipart).
-  Future<bool> submitServiceExitReport({
-    required int serverId,
+class ServiceExitAsNotes {
+  static Future<bool> saveAll({
+    required int sid,
     required String incidencias,
     required String conclusiones,
     required String recomendaciones,
@@ -33,59 +14,63 @@ class ReportFormProvider {
     required List<AssetEntity> photosDespues,
   }) async {
     try {
-      final formData = FormData();
+      final doc = sid.toString();
+      final NoteSyncService _sync = NoteSyncService();
 
-      // Agregar campos de texto
-      formData.fields.addAll([
-        MapEntry('serverId', serverId.toString()),
-        MapEntry('incidencias', incidencias.trim()),
-        MapEntry('conclusiones', conclusiones.trim()),
-        MapEntry('recomendaciones', recomendaciones.trim()),
-      ]);
+      // 1) Textos (si no están vacíos)
+      if (incidencias.trim().isNotEmpty) {
+        await CreateNote.createAndStore(
+          document: doc,
+          description: '[Incidencia Servicio]: ${incidencias.trim()}',
+          //activity: 'SERVICE_EXIT',
+        );
+      }
+      
+      if (conclusiones.trim().isNotEmpty) {
+        await CreateNote.createAndStore(
+          document: doc,
+          description: '[Conclusiones Servicio]: ${conclusiones.trim()}',
+          //activity: 'SERVICE_EXIT',
+        );
+      }
 
-      // Procesar fotos ANTES
+      if (recomendaciones.trim().isNotEmpty) {
+        await CreateNote.createAndStore(
+          document: doc,
+          description: '[Recomendaciones Servicio]: ${recomendaciones.trim()}',
+          //activity: 'SERVICE_EXIT',
+        );
+      }
+     
+      // 2) Fotos ANTES
       for (int i = 0; i < photosAntes.length; i++) {
         final File? file = await photosAntes[i].file;
-        if (file != null) {
-          formData.files.add(MapEntry(
-            'fotos_antes',
-            await MultipartFile.fromFile(
-              file.path,
-              filename:
-                  'antes_${i + 1}_${DateTime.now().millisecondsSinceEpoch}.jpg',
-            ),
-          ));
-        }
+        if (file == null) continue;
+
+        await CreateNote.createAndStore(
+          document: doc,
+          description: '[Foto Antes #${i + 1}]',
+          imagePath: file.path,
+          //activity: 'SERVICE_EXIT_PHOTO_BEFORE',
+        );
       }
 
-      // Procesar fotos DESPUÉS
+      // 3) Fotos DESPUÉS
       for (int i = 0; i < photosDespues.length; i++) {
         final File? file = await photosDespues[i].file;
-        if (file != null) {
-          formData.files.add(MapEntry(
-            'fotos_despues',
-            await MultipartFile.fromFile(
-              file.path,
-              filename:
-                  'despues_${i + 1}_${DateTime.now().millisecondsSinceEpoch}.jpg',
-            ),
-          ));
-        }
+        if (file == null) continue;
+
+        await CreateNote.createAndStore(
+          document: doc,
+          description: '[Foto Después #${i + 1}]',
+          imagePath: file.path,
+          activity: 'SERVICE_EXIT_PHOTO_AFTER',
+        );
       }
 
-      // Enviar al servidor
-      final response = await _api.postFormData(
-        '/api/servicios/reporte',
-        formData: formData,
-        options: Options(
-          sendTimeout: const Duration(minutes: 5),
-          receiveTimeout: const Duration(minutes: 5),
-        ),
-      );
-
-      return response.statusCode == 200 || response.statusCode == 201;
+      await _sync.syncIfPossible();
+      return true;
     } catch (e) {
-      debugPrint('Error en ReportFormProvider.submitServiceExitReport: $e');
       return false;
     }
   }

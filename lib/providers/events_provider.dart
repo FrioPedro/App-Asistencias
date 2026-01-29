@@ -5,16 +5,19 @@ import 'package:app_asistencias/domain/session/active_session_storage.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/activity_model.dart';
 import 'package:app_asistencias/domain/activity/syncService.dart';
+import 'package:app_asistencias/domain/note/sync_note.dart';
 
 class EventsProvider {
   final ActiveSessionStorage _storage;
   final ActivitySyncService _sync = ActivitySyncService();
+  final NoteSyncService _sync2 = NoteSyncService();
 
   EventsProvider({ActiveSessionStorage? storage})
       : _storage = storage ?? ActiveSessionStorage();
 
   Future<List<AssigmentModel>> fetchEvents() async {
     await _sync.syncIfPossible();
+    await _sync2.syncIfPossible();
     return await GetAssigned.fetchAssignment();
   }
 

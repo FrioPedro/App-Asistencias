@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../../models/assigment_model.dart';
 import '../../../models/activity_model.dart';
 import '../../../providers/events_provider.dart';
+import 'package:app_asistencias/providers/notes_provider.dart';
 
 class OfficeWorkshopExitModal extends StatefulWidget {
   final AssigmentModel event;
@@ -25,6 +26,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
   final TextEditingController _descriptionController = TextEditingController();
   bool _isLoading = false;
   final EventsProvider _eventsService = EventsProvider();
+  final NotesProvider _notesProvider = NotesProvider();
 
   @override
   void dispose() {
@@ -121,7 +123,12 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
       if (sid != null) {
         await _eventsService.endAttendance(
           serverId: sid,
-          //description: _descriptionController.text.trim(),
+          //description: ,
+        );
+
+        await _notesProvider.createNote(
+          document: sid.toString(), 
+          description: "[Reporte ${widget.task.label}]: ${_descriptionController.text.trim()}"
         );
       }
 
@@ -166,7 +173,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
               Padding(
                 padding: const EdgeInsets.only(right: 48.0),
                 child: Text(
-                  'Reporte de ${widget.task.label}',
+                  'Reporte de ${widget.task.label}: ${widget.task.label}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,

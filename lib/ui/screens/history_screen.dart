@@ -106,7 +106,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       // 2. Filtro de Fechas
       if (_selectedDateRange != null) {
         // Usamos directamente activity.timestamp con un fallback por seguridad
-        final activityDate = activity.timestamp ?? DateTime.now();
+        final activityDate = activity.timestamp;
 
         final start =
             _selectedDateRange!.start.subtract(const Duration(seconds: 1));
@@ -278,7 +278,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 companyName: activity.client ?? 'Sin cliente',
                                 eventCode: activity.documentId ?? '---',
                                 dateTime: _formatDate(
-                                    activity.timestamp ?? DateTime.now()),
+                                    activity.timestamp),
 
                                 // Tipo de asignación
                                 assigmentType: activity.activityType,
