@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:app_asistencias/domain/note/sync_note.dart';
-import 'package:app_asistencias/models/note_model.dart';
+
 import 'package:app_asistencias/domain/note/create_note.dart';
 
 class ServiceExitAsNotes {
@@ -26,7 +26,15 @@ class ServiceExitAsNotes {
           //activity: 'SERVICE_EXIT',
         );
       }
-      
+
+      if (acciones.trim().isNotEmpty) {
+        await CreateNote.createAndStore(
+          document: doc,
+          description: '[Acciones Servicio]: ${acciones.trim()}',
+          //activity: 'SERVICE_EXIT',
+        );
+      }
+
       if (conclusiones.trim().isNotEmpty) {
         await CreateNote.createAndStore(
           document: doc,
@@ -42,7 +50,7 @@ class ServiceExitAsNotes {
           //activity: 'SERVICE_EXIT',
         );
       }
-     
+
       // 2) Fotos ANTES
       for (int i = 0; i < photosAntes.length; i++) {
         final File? file = await photosAntes[i].file;
