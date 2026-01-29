@@ -1,3 +1,4 @@
+import 'package:app_asistencias/domain/activity/register_activity.dart';
 import 'package:app_asistencias/domain/session/active_session_storage.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/core/database.dart';
@@ -58,7 +59,25 @@ class GetAssigned {
           }
           await isar.assigmentModels.putAll(actives);
         });
-        ActiveSessionStorage().clear();
+        final activadActiva = ActiveSessionStorage();
+        final activa = await activadActiva.read();
+        if (activa != null) {
+          try {
+            await ActivityRegistrar.registerExitWithGPS(
+              serverId: activa.serverId,
+              // si necesitas task/timestamp también:
+              // task: activa.task,
+              // timestamp: activa.timestamp,
+              // eventKey: activa.eventKey,
+            );
+
+            await activadActiva.clear(); // ✅ limpia solo si se registró bien
+          } catch (e) {
+            // ⚠️ si falla (sin internet, GPS, etc), NO limpies para reintentar luego
+            print('[ACTIVE_SESSION] No se pudo registrar salida: $e');
+          }
+        }
+
         print("Borrando Actividad activa");
 
         print('Server vacío: desactivados los locales activos.');
