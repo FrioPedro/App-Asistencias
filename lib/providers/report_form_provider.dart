@@ -29,6 +29,7 @@ class ReportFormProvider {
     required String incidencias,
     required String conclusiones,
     required String recomendaciones,
+    required String acciones,
     required List<AssetEntity> photosAntes,
     required List<AssetEntity> photosDespues,
   }) async {
@@ -41,6 +42,7 @@ class ReportFormProvider {
         MapEntry('incidencias', incidencias.trim()),
         MapEntry('conclusiones', conclusiones.trim()),
         MapEntry('recomendaciones', recomendaciones.trim()),
+        MapEntry('acciones', acciones.trim()),
       ]);
 
       // Procesar fotos ANTES
