@@ -152,7 +152,15 @@ class EventCard extends StatelessWidget {
                           children: [
                             const SizedBox(width: 4),
                             Text(
-                              '- ${assigmentType.label.toUpperCase()}',
+                              '- ',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Text(
+                              assigmentType.label.toUpperCase(),
                               style: const TextStyle(
                                 color: Color(0xFFFF4C4C), // Rojo alerta
                                 fontSize: 11,
