@@ -59,7 +59,7 @@ class GetAssigned {
           await isar.assigmentModels.putAll(actives);
         });
         ActiveSessionStorage().clear();
-        print("Borrando Actividad activa")
+        print("Borrando Actividad activa");
 
         print('Server vacío: desactivados los locales activos.');
       }

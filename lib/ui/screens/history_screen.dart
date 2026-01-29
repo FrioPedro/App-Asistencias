@@ -252,54 +252,63 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Expanded(
                 child: _isLoading
                     ? _buildSkeletons()
-                    : filteredActivities.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.history_toggle_off,
-                                    size: 60, color: Colors.grey[800]),
-                                const SizedBox(height: 16),
-                                Text('No se encontraron actividades',
-                                    style: TextStyle(color: Colors.grey[600])),
-                              ],
-                            ),
-                          )
-                        : ListView(
-                            children: filteredActivities.map((activity) {
-                              // Obtener el icono y nombre de la tarea
-                              final taskIcon = _iconFromTask(activity.task);
-                              final taskName = activity.task.label;
+                    : RefreshIndicator(
+                        onRefresh: _loadData,
+                        color: const Color(0xFF2E60C4),
+                        backgroundColor: const Color(0xFF2C2C2C),
+                        child: filteredActivities.isEmpty
+                            ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                children: [
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.6,
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.history_toggle_off,
+                                              size: 60,
+                                              color: Colors.grey[800]),
+                                          const SizedBox(height: 16),
+                                          Text('No se encontraron actividades',
+                                              style: TextStyle(
+                                                  color: Colors.grey[600])),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: filteredActivities.length,
+                                itemBuilder: (context, index) {
+                                  final activity = filteredActivities[index];
+                                  final taskIcon = _iconFromTask(activity.task);
+                                  final taskName = activity.task.label;
 
-                              return EventCard(
-                                // Mapeo de campos
-                                eventName:
-                                    activity.description ?? 'Sin descripción',
-                                companyName: activity.client ?? 'Sin cliente',
-                                eventCode: activity.documentId ?? '---',
-                                dateTime: _formatDate(
-                                    activity.timestamp),
-
-                                // Tipo de asignación
-                                assigmentType: activity.activityType,
-
-                                // Mostrar como "participando" para activar el diseño visual
-                                isParticipating: true,
-                                actionIcon: taskIcon,
-                                activeTaskName: taskName,
-
-                                // Sin interacción en histórico
-                                onTap: null,
-
-                                // Estado de sincronización y motivo
-                                hasPendingSync: !(activity.isSynced ?? true),
-                                motive: activity.motive,
-
-                                // Ocultar badge de tipo de asignación para reducir sobrecarga visual
-                                showAssignmentTypeBadge: false,
-                              );
-                            }).toList(),
-                          ),
+                                  return EventCard(
+                                    eventName: activity.description ??
+                                        'Sin descripción',
+                                    companyName:
+                                        activity.client ?? 'Sin cliente',
+                                    eventCode: activity.documentId ?? '---',
+                                    dateTime: _formatDate(activity.timestamp),
+                                    assigmentType: activity.activityType,
+                                    isParticipating: true,
+                                    actionIcon: taskIcon,
+                                    activeTaskName: taskName,
+                                    onTap: null,
+                                    hasPendingSync:
+                                        !(activity.isSynced ?? true),
+                                    motive: activity.motive,
+                                    showAssignmentTypeBadge: false,
+                                  );
+                                },
+                              ),
+                      ),
               ),
             ],
           ),
