@@ -10,6 +10,7 @@ class ServiceExitAsNotes {
     required String incidencias,
     required String conclusiones,
     required String recomendaciones,
+    required String acciones,
     required List<AssetEntity> photosAntes,
     required List<AssetEntity> photosDespues,
   }) async {

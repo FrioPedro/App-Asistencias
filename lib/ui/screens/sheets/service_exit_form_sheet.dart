@@ -29,6 +29,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final _incidenciasController = TextEditingController();
   final _conclusionesController = TextEditingController();
   final _recomendacionesController = TextEditingController();
+  final _accionesController = TextEditingController();
 
   final EventsProvider _eventsService = EventsProvider();
 
@@ -52,6 +53,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     _incidenciasController.dispose();
     _conclusionesController.dispose();
     _recomendacionesController.dispose();
+    _accionesController.dispose();
     super.dispose();
   }
 
@@ -155,16 +157,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
 
-    if (_photosAntes.isEmpty) {
-      CustomSnackBar.show(context, 'Debe agregar al menos una foto ANTES',
-          isError: true);
-      return;
-    }
-    if (_photosDespues.isEmpty) {
-      CustomSnackBar.show(context, 'Debe agregar al menos una foto DESPUÉS',
-          isError: true);
-      return;
-    }
+    // Fotos ya no son obligatorias por solicitud
+    // if (_photosAntes.isEmpty) { ... }
 
     setState(() {
       _isSubmitting = true;
@@ -180,6 +174,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         incidencias: _incidenciasController.text,
         conclusiones: _conclusionesController.text,
         recomendaciones: _recomendacionesController.text,
+        acciones: _accionesController.text,
         photosAntes: _photosAntes,
         photosDespues: _photosDespues,
       );
@@ -457,22 +452,33 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   isAntes: false,
                 ),
                 const SizedBox(height: 20),
+                const SizedBox(height: 20),
+                _buildFormField(
+                  label: 'ACCIONES (OBLIGATORIO)',
+                  controller: _accionesController,
+                  hint: 'Describa las acciones realizadas...',
+                  isRequired: true,
+                ),
+                const SizedBox(height: 16),
                 _buildFormField(
                   label: 'INCIDENCIAS',
                   controller: _incidenciasController,
                   hint: 'Describa las incidencias encontradas...',
+                  isRequired: false,
                 ),
                 const SizedBox(height: 16),
                 _buildFormField(
                   label: 'CONCLUSIONES',
                   controller: _conclusionesController,
                   hint: 'Conclusiones del servicio...',
+                  isRequired: false,
                 ),
                 const SizedBox(height: 16),
                 _buildFormField(
                   label: 'RECOMENDACIONES',
                   controller: _recomendacionesController,
                   hint: 'Recomendaciones para el cliente...',
+                  isRequired: false,
                 ),
                 const SizedBox(height: 24),
                 if (_isSubmitting)
@@ -712,6 +718,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     required String label,
     required TextEditingController controller,
     required String hint,
+    bool isRequired = true,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,9 +743,12 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
             style: const TextStyle(color: Colors.white, fontSize: 15),
             maxLines: 3,
             enabled: !_isSubmitting,
-            validator: (v) => (v == null || v.trim().isEmpty)
-                ? 'Este campo es obligatorio'
-                : null,
+            validator: (v) {
+              if (!isRequired) return null;
+              return (v == null || v.trim().isEmpty)
+                  ? 'Este campo es obligatorio'
+                  : null;
+            },
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
