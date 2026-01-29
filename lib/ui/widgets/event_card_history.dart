@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
+import '../../models/assigment_model.dart'; // Import para AssigmentType
 
 /// Widget que muestra una tarjeta de historial con entrada y salida agrupadas
 class EventCard extends StatelessWidget {
@@ -24,6 +25,9 @@ class EventCard extends StatelessWidget {
   /// Indica si el registro está pendiente de sincronización (Offline)
   final bool hasPendingSync;
 
+  /// Tipo de asignación (Emergencia, Servicio, etc.)
+  final AssigmentType assigmentType;
+
   /// Constructor del EventCard
   const EventCard({
     super.key,
@@ -34,6 +38,7 @@ class EventCard extends StatelessWidget {
     this.entryTime,
     this.exitTime,
     this.hasPendingSync = false,
+    this.assigmentType = AssigmentType.other,
   });
 
   @override
@@ -79,7 +84,7 @@ class EventCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. NOMBRE DE ACTIVIDAD (Primero) + Cloud Icon
+                // 1. NOMBRE DE ACTIVIDAD (Primero) + Cloud Icon + (Opcional) Alerta roja
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -92,6 +97,24 @@ class EventCard extends StatelessWidget {
                         letterSpacing: 0.5,
                       ),
                     ),
+
+                    // Alerta Roja (ej: - EMERGENCIA)
+                    if (_isAlert(assigmentType))
+                      Row(
+                        children: [
+                          const SizedBox(width: 4),
+                          Text(
+                            '- ${assigmentType.label.toUpperCase()}',
+                            style: const TextStyle(
+                              color: Color(0xFFFF4C4C), // Rojo alerta
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+
                     // Icono offline al lado del nombre de actividad
                     if (hasPendingSync) ...[
                       const SizedBox(width: 8),
@@ -168,6 +191,13 @@ class EventCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _isAlert(AssigmentType type) {
+    // Definimos qué tipos se consideran "alertas" para mostrar en rojo
+    // Según el User Request: "alertas que dicen por ejemplo emergencia"
+    // Vamos a incluir Emergencia y quizás otros críticos si los hubiera.
+    return type == AssigmentType.emergency;
   }
 
   Widget _buildTimeChip(String label, String? time) {
