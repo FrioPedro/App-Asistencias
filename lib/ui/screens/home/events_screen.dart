@@ -205,39 +205,62 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   Widget _buildEventList(List<AssigmentModel> events) {
+    // Definimos el contenido de la lista (vacía con mensaje o con elementos)
+    Widget listContent;
+
     if (events.isEmpty) {
-      return Center(
-        child: Text(
-          _searchQuery.isEmpty
-              ? 'No hay asignaciones disponibles'
-              : 'No se encontraron resultados',
-          style: TextStyle(color: Colors.grey[500]),
-        ),
+      // Usamos ListView con un solo hijo que ocupa todo el espacio para permitir el scroll y el refresh
+      listContent = ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Center(
+              child: Text(
+                _searchQuery.isEmpty
+                    ? 'No hay asignaciones disponibles'
+                    : 'No se encontraron resultados',
+                style: TextStyle(color: Colors.grey[500]),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      listContent = ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: events.length,
+        itemBuilder: (context, index) {
+          final event = events[index];
+          final String eventKey = event.documentId ?? event.id.toString();
+          final bool isParticipating =
+              _participatingEvents.containsKey(eventKey);
+
+          String timeDisplay = '';
+          if (isParticipating && _activeStartTimes.containsKey(eventKey)) {
+            timeDisplay = _formatDate(_activeStartTimes[eventKey]!);
+          }
+
+          return EventCard(
+            eventName: event.description ?? 'Sin descripción',
+            companyName: event.client ?? 'Sin cliente',
+            eventCode: event.documentId ?? '---',
+            dateTime: timeDisplay,
+            assigmentType: event.assigmentType,
+            isParticipating: isParticipating,
+            actionIcon: _participatingEvents[eventKey],
+            activeTaskName: _activeTaskNames[eventKey],
+            onTap: () => _handleCardTap(event, eventKey),
+          );
+        },
       );
     }
 
-    return ListView(
-      children: events.map((event) {
-        final String eventKey = event.documentId ?? event.id.toString();
-        final bool isParticipating = _participatingEvents.containsKey(eventKey);
-
-        String timeDisplay = '';
-        if (isParticipating && _activeStartTimes.containsKey(eventKey)) {
-          timeDisplay = _formatDate(_activeStartTimes[eventKey]!);
-        }
-
-        return EventCard(
-          eventName: event.description ?? 'Sin descripción',
-          companyName: event.client ?? 'Sin cliente',
-          eventCode: event.documentId ?? '---',
-          dateTime: timeDisplay,
-          assigmentType: event.assigmentType,
-          isParticipating: isParticipating,
-          actionIcon: _participatingEvents[eventKey],
-          activeTaskName: _activeTaskNames[eventKey],
-          onTap: () => _handleCardTap(event, eventKey),
-        );
-      }).toList(),
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      color: const Color(0xFF2E60C4),
+      backgroundColor: const Color(0xFF2C2C2C),
+      child: listContent,
     );
   }
 }
