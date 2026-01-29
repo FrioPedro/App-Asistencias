@@ -94,7 +94,8 @@ class EventCard extends StatelessWidget {
         child: Stack(
           children: [
             // --- CAPA 1: ÍCONO DE FONDO (Si participa) ---
-            if (isParticipating && actionIcon != null)
+            // --- CAPA 1: IMAGEN DE FONDO (Si participa) ---
+            if (isParticipating)
               Positioned(
                 right: -30,
                 top: 0,
@@ -111,34 +112,11 @@ class EventCard extends StatelessWidget {
                           Colors.transparent,
                           Colors.black,
                         ],
-                        stops: [0.0, 0.2, 1.0],
+                        stops: [0.0, 0.1, 1.0],
                       ).createShader(rect);
                     },
                     blendMode: BlendMode.dstIn,
-                    child: Stack(
-                      children: [
-                        // 1.1 Versión Borrosa (Glow)
-                        Center(
-                          child: ImageFiltered(
-                            imageFilter:
-                                ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
-                            child: Icon(
-                              actionIcon,
-                              size: 120,
-                              color: _getActiveColor().withOpacity(0.5),
-                            ),
-                          ),
-                        ),
-                        // 1.2 Versión Nítida
-                        Center(
-                          child: Icon(
-                            actionIcon,
-                            size: 120,
-                            color: _getActiveColor().withOpacity(0.3),
-                          ),
-                        ),
-                      ],
-                    ),
+                    child: _buildBackgroundContent(),
                   ),
                 ),
               ),
@@ -293,6 +271,63 @@ class EventCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildBackgroundContent() {
+    final imageAsset = _getTaskImageAsset(activeTaskName);
+
+    if (imageAsset != null) {
+      return Opacity(
+        opacity: 0.80, // Baja opacidad
+        child: Image.asset(
+          imageAsset,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    if (actionIcon != null) {
+      return Stack(
+        children: [
+          Center(
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+              child: Icon(
+                actionIcon,
+                size: 120,
+                color: _getActiveColor().withOpacity(0.5),
+              ),
+            ),
+          ),
+          Center(
+            child: Icon(
+              actionIcon,
+              size: 120,
+              color: _getActiveColor().withOpacity(0.3),
+            ),
+          ),
+        ],
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  String? _getTaskImageAsset(String? taskName) {
+    if (taskName == null) return null;
+    final name = taskName.toLowerCase();
+    if (name.contains('oficina')) {
+      return 'assets/images/icons-tarjetas/oficina.jpg';
+    }
+    if (name.contains('taller')) {
+      return 'assets/images/icons-tarjetas/taller.jpg';
+    }
+    if (name.contains('servicio')) {
+      return 'assets/images/icons-tarjetas/servicio.jpg';
+    }
+    if (name.contains('transporte')) {
+      return 'assets/images/icons-tarjetas/transporte.jpg';
+    }
+    return null;
   }
 
   /// Obtiene la versión corta del nombre de la tarea
