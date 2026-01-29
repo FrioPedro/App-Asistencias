@@ -199,7 +199,7 @@ class ActivityModel {
   }){
     // 🔐 SE CONSTRUYE AUTOMÁTICAMENTE
     dedupKey = buildDedupKey(
-                documentId: documentId,
+                serverId: serverId ?? 0,
                 motive: motive,
                 task: task,
                 activityType: activityType,
@@ -208,6 +208,7 @@ class ActivityModel {
 
   /// ✅ Del server (evento / historial)
   ActivityModel.fromServer(Map<String, dynamic> json) {
+    serverId = json['Identifier'];
     documentId = json['Document'] as String?;
     client = json['Client'] as String?; // 👈 NUEVO
     description = json['Description'] as String?;
@@ -230,7 +231,7 @@ class ActivityModel {
     isSynced = true; // viene del server → sincronizado
 
     dedupKey = buildDedupKey(
-      documentId: documentId,
+      serverId: serverId ?? 0,
       motive: motive,
       task: task,
       activityType: activityType,
@@ -265,13 +266,13 @@ class ActivityModel {
   String _norm(String? s) => (s ?? '').trim().toLowerCase();
 
   String buildDedupKey({
-    required String? documentId,
+    required int serverId,
     required MotiveType motive,
     required TaskType task,
     required AssigmentType activityType,
   }) {
     return [
-      'doc:${_norm(documentId)}',
+      'id:${_norm(serverId.toString())}',
       'm:${motive.index}',
       't:${task.index}',
       'a:${activityType.index}',

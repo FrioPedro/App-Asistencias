@@ -52,7 +52,7 @@ class ActivitySyncService {
     print('[SYNC] Total pending activities: ${allPending.length}');
 
     final pending = allPending.take(batchSize).toList();
-
+ 
     if (pending.isEmpty) {
       print('[SYNC] No pending activities');
       return;
