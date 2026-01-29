@@ -5,7 +5,7 @@ import 'dart:ui'; // Necesario para ImageFilter.blur
 import '../../../models/activity_model.dart';
 import '../../../models/assigment_model.dart';
 
-/// Widget que muestra una tarjeta de evento/asignación
+/// Widget que muestra una tarjeta de evento/asignación (Home)
 class EventCard extends StatelessWidget {
   /// Nombre del evento / Descripción
   final String eventName;
@@ -25,7 +25,7 @@ class EventCard extends StatelessWidget {
   /// Callback ejecutado al tocar la tarjeta
   final VoidCallback? onTap;
 
-  /// Indica si el usuario está participando (muestra borde verde)
+  /// Indica si el usuario está participando
   final bool isParticipating;
 
   /// Icono grande difuminado de fondo (opcional, solo si participa)
@@ -40,19 +40,8 @@ class EventCard extends StatelessWidget {
   /// Indica si se está procesando una acción (Bloquea clicks y muestra carga)
   final bool isLoading;
 
-  /// Motivo del registro (entrada/salida), para vistas de historial.
+  /// Motivo del registro (entrada/salida)
   final MotiveType? motive;
-
-  /// Controla si se muestra el badge de tipo de asignación
-  final bool showAssignmentTypeBadge;
-
-  // ... (rest of the fields are already there, just fixing the missing one and the usage)
-
-  /// Controla si se muestra el badge del motivo (Entrada/Salida)
-  final bool showMotiveBadge;
-
-  /// Controla si se muestra el badge de la tarea activa (Taller/Oficina...)
-  final bool showActiveTaskBadge;
 
   /// Constructor del EventCard
   const EventCard({
@@ -66,48 +55,33 @@ class EventCard extends StatelessWidget {
     this.onTap,
     this.isParticipating = false,
     this.actionIcon,
-    this.activeTaskName, // <--- NUEVO PARÁMETRO
+    this.activeTaskName,
     this.hasPendingSync = false,
     this.isLoading = false,
     this.motive,
-    this.showAssignmentTypeBadge = true, // Por defecto se muestra
-    this.showMotiveBadge = true,
-    this.showActiveTaskBadge = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Si es SALIDA, oscurecemos el fondo casi a negro
+    // Si es SALIDA, oscurecemos el fondo casi a negro (mantenido solo como sutil diferencia de fondo)
     final backgroundColor = (motive == MotiveType.exit)
         ? const Color(0xFF000000)
         : const Color(0xFF1F1F1F);
+
+    // Determinamos el nombre de la tarea para mostrar
+    final displayTaskName = activeTaskName ?? assigmentType.label;
 
     return GestureDetector(
       onTap: isLoading ? null : onTap, // Bloquea el tap si está cargando
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        // Importante: clipBehavior recorta la imagen de fondo
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: backgroundColor, // Uso del color dinámico
           borderRadius: BorderRadius.circular(16),
-          // Sombra difuminada del color de la actividad opcional
-          boxShadow: isParticipating
-              ? [
-                  BoxShadow(
-                    color: _getActiveColor().withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  )
-                ]
-              : const [],
-        ),
-        foregroundDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
         ),
         child: Stack(
           children: [
-            // --- CAPA 1: ÍCONO DE FONDO (Si participa) ---
             // --- CAPA 1: IMAGEN DE FONDO (Si participa) ---
             if (isParticipating)
               Positioned(
@@ -130,118 +104,136 @@ class EventCard extends StatelessWidget {
                       ).createShader(rect);
                     },
                     blendMode: BlendMode.dstIn,
-                    child: _buildBackgroundContent(),
+                    child: _buildBackgroundContent(displayTaskName),
                   ),
                 ),
               ),
 
-            // --- CAPA 2: CONTENIDO DE LA TARJETA ---
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // COLUMNA IZQUIERDA: Datos
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          eventName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          companyName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          eventCode,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        // La fecha (solo se muestra si se pasa, lógica controlada por el padre)
-                        Text(
-                          dateTime,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // ÍCONO DE SINCRONIZACIÓN PENDIENTE (Offline)
-                  if (hasPendingSync)
-                    const Padding(
-                      padding: EdgeInsets.only(right: 8.0, bottom: 4.0),
-                      child: Icon(
-                        Icons.cloud_off_outlined,
-                        color: Colors.orangeAccent,
-                        size: 20,
-                      ),
-                    ),
-
-                  // COLUMNA DERECHA: Las etiquetas
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      // FILA DE ESTADO (Motivo + Actividad + Tipo)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // A. Badge de Entrada/Salida (Si existe y está habilitado)
-                          if (motive != null && showMotiveBadge) ...[
-                            _buildMotiveTag(),
-                            const SizedBox(width: 6),
-                          ],
-
-                          // B. Badge de Actividad actual (Si existe y está habilitado)
-                          if (isParticipating &&
-                              activeTaskName != null &&
-                              showActiveTaskBadge) ...[
-                            _buildActiveTaskBadge(),
-                            const SizedBox(width: 6), // Espacio entre badges
-                          ],
-
-                          // C. Badge de Tipo de Asignación
-                          if (showAssignmentTypeBadge)
-                            _buildAssignmentTypeTag(),
-                        ],
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
-
             // --- CAPA 2.5: SOMBRADO OSCURO (Si es Salida) ---
+            // Mantenemos esto para dar feedback visual sutil de que es una salida
             if (motive == MotiveType.exit)
               Positioned.fill(
                 child: ColoredBox(
                   color: Colors.black.withOpacity(0.5),
                 ),
               ),
+
+            // --- CAPA 2: CONTENIDO DE LA TARJETA ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. NOMBRE DE ACTIVIDAD (Primero) + Cloud Icon
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (activeTaskName == null &&
+                          assigmentType == AssigmentType.emergency)
+                        // CASO: Sin tarea activa y es Emergencia -> SOLO ROJO
+                        Text(
+                          assigmentType.label.toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xFFFF4C4C), // Rojo alerta
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        )
+                      else
+                        // CASO NORMAL: Azul + (Opcional Rojo)
+                        Row(
+                          children: [
+                            Text(
+                              displayTaskName.toUpperCase(),
+                              style: const TextStyle(
+                                color: Color(0xFF2E60C4), // Azul distintivo
+                                fontSize: 11,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            if (assigmentType == AssigmentType.emergency)
+                              Row(
+                                children: [
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '- ',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                  Text(
+                                    assigmentType.label.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Color(0xFFFF4C4C), // Rojo alerta
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+
+                      // Icono offline al lado del nombre de actividad
+                      if (hasPendingSync) ...[
+                        const SizedBox(width: 8),
+                        const Icon(
+                          Icons.cloud_off_outlined,
+                          color: Colors.orangeAccent,
+                          size: 14,
+                        ),
+                      ],
+                    ],
+                  ),
+
+                  const SizedBox(height: 2),
+
+                  // 2. DESCRIPCIÓN (Nombre de la actividad realizada)
+                  Text(
+                    eventName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 2),
+
+                  // 3. CLIENTE
+                  Text(
+                    companyName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 13,
+                    ),
+                  ),
+
+                  // 4. DOCUMENTO
+                  Text(
+                    eventCode,
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 11,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // 5. FECHA/HORA
+                  _buildTimeChip(dateTime),
+                ],
+              ),
+            ),
 
             // --- CAPA 3: ESTADO DE CARGA (Bloqueo visual) ---
             if (isLoading)
@@ -265,43 +257,31 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  /// Construye la etiqueta de "ACTIVIDAD EN CURSO" (ej: TALLER)
-  Widget _buildActiveTaskBadge() {
-    final color = _getActiveColor();
-    // Versión corta del nombre de la tarea
-    final shortName = _getShortTaskName(activeTaskName!);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.4), // Fondo oscuro semitransparente
-        border: Border.all(color: color), // Borde del color de la actividad
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildTimeChip(String time) {
+    if (time.isEmpty) return const SizedBox.shrink();
+    return RichText(
+      text: TextSpan(
+        style: const TextStyle(fontSize: 12),
         children: [
-          // Pequeño punto indicador
-          Icon(Icons.circle, size: 6, color: color),
-          const SizedBox(width: 4),
-          Text(
-            shortName,
+          // En Home suele ser la fecha/hora del evento actual o futuro,
+          // asi que "Inicio:" podría ser asumido, pero el usuario pidió "Traslada la estética"
+          // Si es solo una fecha larga, la mostraremos tal cual en blanco.
+          TextSpan(
+            text: time,
             style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w900, // Letra muy gruesa
-              letterSpacing: 0.5,
-            ),
+                color: Colors.white, fontWeight: FontWeight.w500),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBackgroundContent() {
-    final imageAsset = _getTaskImageAsset(activeTaskName);
+  Widget _buildBackgroundContent(String taskName) {
+    final imageAsset = _getTaskImageAsset(taskName);
 
-    // Si es salida, la opacidad debe ser menor para que se vea oscuro
-    final opacity = (motive == MotiveType.exit) ? 0.6 : 0.80;
+    // Transparencia para imagen
+    final opacity =
+        (motive == MotiveType.exit) ? 0.6 : 0.6; // Similar al history card
 
     if (imageAsset != null) {
       return Opacity(
@@ -314,29 +294,37 @@ class EventCard extends StatelessWidget {
     }
 
     if (actionIcon != null) {
-      return Stack(
-        children: [
-          Center(
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
-              child: Icon(
-                actionIcon,
-                size: 120,
-                color: _getActiveColor().withOpacity(0.5),
-              ),
-            ),
-          ),
-          Center(
-            child: Icon(
-              actionIcon,
-              size: 120,
-              color: _getActiveColor().withOpacity(0.3),
-            ),
-          ),
-        ],
-      );
+      // Fallback con el icono que venía
+      return _buildIconFallback(actionIcon!);
     }
-    return const SizedBox.shrink();
+
+    // Fallback buscando icono por nombre
+    final iconData = _getTaskIcon(taskName);
+    return _buildIconFallback(iconData);
+  }
+
+  Widget _buildIconFallback(IconData icon) {
+    return Stack(
+      children: [
+        Center(
+          child: ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+            child: Icon(
+              icon,
+              size: 100, // Ajustado a 100 como en history card
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
+        ),
+        Center(
+          child: Icon(
+            icon,
+            size: 100,
+            color: Colors.white.withOpacity(0.1),
+          ),
+        ),
+      ],
+    );
   }
 
   String? _getTaskImageAsset(String? taskName) {
@@ -357,92 +345,14 @@ class EventCard extends StatelessWidget {
     return null;
   }
 
-  /// Obtiene la versión corta del nombre de la tarea
-  String _getShortTaskName(String taskName) {
+  IconData _getTaskIcon(String taskName) {
     final name = taskName.toLowerCase();
-    if (name == 'oficina') return 'OFI';
-    if (name == 'taller') return 'TAL';
-    if (name == 'servicio') return 'SER';
-    if (name == 'transporte') return 'TRA';
-    return taskName.substring(0, 3).toUpperCase();
+    if (name.contains('oficina')) return Icons.business;
+    if (name.contains('taller')) return Icons.build;
+    if (name.contains('servicio')) return Icons.construction;
+    if (name.contains('transporte')) return Icons.local_shipping;
+    return Icons.work;
   }
 
-  Color _getActiveColor() {
-    if (activeTaskName != null) {
-      return TaskTypeX.fromLabel(activeTaskName).color;
-    }
-    return const Color(0xFF4CAF50); // Default Green
-  }
-
-  /// Construye la etiqueta para el tipo de asignación (proyectos, servicios, etc.)
-  Widget _buildAssignmentTypeTag() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: _getTagColor(),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      // Usamos .label de tu extensión en assigment_model.dart
-      child: Text(
-        assigmentType.label.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
-  /// Construye la etiqueta para el motivo del registro (Entrada/Salida)
-  Widget _buildMotiveTag() {
-    final isEntry = motive == MotiveType.entry;
-    final label = isEntry ? 'ENT' : 'SAL'; // Versión corta
-    final color = isEntry ? const Color(0xFF4CAF50) : const Color(0xFFFF6B6B);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        border: Border.all(color: color),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
-  /// Retorna el color de la etiqueta según el tipo de asignación
-  Color _getTagColor() {
-    switch (assigmentType) {
-      case AssigmentType.emergency:
-        return const Color(0xFFFF6B6B); // Rojo (Emergencia)
-
-      case AssigmentType.technicalVisit:
-      case AssigmentType.serviceProject:
-        return const Color(0xFF2E60C4); // Azul (Servicios)
-
-      case AssigmentType.projectOrder:
-      case AssigmentType.projectAdditional:
-        return const Color(0xFF4CAF50); // Verde (Proyectos)
-
-      case AssigmentType.warrantyProject:
-        return const Color(0xFFFFC107); // Amarillo (Garantía)
-
-      case AssigmentType.transfer:
-        return const Color(0xFF9C27B0); // Morado (Traslados)
-
-      case AssigmentType.officeAssistance:
-      case AssigmentType.other:
-        return Colors.white.withOpacity(0.1); // Gris (Otros)
-    }
-  }
+  // --- Helpers de colores (mantenidos si se necesitan en futuro, o para fallbacks) ---
 }

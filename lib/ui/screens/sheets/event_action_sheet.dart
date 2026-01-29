@@ -207,11 +207,11 @@ class _EventActionModalState extends State<EventActionModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Stack(
-          alignment: Alignment.centerLeft,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(right: 48.0),
+            const Expanded(
               child: Text(
                 'Iniciar Turno',
                 style: TextStyle(
@@ -221,13 +221,11 @@ class _EventActionModalState extends State<EventActionModal> {
                 ),
               ),
             ),
-            Positioned(
-              right: -12,
-              top: -8,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey, size: 28),
-                onPressed: () => Navigator.pop(context),
-              ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+              onPressed: () => Navigator.pop(context),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
           ],
         ),
@@ -267,11 +265,11 @@ class _EventActionModalState extends State<EventActionModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Stack(
-          alignment: Alignment.centerLeft,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.only(right: 48.0),
+            const Expanded(
               child: Text(
                 'Gestionar Turno',
                 style: TextStyle(
@@ -281,13 +279,11 @@ class _EventActionModalState extends State<EventActionModal> {
                 ),
               ),
             ),
-            Positioned(
-              right: -12,
-              top: -8,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey, size: 28),
-                onPressed: () => Navigator.pop(context),
-              ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+              onPressed: () => Navigator.pop(context),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
             ),
           ],
         ),
