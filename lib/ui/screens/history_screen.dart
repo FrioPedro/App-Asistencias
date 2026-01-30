@@ -81,7 +81,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     // Inicializar con la fecha de hoy por defecto si se desea, o null si quiere ver todo.
     // El user dijo "a pena presionas el dia se filtre", asi que iniciamos con Hoy para ser útiles o todo?
     // Generalmente historia es "todo", pero si filtramos por día, mejor null inicialmente o Hoy.
-    _selectedDate = DateTime.now();
+    // Inicializar con null para mostrar todo el historial por defecto
+    _selectedDate = null;
 
     // Carga inicial
     _loadData();
@@ -145,9 +146,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final Map<String, List<_HistorySession>> openExits = {};
 
     for (var activity in sorted) {
-      // Clave única para agrupar sesión: Documento + Tarea + (Opcional: Cliente)
-      // Esto previene mezclar Entry de Taller con Exit de Oficina
-      final key = '${activity.documentId}_${activity.task.index}';
+      // Clave única para agrupar sesión:
+      // PREFERENCIA 1: ServerID (Si existe, es lo más confiable)
+      // PREFERENCIA 2: DocumentID + Tarea
+
+      String key;
+      if (activity.serverId != null && activity.serverId != 0) {
+        key = 'srv_${activity.serverId}';
+      } else {
+        key = 'doc_${activity.documentId ?? "null"}_${activity.task.index}';
+      }
 
       if (activity.motive == MotiveType.exit) {
         // ENCONTRAMOS SALIDA (Reciente)

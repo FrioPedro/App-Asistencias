@@ -183,10 +183,6 @@ class EventCard extends StatelessWidget {
                             color: Colors.grey[700]), // Separador
                         const SizedBox(width: 12),
                         _buildTimeChip('Salida:', exitTime),
-                      ] else ...[
-                        // Si no hay salida, mostramos "En curso" o similar?
-                        // El usuario dijo "antes de marcar salida saldrá solo la hora de entrada"
-                        // Así que no mostramos nada extra.
                       ]
                     ],
                   ),

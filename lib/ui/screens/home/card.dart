@@ -125,42 +125,59 @@ class EventCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // 1. ALERTA (ROJO) + '-' (GRIS) + NOMBRE DE ACTIVIDAD (AZUL) + ICONO CLOUD OPCIONAL (ÁMBAR)
+                  // 1. ALERTA (ROJO) + '-' (GRIS) + NOMBRE DE ACTIVIDAD (AZUL) + ICONO CLOUD OPCIONAL (ÁMBAR)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Alerta Roja (ej: - EMERGENCIA)
-                      if (assigmentType == AssigmentType.emergency)
-                        Row(
-                          children: [
-                            Text(
-                              assigmentType.label.toUpperCase(),
-                              style: const TextStyle(
-                                color: Color(0xFFFF4C4C), // Rojo alerta
-                                fontSize: 11,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            Text(
-                              ' - ',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 11,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ],
-                        ),
+                      // CASO 1: Es emergencia pero NO hay tarea activa definida (Evitar "Emergencia - Emergencia")
+                      if (assigmentType == AssigmentType.emergency &&
+                          activeTaskName == null)
+                        Text(
+                          assigmentType.label.toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xFFFF4C4C), // Rojo alerta
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        )
+                      else ...[
+                        // CASO 2: Normal (Alert - Task) o Regular (Task)
 
-                      Text(
-                        displayTaskName.toUpperCase(),
-                        style: const TextStyle(
-                          color: Color(0xFF2E60C4), // Azul distintivo
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.5,
+                        // Alerta Roja (ej: - EMERGENCIA)
+                        if (assigmentType == AssigmentType.emergency)
+                          Row(
+                            children: [
+                              Text(
+                                assigmentType.label.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Color(0xFFFF4C4C), // Rojo alerta
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              Text(
+                                ' - ',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        Text(
+                          displayTaskName.toUpperCase(),
+                          style: const TextStyle(
+                            color: Color(0xFF2E60C4), // Azul distintivo
+                            fontSize: 11,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
+                      ],
 
                       // Icono offline al lado del nombre de actividad
                       if (hasPendingSync) ...[
