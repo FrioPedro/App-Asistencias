@@ -7,8 +7,11 @@ class HistoryProvider {
   final ActivitySyncService _sync = ActivitySyncService();
   Future<List<ActivityModel>> fetchHistory() async {
     await GetActivity.syncOnline();
-    
+
     await _sync.syncIfPossible();
-    return await GetActivity.syncOnlineToLocal();
+    // TEMPORAL: Desactivamos la bajada de datos del servidor porque está corrompiendo/borrando
+    // los datos locales recientes con timestamps erróneos o estados antiguos.
+    // return await GetActivity.syncOnlineToLocal();
+    return await GetActivity.getLocalData();
   }
 }
