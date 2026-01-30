@@ -224,6 +224,10 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
     if (!mounted) return;
 
+    // Verificar estado actual de permisos
+    final PermissionState ps = await PhotoManager.requestPermissionExtend();
+    final bool isLimited = ps == PermissionState.limited;
+
     // Obtenemos la acción del bottom sheet
     final String? action = await showModalBottomSheet<String>(
       context: context,
@@ -275,6 +279,21 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   ),
                 ],
               ),
+              if (isLimited) ...[
+                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                TextButton.icon(
+                  onPressed: () => Navigator.pop(context, 'settings'),
+                  icon: const Icon(Icons.settings, color: Colors.blueAccent),
+                  label: const Text(
+                    'Gestionar Acceso a Fotos (Limitado)',
+                    style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
             ],
           ),
@@ -297,6 +316,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         await Future.delayed(const Duration(milliseconds: 200));
         await _pickFromCamera(isAntes: isAntes);
       }
+    } else if (action == 'settings') {
+      await PhotoManager.openSetting();
     }
   }
 
