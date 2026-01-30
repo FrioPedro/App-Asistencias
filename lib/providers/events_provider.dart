@@ -37,17 +37,27 @@ class EventsProvider {
       throw Exception('No se puede iniciar: serverId es null');
     }
 
-    // 1) si hay activo, ciérralo
+    // Capturamos el tiempo BASE
+    final now = DateTime.now();
+    // Agregamos un pequeño delta a la entrada nueva para asegurar que, al ordenar por fecha,
+    // la Entrada de B quede técnicamente "después" de la Salida de A en la BD.
+    final entryTime = now.add(const Duration(milliseconds: 100));
+
+    // 1) si hay activo, ciérralo (Hora base)
     final active = await _storage.read();
     if (active != null) {
-      await ActivityRegistrar.registerExitWithGPS(serverId: active.serverId);
+      await ActivityRegistrar.registerExitWithGPS(
+        serverId: active.serverId,
+        timestamp: now,
+      );
       await _storage.clear();
     }
 
-    // 2) marca la nueva entrada
+    // 2) marca la nueva entrada (Hora base + 100ms)
     await ActivityRegistrar.registerEntryWithGPS(
       assignment: assignment,
       task: task,
+      timestamp: entryTime,
     );
 
     // 3) guarda nuevo activo
@@ -56,7 +66,7 @@ class EventsProvider {
       eventKey: eventKey,
       task: task,
       serverId: newServerId,
-      timestamp: DateTime.now(),
+      timestamp: entryTime,
     );
 
     await _sync.syncIfPossible();

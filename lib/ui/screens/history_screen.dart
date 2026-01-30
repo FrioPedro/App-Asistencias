@@ -7,7 +7,8 @@ import '../../providers/history_provider.dart'; // Provider actualizado
 import '../widgets/event_card_history.dart'; // Importamos la nueva tarjeta de historial
 import '../widgets/event_card_skeleton.dart';
 import '../widgets/custom_search_bar.dart';
-import '../widgets/calendar_modal.dart'; // Nuevo modal de calendario
+import '../widgets/calendar_modal.dart';
+import '../../domain/activity/get_activity.dart'; // Re-added for debug info
 
 // --- MODELO AUXILIAR PARA AGRUPACIÓN (Clase Privada) ---
 class _HistorySession {
@@ -135,6 +136,33 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
+  void _showDebugInfo() async {
+    final data = await GetActivity.getLocalData(); // Raw from Isar
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Debug Raw (${data.length} items)'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 300,
+          child: ListView.builder(
+            itemCount: data.length,
+            itemBuilder: (ctx, i) {
+              final a = data[i];
+              return ListTile(
+                dense: true,
+                title: Text(
+                    '${a.motive.name} - ${a.timestamp.hour}:${a.timestamp.minute}:${a.timestamp.second}.${a.timestamp.millisecond}'),
+                subtitle: Text('ID:${a.serverId} Task:${a.task.name}'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   // --- LÓGICA DE AGRUPACIÓN (Entry + Exit) ---
   List<_HistorySession> _groupActivities(List<ActivityModel> rawActivities) {
     // 1. Nos aseguramos que estén ordenados del MÁS RECIENTE al MÁS ANTIGUO
@@ -232,10 +260,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Histórico',
-          style: TextStyle(
-              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        title: GestureDetector(
+          onLongPress: _showDebugInfo,
+          child: const Text(
+            'Histórico',
+            style: TextStyle(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ),
       ),
       body: SafeArea(
