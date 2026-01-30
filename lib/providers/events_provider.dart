@@ -70,6 +70,7 @@ class EventsProvider {
     );
 
     await _sync.syncIfPossible();
+    await _sync2.syncIfPossible(); // Forzamos envío de notas pendientes
   }
 
   Future<void> endAttendance({
@@ -82,6 +83,7 @@ class EventsProvider {
     await _storage.clear();
 
     await _sync.syncIfPossible();
+    await _sync2.syncIfPossible(); // Forzamos envío de notas pendientes
   }
 
   Future<void> clearActiveSession() => _storage.clear();

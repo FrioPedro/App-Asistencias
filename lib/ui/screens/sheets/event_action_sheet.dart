@@ -79,6 +79,59 @@ class _EventActionModalState extends State<EventActionModal> {
         await PermissionGuard.checkLocationPermission(context);
     if (!hasPermission) return;
 
+    // --- LÓGICA DE INTERCEPCIÓN DE FORMULARIOS ---
+    if (widget.isActiveSession) {
+      final currentTaskName = widget.activeTaskName ?? '';
+      final currentTask = EventsProvider.taskFromTitle(currentTaskName);
+
+      // CASO 1: Si estoy en SERVICIO -> Formulario de Servicio
+      if (widget.activeIcon == Icons.construction ||
+          currentTask == TaskType.service) {
+        // Navegamos al formulario SIN cerrar este modal todavía
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ServiceExitFormScreen(
+              event: widget.event,
+              eventKey: widget.eventKey,
+            ),
+          ),
+        );
+
+        // Si no completó el formulario (volvió atrás), cancelamos el cambio
+        if (result != true) return;
+
+        // Esperamos un momento para asegurar que el cierre anterior
+        // y el envío de notas se procesen completamente antes de iniciar B.
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
+      // CASO 2: Si estoy en OFICINA/TALLER -> Modal de Reporte
+      else if (currentTask == TaskType.office ||
+          currentTask == TaskType.workshop) {
+        final result = await showModalBottomSheet(
+          context: context,
+          backgroundColor: const Color(0xFF1E1E1E),
+          isScrollControlled: true,
+          isDismissible: false,
+          enableDrag: false,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          builder: (_) => OfficeWorkshopExitModal(
+            event: widget.event,
+            task: currentTask,
+            eventKey: widget.eventKey,
+          ),
+        );
+
+        if (result != true) return;
+
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
+      // CASO 3: Transporte u otros -> Cambio directo (startAttendance maneja el timestamp perfecto)
+    }
+    // ----------------------------------------------
+
     setState(() => _isLoading = true);
 
     try {
