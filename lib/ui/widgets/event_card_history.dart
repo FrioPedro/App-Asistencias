@@ -84,33 +84,14 @@ class EventCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. NOMBRE DE ACTIVIDAD (Primero) + Cloud Icon + (Opcional) Alerta roja
+                // 1. ALERTA (ROJO) + '-' (GRIS) + NOMBRE DE ACTIVIDAD (AZUL) + ICONO CLOUD OPCIONAL (ÁMBAR)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      taskName.toUpperCase(),
-                      style: const TextStyle(
-                        color: Color(0xFF2E60C4), // Azul distintivo
-                        fontSize: 11, // Un poco más pequeño
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-
                     // Alerta Roja (ej: - EMERGENCIA)
                     if (_isAlert(assigmentType))
                       Row(
                         children: [
-                          const SizedBox(width: 4),
-                          Text(
-                            '- ',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 11,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
                           Text(
                             assigmentType.label.toUpperCase(),
                             style: const TextStyle(
@@ -120,9 +101,25 @@ class EventCard extends StatelessWidget {
                               letterSpacing: 0.5,
                             ),
                           ),
+                          Text(
+                            ' - ',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 11,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ],
                       ),
-
+                    Text(
+                      taskName.toUpperCase(),
+                      style: const TextStyle(
+                        color: Color(0xFF2E60C4), // Azul distintivo
+                        fontSize: 11, // Un poco más pequeño
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
                     // Icono offline al lado del nombre de actividad
                     if (hasPendingSync) ...[
                       const SizedBox(width: 8),
