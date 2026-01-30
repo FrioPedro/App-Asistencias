@@ -122,6 +122,9 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   void _handleCardTap(AssigmentModel event, String eventKey) {
+    // Cerramos teclado por si acaso
+    FocusScope.of(context).unfocus();
+
     final bool isParticipating = _participatingEvents.containsKey(eventKey);
     final bool isAnyEventActive = _participatingEvents.isNotEmpty;
 
