@@ -127,9 +127,9 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         );
 
         await _notesProvider.createNote(
-          document: sid.toString(), 
-          description: "[Reporte ${widget.task.label}]: ${_descriptionController.text.trim()}"
-        );
+            document: sid.toString(),
+            description:
+                "[Reporte ${widget.task.label}]: ${_descriptionController.text.trim()}");
       }
 
       if (mounted) {
@@ -173,7 +173,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
               Padding(
                 padding: const EdgeInsets.only(right: 48.0),
                 child: Text(
-                  'Reporte de ${widget.task.label}: ${widget.task.label}',
+                  'Reporte de ${widget.task.label}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
