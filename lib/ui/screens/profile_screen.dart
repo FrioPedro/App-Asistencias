@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
-import '../../models/user_model.dart';          
-import '../../providers/profile_provider.dart'; 
-import 'log_viewer_screen.dart'; // Ahora en screens     
+import '../../models/user_model.dart';
+import '../../providers/profile_provider.dart';
+import 'log_viewer_screen.dart'; // Ahora en screens
 
 // ✅ Importamos el modelo y la extensión
-import '../../models/user_zone.dart'; 
+import '../../models/user_zone.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,12 +18,12 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final ProfileProvider _profileService = ProfileProvider();
 
-  UserModel? _user;       
-  bool _isLoading = true; 
-  
+  UserModel? _user;
+  bool _isLoading = true;
+
   // Variable para la zona seleccionada (Texto visible)
   String? _selectedZoneLabel;
-  
+
   // ✅ Obtenemos las opciones directamente del Enum
   final List<String> _zones = UserZoneX.labels();
 
@@ -49,7 +49,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         behavior: SnackBarBehavior.floating,
         elevation: 6,
         margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)), // Borde 5px
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5)), // Borde 5px
         content: Row(
           children: [
             // Esfera del ícono
@@ -57,13 +58,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isError 
-                    ? const Color(0xFFFF5252).withOpacity(0.2) 
+                color: isError
+                    ? const Color(0xFFFF5252).withOpacity(0.2)
                     : const Color(0xFF4CAF50).withOpacity(0.2),
               ),
               child: Icon(
                 isError ? Icons.close : Icons.check,
-                color: isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
+                color:
+                    isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
                 size: 20,
               ),
             ),
@@ -87,31 +89,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _handleSecretTap() {
     final now = DateTime.now();
-    if (_lastTapTime == null || now.difference(_lastTapTime!) > const Duration(milliseconds: 500)) {
+    if (_lastTapTime == null ||
+        now.difference(_lastTapTime!) > const Duration(milliseconds: 500)) {
       _tapCount = 0;
     }
-    
+
     _tapCount++;
     _lastTapTime = now;
 
     if (_tapCount == 3) {
-      _tapCount = 0; 
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const LogViewerScreen()));
+      _tapCount = 0;
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const LogViewerScreen()));
     }
   }
 
   Future<void> _loadProfile() async {
     final userLoaded = await _profileService.getUserProfile();
-    
+
     if (mounted) {
       setState(() {
         _user = userLoaded;
         _isLoading = false;
-        
+
         // Intentamos matchear la zona que viene del usuario con nuestras etiquetas
         if (userLoaded != null) {
           final zoneEnum = UserZoneX.fromString(userLoaded.zone);
-          _selectedZoneLabel = zoneEnum?.label; 
+          _selectedZoneLabel = zoneEnum?.label;
         }
       });
     }
@@ -121,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _updateZone(String newZoneLabel) async {
     setState(() {
       _selectedZoneLabel = newZoneLabel;
-      _isLoading = true; 
+      _isLoading = true;
     });
 
     try {
@@ -131,16 +135,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (zoneEnum != null) {
         // 2. Llamamos al provider
         await _profileService.updateZone(zoneEnum);
-        
+
         if (mounted) {
           // ✅ Mensaje de Éxito Personalizado
-          _showCustomSnackBar('Zona actualizada a: $newZoneLabel', isError: false);
+          _showCustomSnackBar('Zona actualizada a: $newZoneLabel',
+              isError: false);
         }
       }
-      
+
       // 3. Recargamos perfil
       await _loadProfile();
-
     } catch (e) {
       if (mounted) {
         // ❌ Mensaje de Error Personalizado
@@ -161,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: _isLoading 
+      body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : _buildProfileContent(),
     );
@@ -169,7 +173,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProfileContent() {
     if (_user == null) {
-        return const Center(child: Text("Error cargando perfil", style: TextStyle(color: Colors.white)));
+      return const Center(
+          child: Text("Error cargando perfil",
+              style: TextStyle(color: Colors.white)));
     }
 
     final fullName = '${_user?.names ?? ''} ${_user?.lastNames ?? ''}'.trim();
@@ -186,14 +192,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 40),
 
-          _buildInfoTile('Nombres', fullName.isNotEmpty ? fullName : 'Sin Nombre'),
+          _buildInfoTile(
+              'Nombres', fullName.isNotEmpty ? fullName : 'Sin Nombre'),
           const SizedBox(height: 16),
           _buildInfoTile('Documento', document),
           const SizedBox(height: 16),
-          
+
           // Selector de Zona
           _buildZoneSelector(),
-          
+
           const SizedBox(height: 40),
 
           SizedBox(
@@ -211,10 +218,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: const Text(
                 'CERRAR SESIÓN',
-                style: TextStyle(
-                  color: Colors.white, 
-                  fontWeight: FontWeight.bold
-                ),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -223,7 +228,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           GestureDetector(
             onTap: _handleSecretTap,
-            behavior: HitTestBehavior.opaque, 
+            behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Text(
@@ -264,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildZoneSelector() {
     const cardColor = Color(0xFF2C2C2C);
-    
+
     final darkDropdownDecoration = CustomDropdownDecoration(
       closedFillColor: cardColor,
       expandedFillColor: cardColor,
@@ -272,7 +277,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       hintStyle: TextStyle(color: Colors.grey[600]),
       headerStyle: const TextStyle(color: Colors.white, fontSize: 16),
       listItemStyle: const TextStyle(color: Colors.white),
-      listItemDecoration: ListItemDecoration(
+      listItemDecoration: const ListItemDecoration(
         selectedColor: Colors.white10,
         highlightColor: Colors.white10,
         splashColor: Colors.white10,

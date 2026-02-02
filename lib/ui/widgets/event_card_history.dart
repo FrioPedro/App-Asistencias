@@ -84,7 +84,7 @@ class EventCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. ALERTA (ROJO) + '-' (GRIS) + NOMBRE DE ACTIVIDAD (AZUL) + ICONO CLOUD OPCIONAL (ÁMBAR)
+                // 1. ALERTA (ROJO) + '-' (GRIS) + NOMBRE DE ACTIVIDAD (PERSONALIZADO) + ICONO CLOUD OPCIONAL (ÁMBAR)
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -95,7 +95,7 @@ class EventCard extends StatelessWidget {
                           Text(
                             assigmentType.label.toUpperCase(),
                             style: const TextStyle(
-                              color: Color(0xFFFF4C4C), // Rojo alerta
+                              color: Color(0xFF9E9E9E), // Gris Apagado
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.5,
@@ -113,8 +113,8 @@ class EventCard extends StatelessWidget {
                       ),
                     Text(
                       taskName.toUpperCase(),
-                      style: const TextStyle(
-                        color: Color(0xFF2E60C4), // Azul distintivo
+                      style: TextStyle(
+                        color: _getTaskColor(taskName), // Color dinámico
                         fontSize: 11, // Un poco más pequeño
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
@@ -259,6 +259,15 @@ class EventCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Color _getTaskColor(String taskName) {
+    final name = taskName.toLowerCase();
+    if (name.contains('oficina')) return Colors.grey;
+    if (name.contains('taller')) return const Color(0xFF4CAF50); // Verde
+    if (name.contains('transporte')) return const Color(0xFFFF9800); // Naranja
+    if (name.contains('servicio')) return const Color(0xFF2E60C4); // Azul
+    return const Color(0xFF2E60C4); // Default Azul
   }
 
   String? _getTaskImageAsset(String taskName) {
