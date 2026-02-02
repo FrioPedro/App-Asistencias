@@ -9,9 +9,8 @@ class HistoryProvider {
     await GetActivity.syncOnline();
 
     await _sync.syncIfPossible();
-    // TEMPORAL: Desactivamos la bajada de datos del servidor porque está corrompiendo/borrando
-    // los datos locales recientes con timestamps erróneos o estados antiguos.
-    // return await GetActivity.syncOnlineToLocal();
-    return await GetActivity.getLocalData();
+
+    // Reactivada la sincronización con el servidor
+    return await GetActivity.syncOnlineToLocal();
   }
 }

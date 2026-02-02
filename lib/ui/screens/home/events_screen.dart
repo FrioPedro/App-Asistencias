@@ -245,9 +245,9 @@ class _EventsScreenState extends State<EventsScreen> {
           }
 
           // Determinar nombre de tarea para mostrar
-          String displayTaskName = 'Oficina'; // Default
+          String? displayTaskName; // Null por defecto (estado vacío)
           if (isParticipating) {
-            displayTaskName = _activeTaskNames[eventKey] ?? 'Oficina';
+            displayTaskName = _activeTaskNames[eventKey];
           }
 
           // Buscar si hay alguna tarea activa en OTRO evento
@@ -265,8 +265,7 @@ class _EventsScreenState extends State<EventsScreen> {
             assigmentType: event.assigmentType,
             isParticipating: isParticipating,
             activeTaskName: globalActiveTask,
-            onEnter: () => _handleCardTap(event, eventKey),
-            onExit: () => _handleCardTap(event, eventKey),
+            onTap: () => _handleCardTap(event, eventKey),
           );
         },
       );
