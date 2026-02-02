@@ -1,4 +1,3 @@
-// lib/domain/sync/activity_sync_service.dart
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/core/enpoinService.dart';
 import 'package:app_asistencias/domain/connectivity/network_info.dart';
@@ -15,14 +14,11 @@ class ActivitySyncService {
   DateTime _floorToSecond(DateTime dt) =>
       DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second);
 
-  /// Dedup por dedupKey:
-  /// - si hay repetidos, gana isSynced=true
-  /// - si empatan, gana el más reciente por timestamp
-  List<ActivityModel> _dedupeByDedupKey(List<ActivityModel> list) {
+  List<ActivityModel> _dedupeByToken(List<ActivityModel> list) {
     final Map<String, ActivityModel> byKey = {};
 
     for (final a in list) {
-      final key = a.dedupKey;
+      final key = a.token;
 
       if (!byKey.containsKey(key)) {
         byKey[key] = a;
@@ -31,41 +27,13 @@ class ActivitySyncService {
 
       final existing = byKey[key]!;
 
-      // 1) synced gana
-      if (existing.isSynced != true && a.isSynced == true) {
-        byKey[key] = a;
-        continue;
-      }
-
-      // 2) si ambos synced o ambos pending -> gana más reciente
-      if ((existing.isSynced == a.isSynced) &&
-          a.timestamp.isAfter(existing.timestamp)) {
+      // Si ambos existen, nos quedamos con el que tenga más datos (ej. cerrado vs abierto)
+      if (a.isClosed && !existing.isClosed) {
         byKey[key] = a;
       }
     }
 
     return byKey.values.toList();
-  }
-
-  void _printLastStateByService(Map<int, List<ActivityModel>> byService) {
-    print('--- LAST STATE BY SERVICE ---');
-
-    byService.forEach((sid, activities) {
-      if (activities.isEmpty) return;
-
-      activities.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-      final last = activities.last;
-      final isActive = last.motive == MotiveType.entry;
-
-      print(
-        'Servicio $sid → '
-        'ESTADO=${isActive ? "ACTIVO" : "CERRADO"} | '
-        'ultimo=${last.motive.label} | '
-        'timestamp=${last.timestamp} | '
-        'synced=${last.isSynced} | '
-        'dedupKey=${last.dedupKey}',
-      );
-    });
   }
 
   /// Wi-Fi o datos móviles
@@ -80,8 +48,6 @@ class ActivitySyncService {
       print('[SYNC] syncIfPossible called');
 
       final connected = await _net.hasConnection();
-      print('[SYNC] Connectivity: ${connected ? "CONNECTED" : "NO CONNECTION"}');
-
       if (!connected) {
         print('[SYNC] Aborting sync: no connection');
         return;
@@ -107,98 +73,99 @@ class ActivitySyncService {
       return;
     }
 
-    print('[SYNC] User loaded: nationalId=${user.nationalId}, zone=${user.zone}');
+    // 1) Cargar pendientes
+    final pendingModels =
+        await isar.activityModels.filter().isSyncedEqualTo(false).findAll();
 
-    // 1) Cargar TODO local (synced + pending)
-    final allLocal = await isar.activityModels.where().findAll();
-
-    // 2) Normalizar timestamps a segundos (evita microsegundos raros)
-    for (final a in allLocal) {
-      a.timestamp = _floorToSecond(a.timestamp);
-      // IMPORTANTE: si tu dedupKey depende del timestamp, idealmente deberías
-      // tener ya dedupKey construido con timestamp sin microsegundos desde el modelo.
-      // Si NO es así, esta dedupe no será fiable.
-    }
-
-    // 3) Dedupe global (fuente de verdad para estado y para envío)
-    final canonical = _dedupeByDedupKey(allLocal)
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    // 4) Agrupar canonical por servicio y print de estado (ACTIVO/CERRADO)
-    final Map<int, List<ActivityModel>> byService = {};
-    for (final a in canonical) {
-      final sid = a.serverId;
-      if (sid == null) continue;
-      (byService[sid] ??= <ActivityModel>[]).add(a);
-    }
-    _printLastStateByService(byService);
-
-    // 5) Prevención clave:
-    //    pending a enviar = canonical donde isSynced=false
-    //    (esto automáticamente descarta duplicates que ya tienen synced=true con mismo dedupKey)
-    final canonicalPending = canonical.where((a) => a.isSynced != true).toList();
-
-    print('[SYNC] Local total=${allLocal.length} canonical=${canonical.length} pendingCanonical=${canonicalPending.length}');
-
-    // 6) (Opcional recomendado) Purga duplicados físicos en Isar (deja solo canonical)
-    await isar.writeTxn(() async {
-      final keepIds = canonical.map((e) => e.id).toSet();
-      final toDelete = allLocal
-          .where((a) => !keepIds.contains(a.id))
-          .map((a) => a.id)
-          .toList();
-
-      if (toDelete.isNotEmpty) {
-        await isar.activityModels.deleteAll(toDelete);
-        print('[SYNC] Purged duplicates in Isar: ${toDelete.length}');
-      }
-    });
-
-    // 7) Batch de envío
-    final pendingBatch = canonicalPending.take(batchSize).toList();
-
-    if (pendingBatch.isEmpty) {
+    if (pendingModels.isEmpty) {
       print('[SYNC] No pending activities');
       return;
     }
 
-    print('[SYNC] Sending ${pendingBatch.length} activities');
+    print('[SYNC] Sending ${pendingModels.length} activities');
 
-    for (final a in pendingBatch) {
-      a.timestamp = _floorToSecond(a.timestamp);
-
-      print('[SYNC] Sending activity project=${a.serverId}, motive=${a.motive.label}, timestamp=${a.timestamp}, dedupKey=${a.dedupKey}');
-
+    for (final a in pendingModels) {
       try {
-        final payload = a.toMarkPayload(
-          project: a.serverId ?? 0,
-          collaboratorId: user.nationalId ?? '',
-          zone: user.zone ?? '',
-          timestamp: a.timestamp,
-        );
+        // --- LÓGICA DE DOBLE ENVÍO PARA SESIONES COMPLETAS OFFLINE ---
+        // Si la sesión está CERRADA, debemos garantizar que el server tenga la ENTRADA primero.
+        // Como no sabemos si la entrada ya se envió (isSynced es un solo bool),
+        // Por seguridad, enviamos ENTRADA primero. Si el server es idempotente (upsert), no pasa nada.
 
-        print('[SYNC] Payload: $payload');
+        bool success = true;
 
-        final res = await api.post('/api/attendance/v2', data: payload);
+        // 1. Enviar ENTRADA (Motive 1)
+        // Forzamos "isOpen" visualmente para generar payload de entrada??
+        // No, el toMarkPayload usa "isClosed" para decidir.
+        // Haremos un truco: generamos payload manual o modificamos toMarkPayload?
+        // Mejor: Construimos payload manualmente aquí para tener control absoluto.
 
-        print('[SYNC] Response status: ${res.statusCode}');
+        final basePayload = {
+          'token': a.token,
+          'project': a.serverId ?? 0,
+          'collaborator': user.nationalId ?? '',
+          'zone': user.zone ?? '',
+          'task': a.task.id,
+        };
 
-        if (res.statusCode == 200 || res.statusCode == 201) {
+        // PAYLOAD 1: ENTRADA
+        final payloadEntry = {
+          ...basePayload,
+          'motive': 1,
+          'latitude': a.entryLatitude,
+          'longitude': a.entryLongitude,
+          'timestamp': a.entryTimestamp
+              .toIso8601String()
+              .replaceFirst('T', ' ')
+              .split('.')
+              .first,
+        };
+
+        print('[SYNC] Sending ENTRY for ${a.token}...');
+        final resEntry =
+            await api.post('/api/attendance/v2', data: payloadEntry);
+
+        if (resEntry.statusCode != 200 && resEntry.statusCode != 201) {
+          print('[SYNC] Entry failed: ${resEntry.statusCode}');
+          success = false;
+        }
+
+        // 2. Si está CERRADA y Entry fue ok, enviar SALIDA (Motive 2)
+        if (success && a.isClosed) {
+          final payloadExit = {
+            ...basePayload,
+            'motive': 2,
+            'latitude': a.exitLatitude,
+            'longitude': a.exitLongitude,
+            'timestamp': a.exitTimestamp!
+                .toIso8601String()
+                .replaceFirst('T', ' ')
+                .split('.')
+                .first,
+          };
+
+          print('[SYNC] Sending EXIT for ${a.token}...');
+          final resExit =
+              await api.post('/api/attendance/v2', data: payloadExit);
+
+          if (resExit.statusCode != 200 && resExit.statusCode != 201) {
+            print('[SYNC] Exit failed: ${resExit.statusCode}');
+            success = false;
+          }
+        }
+
+        // 3. Si todo OK, marcar synced
+        if (success) {
           await isar.writeTxn(() async {
             final fresh = await isar.activityModels.get(a.id);
             if (fresh != null) {
               fresh.isSynced = true;
-              fresh.timestamp = _floorToSecond(fresh.timestamp);
               await isar.activityModels.put(fresh);
             }
           });
-
-          print('[SYNC] Activity marked as synced');
-        } else {
-          print('[SYNC] Server returned ${res.statusCode}, activity remains pending');
+          print('[SYNC] Synced success: ${a.token}');
         }
       } catch (e) {
-        print('[SYNC] Error sending activity: $e');
+        print('[SYNC] Error sending activity ${a.token}: $e');
       }
     }
 

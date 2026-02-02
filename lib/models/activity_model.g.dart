@@ -48,47 +48,56 @@ const ActivityModelSchema = CollectionSchema(
       name: r'documentId',
       type: IsarType.string,
     ),
-    r'isSynced': PropertySchema(
+    r'entryLatitude': PropertySchema(
       id: 6,
+      name: r'entryLatitude',
+      type: IsarType.double,
+    ),
+    r'entryLongitude': PropertySchema(
+      id: 7,
+      name: r'entryLongitude',
+      type: IsarType.double,
+    ),
+    r'entryTimestamp': PropertySchema(
+      id: 8,
+      name: r'entryTimestamp',
+      type: IsarType.dateTime,
+    ),
+    r'exitLatitude': PropertySchema(
+      id: 9,
+      name: r'exitLatitude',
+      type: IsarType.double,
+    ),
+    r'exitLongitude': PropertySchema(
+      id: 10,
+      name: r'exitLongitude',
+      type: IsarType.double,
+    ),
+    r'exitTimestamp': PropertySchema(
+      id: 11,
+      name: r'exitTimestamp',
+      type: IsarType.dateTime,
+    ),
+    r'isSynced': PropertySchema(
+      id: 12,
       name: r'isSynced',
       type: IsarType.bool,
     ),
-    r'latitude': PropertySchema(
-      id: 7,
-      name: r'latitude',
-      type: IsarType.double,
-    ),
-    r'longitude': PropertySchema(
-      id: 8,
-      name: r'longitude',
-      type: IsarType.double,
-    ),
-    r'motive': PropertySchema(
-      id: 9,
-      name: r'motive',
-      type: IsarType.byte,
-      enumMap: _ActivityModelmotiveEnumValueMap,
-    ),
-    r'motiveText': PropertySchema(
-      id: 10,
-      name: r'motiveText',
-      type: IsarType.string,
-    ),
     r'serverId': PropertySchema(
-      id: 11,
+      id: 13,
       name: r'serverId',
       type: IsarType.long,
     ),
     r'task': PropertySchema(
-      id: 12,
+      id: 14,
       name: r'task',
       type: IsarType.byte,
       enumMap: _ActivityModeltaskEnumValueMap,
     ),
-    r'timestamp': PropertySchema(
-      id: 13,
-      name: r'timestamp',
-      type: IsarType.dateTime,
+    r'token': PropertySchema(
+      id: 15,
+      name: r'token',
+      type: IsarType.string,
     )
   },
   estimateSize: _activityModelEstimateSize,
@@ -97,6 +106,19 @@ const ActivityModelSchema = CollectionSchema(
   deserializeProp: _activityModelDeserializeProp,
   idName: r'id',
   indexes: {
+    r'token': IndexSchema(
+      id: -5898650166254967271,
+      name: r'token',
+      unique: true,
+      replace: true,
+      properties: [
+        IndexPropertySchema(
+          name: r'token',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    ),
     r'serverId': IndexSchema(
       id: -7950187970872907662,
       name: r'serverId',
@@ -136,19 +158,6 @@ const ActivityModelSchema = CollectionSchema(
         )
       ],
     ),
-    r'motive': IndexSchema(
-      id: 1157251974383467172,
-      name: r'motive',
-      unique: false,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'motive',
-          type: IndexType.value,
-          caseSensitive: false,
-        )
-      ],
-    ),
     r'task': IndexSchema(
       id: 4607462848387024586,
       name: r'task',
@@ -175,19 +184,6 @@ const ActivityModelSchema = CollectionSchema(
         )
       ],
     ),
-    r'dedupKey': IndexSchema(
-      id: 2124236096506660101,
-      name: r'dedupKey',
-      unique: true,
-      replace: true,
-      properties: [
-        IndexPropertySchema(
-          name: r'dedupKey',
-          type: IndexType.hash,
-          caseSensitive: true,
-        )
-      ],
-    ),
     r'isSynced': IndexSchema(
       id: -39763503327887510,
       name: r'isSynced',
@@ -198,6 +194,19 @@ const ActivityModelSchema = CollectionSchema(
           name: r'isSynced',
           type: IndexType.value,
           caseSensitive: false,
+        )
+      ],
+    ),
+    r'dedupKey': IndexSchema(
+      id: 2124236096506660101,
+      name: r'dedupKey',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'dedupKey',
+          type: IndexType.hash,
+          caseSensitive: true,
         )
       ],
     )
@@ -241,12 +250,7 @@ int _activityModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  {
-    final value = object.motiveText;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.token.length * 3;
   return bytesCount;
 }
 
@@ -262,14 +266,16 @@ void _activityModelSerialize(
   writer.writeString(offsets[3], object.dedupKey);
   writer.writeString(offsets[4], object.description);
   writer.writeString(offsets[5], object.documentId);
-  writer.writeBool(offsets[6], object.isSynced);
-  writer.writeDouble(offsets[7], object.latitude);
-  writer.writeDouble(offsets[8], object.longitude);
-  writer.writeByte(offsets[9], object.motive.index);
-  writer.writeString(offsets[10], object.motiveText);
-  writer.writeLong(offsets[11], object.serverId);
-  writer.writeByte(offsets[12], object.task.index);
-  writer.writeDateTime(offsets[13], object.timestamp);
+  writer.writeDouble(offsets[6], object.entryLatitude);
+  writer.writeDouble(offsets[7], object.entryLongitude);
+  writer.writeDateTime(offsets[8], object.entryTimestamp);
+  writer.writeDouble(offsets[9], object.exitLatitude);
+  writer.writeDouble(offsets[10], object.exitLongitude);
+  writer.writeDateTime(offsets[11], object.exitTimestamp);
+  writer.writeBool(offsets[12], object.isSynced);
+  writer.writeLong(offsets[13], object.serverId);
+  writer.writeByte(offsets[14], object.task.index);
+  writer.writeString(offsets[15], object.token);
 }
 
 ActivityModel _activityModelDeserialize(
@@ -284,21 +290,21 @@ ActivityModel _activityModelDeserialize(
         AssigmentType.other,
     client: reader.readStringOrNull(offsets[1]),
     collaborator: reader.readStringOrNull(offsets[2]),
+    dedupKey: reader.readStringOrNull(offsets[3]) ?? '',
     description: reader.readStringOrNull(offsets[4]),
     documentId: reader.readStringOrNull(offsets[5]),
-    isSynced: reader.readBoolOrNull(offsets[6]),
-    latitude: reader.readDoubleOrNull(offsets[7]),
-    longitude: reader.readDoubleOrNull(offsets[8]),
-    motive:
-        _ActivityModelmotiveValueEnumMap[reader.readByteOrNull(offsets[9])] ??
-            MotiveType.entry,
-    motiveText: reader.readStringOrNull(offsets[10]),
-    serverId: reader.readLongOrNull(offsets[11]),
-    task: _ActivityModeltaskValueEnumMap[reader.readByteOrNull(offsets[12])] ??
+    entryLatitude: reader.readDoubleOrNull(offsets[6]),
+    entryLongitude: reader.readDoubleOrNull(offsets[7]),
+    entryTimestamp: reader.readDateTime(offsets[8]),
+    exitLatitude: reader.readDoubleOrNull(offsets[9]),
+    exitLongitude: reader.readDoubleOrNull(offsets[10]),
+    exitTimestamp: reader.readDateTimeOrNull(offsets[11]),
+    isSynced: reader.readBoolOrNull(offsets[12]) ?? false,
+    serverId: reader.readLongOrNull(offsets[13]),
+    task: _ActivityModeltaskValueEnumMap[reader.readByteOrNull(offsets[14])] ??
         TaskType.office,
-    timestamp: reader.readDateTime(offsets[13]),
+    token: reader.readStringOrNull(offsets[15]) ?? '',
   );
-  object.dedupKey = reader.readString(offsets[3]);
   object.id = id;
   return object;
 }
@@ -319,29 +325,32 @@ P _activityModelDeserializeProp<P>(
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 7:
       return (reader.readDoubleOrNull(offset)) as P;
     case 8:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 9:
-      return (_ActivityModelmotiveValueEnumMap[reader.readByteOrNull(offset)] ??
-          MotiveType.entry) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 10:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 11:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 12:
+      return (reader.readBoolOrNull(offset) ?? false) as P;
+    case 13:
+      return (reader.readLongOrNull(offset)) as P;
+    case 14:
       return (_ActivityModeltaskValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskType.office) as P;
-    case 13:
-      return (reader.readDateTime(offset)) as P;
+    case 15:
+      return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -368,14 +377,6 @@ const _ActivityModelactivityTypeValueEnumMap = {
   6: AssigmentType.officeAssistance,
   7: AssigmentType.transfer,
   8: AssigmentType.other,
-};
-const _ActivityModelmotiveEnumValueMap = {
-  'entry': 0,
-  'exit': 1,
-};
-const _ActivityModelmotiveValueEnumMap = {
-  0: MotiveType.entry,
-  1: MotiveType.exit,
 };
 const _ActivityModeltaskEnumValueMap = {
   'office': 0,
@@ -404,57 +405,57 @@ void _activityModelAttach(
 }
 
 extension ActivityModelByIndex on IsarCollection<ActivityModel> {
-  Future<ActivityModel?> getByDedupKey(String dedupKey) {
-    return getByIndex(r'dedupKey', [dedupKey]);
+  Future<ActivityModel?> getByToken(String token) {
+    return getByIndex(r'token', [token]);
   }
 
-  ActivityModel? getByDedupKeySync(String dedupKey) {
-    return getByIndexSync(r'dedupKey', [dedupKey]);
+  ActivityModel? getByTokenSync(String token) {
+    return getByIndexSync(r'token', [token]);
   }
 
-  Future<bool> deleteByDedupKey(String dedupKey) {
-    return deleteByIndex(r'dedupKey', [dedupKey]);
+  Future<bool> deleteByToken(String token) {
+    return deleteByIndex(r'token', [token]);
   }
 
-  bool deleteByDedupKeySync(String dedupKey) {
-    return deleteByIndexSync(r'dedupKey', [dedupKey]);
+  bool deleteByTokenSync(String token) {
+    return deleteByIndexSync(r'token', [token]);
   }
 
-  Future<List<ActivityModel?>> getAllByDedupKey(List<String> dedupKeyValues) {
-    final values = dedupKeyValues.map((e) => [e]).toList();
-    return getAllByIndex(r'dedupKey', values);
+  Future<List<ActivityModel?>> getAllByToken(List<String> tokenValues) {
+    final values = tokenValues.map((e) => [e]).toList();
+    return getAllByIndex(r'token', values);
   }
 
-  List<ActivityModel?> getAllByDedupKeySync(List<String> dedupKeyValues) {
-    final values = dedupKeyValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'dedupKey', values);
+  List<ActivityModel?> getAllByTokenSync(List<String> tokenValues) {
+    final values = tokenValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'token', values);
   }
 
-  Future<int> deleteAllByDedupKey(List<String> dedupKeyValues) {
-    final values = dedupKeyValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'dedupKey', values);
+  Future<int> deleteAllByToken(List<String> tokenValues) {
+    final values = tokenValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'token', values);
   }
 
-  int deleteAllByDedupKeySync(List<String> dedupKeyValues) {
-    final values = dedupKeyValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'dedupKey', values);
+  int deleteAllByTokenSync(List<String> tokenValues) {
+    final values = tokenValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'token', values);
   }
 
-  Future<Id> putByDedupKey(ActivityModel object) {
-    return putByIndex(r'dedupKey', object);
+  Future<Id> putByToken(ActivityModel object) {
+    return putByIndex(r'token', object);
   }
 
-  Id putByDedupKeySync(ActivityModel object, {bool saveLinks = true}) {
-    return putByIndexSync(r'dedupKey', object, saveLinks: saveLinks);
+  Id putByTokenSync(ActivityModel object, {bool saveLinks = true}) {
+    return putByIndexSync(r'token', object, saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByDedupKey(List<ActivityModel> objects) {
-    return putAllByIndex(r'dedupKey', objects);
+  Future<List<Id>> putAllByToken(List<ActivityModel> objects) {
+    return putAllByIndex(r'token', objects);
   }
 
-  List<Id> putAllByDedupKeySync(List<ActivityModel> objects,
+  List<Id> putAllByTokenSync(List<ActivityModel> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'dedupKey', objects, saveLinks: saveLinks);
+    return putAllByIndexSync(r'token', objects, saveLinks: saveLinks);
   }
 }
 
@@ -470,14 +471,6 @@ extension ActivityModelQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'serverId'),
-      );
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhere> anyMotive() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'motive'),
       );
     });
   }
@@ -575,6 +568,51 @@ extension ActivityModelQueryWhere
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> tokenEqualTo(
+      String token) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'token',
+        value: [token],
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> tokenNotEqualTo(
+      String token) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'token',
+              lower: [],
+              upper: [token],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'token',
+              lower: [token],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'token',
+              lower: [token],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'token',
+              lower: [],
+              upper: [token],
+              includeUpper: false,
+            ));
+      }
     });
   }
 
@@ -825,97 +863,6 @@ extension ActivityModelQueryWhere
     });
   }
 
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> motiveEqualTo(
-      MotiveType motive) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'motive',
-        value: [motive],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      motiveNotEqualTo(MotiveType motive) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'motive',
-              lower: [],
-              upper: [motive],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'motive',
-              lower: [motive],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'motive',
-              lower: [motive],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'motive',
-              lower: [],
-              upper: [motive],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      motiveGreaterThan(
-    MotiveType motive, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'motive',
-        lower: [motive],
-        includeLower: include,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> motiveLessThan(
-    MotiveType motive, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'motive',
-        lower: [],
-        upper: [motive],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> motiveBetween(
-    MotiveType lowerMotive,
-    MotiveType upperMotive, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'motive',
-        lower: [lowerMotive],
-        includeLower: includeLower,
-        upper: [upperMotive],
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> taskEqualTo(
       TaskType task) {
     return QueryBuilder.apply(this, (query) {
@@ -1099,6 +1046,51 @@ extension ActivityModelQueryWhere
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> isSyncedEqualTo(
+      bool isSynced) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'isSynced',
+        value: [isSynced],
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
+      isSyncedNotEqualTo(bool isSynced) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isSynced',
+              lower: [],
+              upper: [isSynced],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isSynced',
+              lower: [isSynced],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isSynced',
+              lower: [isSynced],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isSynced',
+              lower: [],
+              upper: [isSynced],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> dedupKeyEqualTo(
       String dedupKey) {
     return QueryBuilder.apply(this, (query) {
@@ -1138,73 +1130,6 @@ extension ActivityModelQueryWhere
               indexName: r'dedupKey',
               lower: [],
               upper: [dedupKey],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      isSyncedIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'isSynced',
-        value: [null],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      isSyncedIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'isSynced',
-        lower: [null],
-        includeLower: false,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause> isSyncedEqualTo(
-      bool? isSynced) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'isSynced',
-        value: [isSynced],
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterWhereClause>
-      isSyncedNotEqualTo(bool? isSynced) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'isSynced',
-              lower: [],
-              upper: [isSynced],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'isSynced',
-              lower: [isSynced],
-              includeLower: false,
-              upper: [],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'isSynced',
-              lower: [isSynced],
-              includeLower: false,
-              upper: [],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'isSynced',
-              lower: [],
-              upper: [isSynced],
               includeUpper: false,
             ));
       }
@@ -2022,6 +1947,472 @@ extension ActivityModelQueryFilter
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLatitudeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'entryLatitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLatitudeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'entryLatitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLatitudeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'entryLatitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLatitudeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'entryLatitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLatitudeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'entryLatitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLatitudeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'entryLatitude',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLongitudeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'entryLongitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLongitudeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'entryLongitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLongitudeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'entryLongitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLongitudeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'entryLongitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLongitudeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'entryLongitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryLongitudeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'entryLongitude',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryTimestampEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'entryTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryTimestampGreaterThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'entryTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryTimestampLessThan(
+    DateTime value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'entryTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      entryTimestampBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'entryTimestamp',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLatitudeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'exitLatitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLatitudeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'exitLatitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLatitudeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'exitLatitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLatitudeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'exitLatitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLatitudeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'exitLatitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLatitudeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'exitLatitude',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLongitudeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'exitLongitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLongitudeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'exitLongitude',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLongitudeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'exitLongitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLongitudeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'exitLongitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLongitudeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'exitLongitude',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitLongitudeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'exitLongitude',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitTimestampIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'exitTimestamp',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitTimestampIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'exitTimestamp',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitTimestampEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'exitTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitTimestampGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'exitTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitTimestampLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'exitTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      exitTimestampBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'exitTimestamp',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -2077,407 +2468,11 @@ extension ActivityModelQueryFilter
   }
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      isSyncedIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'isSynced',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      isSyncedIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'isSynced',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      isSyncedEqualTo(bool? value) {
+      isSyncedEqualTo(bool value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isSynced',
         value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      latitudeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'latitude',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      latitudeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'latitude',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      latitudeEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'latitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      latitudeGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'latitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      latitudeLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'latitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      latitudeBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'latitude',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      longitudeIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'longitude',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      longitudeIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'longitude',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      longitudeEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'longitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      longitudeGreaterThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'longitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      longitudeLessThan(
-    double? value, {
-    bool include = false,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'longitude',
-        value: value,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      longitudeBetween(
-    double? lower,
-    double? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    double epsilon = Query.epsilon,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'longitude',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveEqualTo(MotiveType value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'motive',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveGreaterThan(
-    MotiveType value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'motive',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveLessThan(
-    MotiveType value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'motive',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveBetween(
-    MotiveType lower,
-    MotiveType upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'motive',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'motiveText',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'motiveText',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'motiveText',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'motiveText',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'motiveText',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'motiveText',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'motiveText',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'motiveText',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'motiveText',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'motiveText',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'motiveText',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      motiveTextIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'motiveText',
-        value: '',
       ));
     });
   }
@@ -2612,57 +2607,137 @@ extension ActivityModelQueryFilter
   }
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      timestampEqualTo(DateTime value) {
+      tokenEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'timestamp',
+        property: r'token',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      timestampGreaterThan(
-    DateTime value, {
+      tokenGreaterThan(
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'timestamp',
+        property: r'token',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      timestampLessThan(
-    DateTime value, {
+      tokenLessThan(
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'timestamp',
+        property: r'token',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
-      timestampBetween(
-    DateTime lower,
-    DateTime upper, {
+      tokenBetween(
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'timestamp',
+        property: r'token',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      tokenStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'token',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      tokenEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'token',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      tokenContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'token',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      tokenMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'token',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      tokenIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'token',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterFilterCondition>
+      tokenIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'token',
+        value: '',
       ));
     });
   }
@@ -2755,6 +2830,90 @@ extension ActivityModelQuerySortBy
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByEntryLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLatitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByEntryLatitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLatitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByEntryLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLongitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByEntryLongitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLongitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByEntryTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByEntryTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryTimestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByExitLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLatitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByExitLatitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLatitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByExitLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLongitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByExitLongitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLongitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByExitTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      sortByExitTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitTimestamp', Sort.desc);
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.asc);
@@ -2765,57 +2924,6 @@ extension ActivityModelQuerySortBy
       sortByIsSyncedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByLatitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      sortByLatitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByLongitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      sortByLongitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByMotive() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motive', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByMotiveDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motive', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByMotiveText() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motiveText', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      sortByMotiveTextDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motiveText', Sort.desc);
     });
   }
 
@@ -2844,16 +2952,15 @@ extension ActivityModelQuerySortBy
     });
   }
 
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByTimestamp() {
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByToken() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timestamp', Sort.asc);
+      return query.addSortBy(r'token', Sort.asc);
     });
   }
 
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      sortByTimestampDesc() {
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> sortByTokenDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timestamp', Sort.desc);
+      return query.addSortBy(r'token', Sort.desc);
     });
   }
 }
@@ -2939,6 +3046,90 @@ extension ActivityModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByEntryLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLatitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByEntryLatitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLatitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByEntryLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLongitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByEntryLongitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryLongitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByEntryTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByEntryTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entryTimestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByExitLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLatitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByExitLatitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLatitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByExitLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLongitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByExitLongitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitLongitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByExitTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
+      thenByExitTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'exitTimestamp', Sort.desc);
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -2961,57 +3152,6 @@ extension ActivityModelQuerySortThenBy
       thenByIsSyncedDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isSynced', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByLatitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      thenByLatitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'latitude', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByLongitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      thenByLongitudeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'longitude', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByMotive() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motive', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByMotiveDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motive', Sort.desc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByMotiveText() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motiveText', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      thenByMotiveTextDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'motiveText', Sort.desc);
     });
   }
 
@@ -3040,16 +3180,15 @@ extension ActivityModelQuerySortThenBy
     });
   }
 
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByTimestamp() {
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByToken() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timestamp', Sort.asc);
+      return query.addSortBy(r'token', Sort.asc);
     });
   }
 
-  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy>
-      thenByTimestampDesc() {
+  QueryBuilder<ActivityModel, ActivityModel, QAfterSortBy> thenByTokenDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'timestamp', Sort.desc);
+      return query.addSortBy(r'token', Sort.desc);
     });
   }
 }
@@ -3098,34 +3237,51 @@ extension ActivityModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct>
+      distinctByEntryLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'entryLatitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct>
+      distinctByEntryLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'entryLongitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct>
+      distinctByEntryTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'entryTimestamp');
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct>
+      distinctByExitLatitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'exitLatitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct>
+      distinctByExitLongitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'exitLongitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct>
+      distinctByExitTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'exitTimestamp');
+    });
+  }
+
   QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByIsSynced() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isSynced');
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByLatitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'latitude');
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByLongitude() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'longitude');
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByMotive() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'motive');
-    });
-  }
-
-  QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByMotiveText(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'motiveText', caseSensitive: caseSensitive);
     });
   }
 
@@ -3141,9 +3297,10 @@ extension ActivityModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByTimestamp() {
+  QueryBuilder<ActivityModel, ActivityModel, QDistinct> distinctByToken(
+      {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'timestamp');
+      return query.addDistinctBy(r'token', caseSensitive: caseSensitive);
     });
   }
 }
@@ -3194,33 +3351,51 @@ extension ActivityModelQueryProperty
     });
   }
 
-  QueryBuilder<ActivityModel, bool?, QQueryOperations> isSyncedProperty() {
+  QueryBuilder<ActivityModel, double?, QQueryOperations>
+      entryLatitudeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'entryLatitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, double?, QQueryOperations>
+      entryLongitudeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'entryLongitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, DateTime, QQueryOperations>
+      entryTimestampProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'entryTimestamp');
+    });
+  }
+
+  QueryBuilder<ActivityModel, double?, QQueryOperations>
+      exitLatitudeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'exitLatitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, double?, QQueryOperations>
+      exitLongitudeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'exitLongitude');
+    });
+  }
+
+  QueryBuilder<ActivityModel, DateTime?, QQueryOperations>
+      exitTimestampProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'exitTimestamp');
+    });
+  }
+
+  QueryBuilder<ActivityModel, bool, QQueryOperations> isSyncedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isSynced');
-    });
-  }
-
-  QueryBuilder<ActivityModel, double?, QQueryOperations> latitudeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'latitude');
-    });
-  }
-
-  QueryBuilder<ActivityModel, double?, QQueryOperations> longitudeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'longitude');
-    });
-  }
-
-  QueryBuilder<ActivityModel, MotiveType, QQueryOperations> motiveProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'motive');
-    });
-  }
-
-  QueryBuilder<ActivityModel, String?, QQueryOperations> motiveTextProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'motiveText');
     });
   }
 
@@ -3236,9 +3411,9 @@ extension ActivityModelQueryProperty
     });
   }
 
-  QueryBuilder<ActivityModel, DateTime, QQueryOperations> timestampProperty() {
+  QueryBuilder<ActivityModel, String, QQueryOperations> tokenProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'timestamp');
+      return query.addPropertyName(r'token');
     });
   }
 }

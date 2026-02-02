@@ -1,54 +1,14 @@
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
-import '../../models/activity_model.dart'; // Usamos ActivityModel para el historial
-import '../../models/assigment_model.dart'; // Import para AssigmentType
-import '../../providers/history_provider.dart'; // Provider actualizado
-import '../widgets/event_card_history.dart'; // Importamos la nueva tarjeta de historial
+import '../../models/activity_model.dart';
+import '../../models/assigment_model.dart';
+import '../../providers/history_provider.dart';
+import '../widgets/event_card_history.dart';
 import '../widgets/event_card_skeleton.dart';
 import '../widgets/custom_search_bar.dart';
 import '../widgets/calendar_modal.dart';
-import '../../domain/activity/get_activity.dart'; // Re-added for debug info
-
-// --- MODELO AUXILIAR PARA AGRUPACIÓN (Clase Privada) ---
-class _HistorySession {
-  ActivityModel? entry;
-  ActivityModel? exit;
-
-  _HistorySession({this.entry, this.exit});
-
-  // Helpers para obtener datos comunes
-  String get description =>
-      entry?.description ?? exit?.description ?? 'Sin descripción';
-  String get client => entry?.client ?? exit?.client ?? 'Sin cliente';
-  String get documentId => entry?.documentId ?? exit?.documentId ?? '---';
-  String get taskLabel => entry?.task.label ?? exit?.task.label ?? 'Oficina';
-
-  DateTime get sortDate =>
-      entry?.timestamp ?? exit?.timestamp ?? DateTime.now();
-
-  // Cálculo de tiempos
-  String? get entryTime {
-    if (entry == null) return null;
-    return _formatTime(entry!.timestamp);
-  }
-
-  String? get exitTime {
-    if (exit == null) return null;
-    return _formatTime(exit!.timestamp);
-  }
-
-  bool get hasPendingSync =>
-      (entry != null && entry!.isSynced == false) ||
-      (exit != null && exit!.isSynced == false);
-
-  static String _formatTime(DateTime d) {
-    final hour = d.hour > 12 ? d.hour - 12 : (d.hour == 0 ? 12 : d.hour);
-    final amPm = d.hour >= 12 ? 'PM' : 'AM';
-    final minute = d.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $amPm';
-  }
-}
+import '../../domain/activity/get_activity.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -67,10 +27,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool _isLoading = true;
 
   // Filtro
-  DateTime?
-      _selectedDate; // Null = Sin filtro (o todos) o hoy? El user quiere filtro inicial? Asumamos null o hoy.
+  DateTime? _selectedDate;
 
-  // Lista de nuevos modelos
+  // Lista de modelos (Sesiones unificadas)
   List<ActivityModel> _allActivities = [];
 
   @override
@@ -78,14 +37,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     super.initState();
     _searchController = TextEditingController();
     _searchController.addListener(_onSearchChanged);
-
-    // Inicializar con la fecha de hoy por defecto si se desea, o null si quiere ver todo.
-    // El user dijo "a pena presionas el dia se filtre", asi que iniciamos con Hoy para ser útiles o todo?
-    // Generalmente historia es "todo", pero si filtramos por día, mejor null inicialmente o Hoy.
-    // Inicializar con null para mostrar todo el historial por defecto
     _selectedDate = null;
-
-    // Carga inicial
     _loadData();
   }
 
@@ -152,9 +104,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
               final a = data[i];
               return ListTile(
                 dense: true,
-                title: Text(
-                    '${a.motive.name} - ${a.timestamp.hour}:${a.timestamp.minute}:${a.timestamp.second}.${a.timestamp.millisecond}'),
-                subtitle: Text('ID:${a.serverId} Task:${a.task.name}'),
+                title: Text('Token: ${a.token.substring(0, 8)}...'),
+                subtitle: Text(
+                    'ID:${a.serverId} Task:${a.task.name} Open:${a.isOpen}'),
               );
             },
           ),
@@ -163,66 +115,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  // --- LÓGICA DE AGRUPACIÓN (Entry + Exit) ---
-  List<_HistorySession> _groupActivities(List<ActivityModel> rawActivities) {
-    // 1. Nos aseguramos que estén ordenados del MÁS RECIENTE al MÁS ANTIGUO
-    // (Asumimos que timestamp es confiable)
-    final sorted = List<ActivityModel>.from(rawActivities);
-    sorted.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-
-    final List<_HistorySession> sessions = [];
-    final Map<String, List<_HistorySession>> openExits = {};
-
-    for (var activity in sorted) {
-      // Clave única para agrupar sesión:
-      // PREFERENCIA 1: ServerID (Si existe, es lo más confiable)
-      // PREFERENCIA 2: DocumentID + Tarea
-
-      String key;
-      if (activity.serverId != null && activity.serverId != 0) {
-        key = 'srv_${activity.serverId}';
-      } else {
-        key = 'doc_${activity.documentId ?? "null"}_${activity.task.index}';
-      }
-
-      if (activity.motive == MotiveType.exit) {
-        // ENCONTRAMOS SALIDA (Reciente)
-        // Creamos una sesión "abierta por arriba" (tiene fin, busca inicio)
-        final session = _HistorySession(exit: activity);
-        sessions.add(session);
-
-        // La registramos para esperar su entrada
-        if (!openExits.containsKey(key)) {
-          openExits[key] = [];
-        }
-        openExits[key]!.add(session);
-      } else {
-        // ENCONTRAMOS ENTRADA (Más antigua)
-        // Buscamos si hay un Exit esperando
-        if (openExits.containsKey(key) && openExits[key]!.isNotEmpty) {
-          // Emparejamos con el Exit más reciente encontrado (el último agregado a la pila)
-          final session = openExits[key]!.removeLast();
-          session.entry = activity;
-        } else {
-          // Entrada sin salida futura (Es la actividad actual o olvidó marcar salida)
-          final session = _HistorySession(entry: activity);
-          sessions.add(session);
-        }
-      }
-    }
-
-    return sessions;
-  }
-
   // --- LÓGICA DE FILTRADO ---
-  List<_HistorySession> _getFilteredSessions() {
-    final grouped = _groupActivities(_allActivities);
+  List<ActivityModel> _getFilteredSessions() {
+    // Las actividades ya vienen ordenadas por GetActivity (reciente primero)
+    // Simplemente filtramos.
 
-    return grouped.where((session) {
+    return _allActivities.where((session) {
       // 1. Filtro de Texto
-      final desc = session.description.toLowerCase();
-      final client = session.client.toLowerCase();
-      final docId = session.documentId.toLowerCase();
+      final desc = (session.description ?? '').toLowerCase();
+      final client = (session.client ?? '').toLowerCase();
+      final docId = (session.documentId ?? '').toLowerCase();
 
       final matchesText = _searchQuery.isEmpty ||
           desc.contains(_searchQuery) ||
@@ -233,7 +135,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       // 2. Filtro de Fecha (DÍA ÚNICO)
       if (_selectedDate != null) {
-        final activityDate = session.sortDate;
+        final activityDate = session.entryTimestamp; // Usamos fecha de entrada
 
         final isSameDay = activityDate.year == _selectedDate!.year &&
             activityDate.month == _selectedDate!.month &&
@@ -244,6 +146,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       return true;
     }).toList();
+  }
+
+  String _formatTime(DateTime d) {
+    final hour = d.hour > 12 ? d.hour - 12 : (d.hour == 0 ? 12 : d.hour);
+    final amPm = d.hour >= 12 ? 'PM' : 'AM';
+    final minute = d.minute.toString().padLeft(2, '0');
+    return '$hour:$minute $amPm';
   }
 
   @override
@@ -288,7 +197,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Botón Calendario Restaourado
+                  // Botón Calendario
                   Container(
                     decoration: BoxDecoration(
                       color: isDateFilterActive
@@ -306,7 +215,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ),
 
-            // --- CHIP FILTRO (Solo si hay fecha seleccionada) ---
+            // --- CHIP FILTRO ---
             if (isDateFilterActive)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -390,15 +299,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 final session = filteredSessions[index];
 
                                 return EventCard(
-                                  eventName: session.description,
-                                  companyName: session.client,
-                                  eventCode: session.documentId,
-                                  taskName: session.taskLabel,
-                                  entryTime: session.entryTime,
-                                  exitTime: session.exitTime,
-                                  hasPendingSync: session.hasPendingSync,
-                                  assigmentType: session.entry?.activityType ??
-                                      AssigmentType.other,
+                                  eventName:
+                                      session.description ?? 'Sin descripción',
+                                  companyName: session.client ?? 'Sin cliente',
+                                  eventCode: session.documentId ?? '---',
+                                  taskName: session.task.label,
+
+                                  // Mapeo de tiempos unificado
+                                  entryTime:
+                                      _formatTime(session.entryTimestamp),
+                                  exitTime: session.exitTimestamp != null
+                                      ? _formatTime(session.exitTimestamp!)
+                                      : null,
+
+                                  hasPendingSync: !session.isSynced,
+                                  assigmentType: session.activityType,
                                 );
                               },
                             ),

@@ -4,6 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 class NetworkInfo {
   Future<bool> hasConnection() async {
     final result = await Connectivity().checkConnectivity();
-    return result != ConnectivityResult.none;
+    // En versiones nuevas devuelve List<ConnectivityResult>
+    return !result.contains(ConnectivityResult.none);
   }
 }

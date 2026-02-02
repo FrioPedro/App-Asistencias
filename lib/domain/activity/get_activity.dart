@@ -10,7 +10,7 @@ class GetActivity {
     final isar = await Database.instance();
 
     final recent =
-        await isar.activityModels.where().sortByTimestamp().findAll();
+        await isar.activityModels.where().sortByEntryTimestamp().findAll();
 
     return recent.reversed.toList();
   }
@@ -23,7 +23,7 @@ class GetActivity {
     final recent = await isar.activityModels
         .filter()
         .serverIdEqualTo(serverId)
-        .sortByTimestampDesc()
+        .sortByEntryTimestampDesc()
         .limit(20)
         .findAll();
 
@@ -60,19 +60,22 @@ class GetActivity {
     }
   }
 
-  /// Asignación está "activa" si el ÚLTIMO registro es MotiveType.entry
+  /// Asignación está "activa" si EXISTE una sesión ABIERTA (exitTimestamp == null)
+  /// Se asume que solo puede haber 1 abierta por serverId.
   static Future<ActivityModel?> getActive(int serverId) async {
     final isar = await Database.instance();
 
+    // Buscamos la más reciente que tenga ese ServerID
     final last = await isar.activityModels
         .filter()
         .serverIdEqualTo(serverId)
-        .sortByTimestampDesc()
+        .sortByEntryTimestampDesc()
         .findFirst();
 
     if (last == null) return null;
 
-    return (last.motive == MotiveType.entry) ? last : null;
+    // Si la última actividad NO tiene timestamp de salida, está abierta.
+    return (last.exitTimestamp == null) ? last : null;
   }
 
   static Future<bool> isActive(int serverId) async {
@@ -86,74 +89,47 @@ class GetActivity {
     return isar.activityModels
         .filter()
         .isSyncedEqualTo(false)
-        .sortByTimestamp()
+        .sortByEntryTimestamp()
         .limit(limit)
         .findAll();
   }
 
-static List<ActivityModel> dedupeActivities(List<ActivityModel> list) {
-  final Map<String, ActivityModel> byKey = {};
+  static List<ActivityModel> dedupeActivities(List<ActivityModel> list) {
+    final Map<String, ActivityModel> byKey = {};
 
-  for (final a in list) {
-    final key = a.dedupKey;
+    for (final a in list) {
+      // Usamos el Token como Deduplicación Primaria
+      final key = a.token;
 
-    if (!byKey.containsKey(key)) {
-      byKey[key] = a;
-      continue;
+      if (!byKey.containsKey(key)) {
+        byKey[key] = a;
+        continue;
+      }
+
+      final existing = byKey[key]!;
+
+      // Prioridad: synced gana sobre pending
+      if (existing.isSynced != true && a.isSynced == true) {
+        byKey[key] = a;
+        continue;
+      }
+
+      if ((existing.isSynced == a.isSynced) &&
+          a.entryTimestamp.isAfter(existing.entryTimestamp)) {
+        byKey[key] = a;
+      }
     }
 
-    final existing = byKey[key]!;
-
-    // Prioridad: synced gana sobre pending
-    if (existing.isSynced != true && a.isSynced == true) {
-      byKey[key] = a;
-      continue;
-    }
-
-    if ((existing.isSynced == a.isSynced) &&
-        a.timestamp.isAfter(existing.timestamp)) {
-      byKey[key] = a;
-    }
+    return byKey.values.toList();
   }
 
-  return byKey.values.toList();
-}
-
-
   static Future<List<ActivityModel>> syncOnline() async {
+    // Método legacy/debug que imprime info
     final online = await getOnlineData();
-
-    final onlineRecent = online.where((a) => a.timestamp
-        .isAfter(DateTime.now().subtract(const Duration(hours: 24)))).toList();
-
-    final pendingSync = await getPendingSync();
-
-     onlineRecent.addAll(pendingSync);
-
-     final deduped = dedupeActivities(onlineRecent);
-     deduped.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    
-    final Map<int, List<ActivityModel>> RecentByService = {};
-    for (final _activity in deduped) {
-      final sid = _activity.serverId!;
-      (RecentByService[sid] ??= []).add(_activity);
+    print('--- ONLINE DATA (${online.length}) ---');
+    for (var a in online) {
+      print('Token: ${a.token} | Open: ${a.isOpen} | Synced: ${a.isSynced}');
     }
-    
-    
-
-    print('--- ONLINE RECENT BY SERVICE (24h) ---');
-    RecentByService.forEach((sid, activities) {
-      print('Servicio $sid → ${activities.length} actividades');
-
-      for (final a in activities) {
-        print(
-          '  • ${a.timestamp} | motive=${a.motive} | status=${a.isSynced} ', 
-        );
-      }
-    });
-
-
     return [];
   }
 
@@ -166,52 +142,27 @@ static List<ActivityModel> dedupeActivities(List<ActivityModel> list) {
 
       await isar.writeTxn(() async {
         for (final activity in online) {
-          if (activity.timestamp == null) continue;
-
-          // ESTRATEGIA: Buscar por VENTANA DE TIEMPO primero, no por ID.
-          // Esto es más robusto si el ServerID o Motive difieren ligeramente (case sensitive, nulls, etc).
-          final windowStart =
-              activity.timestamp!.subtract(const Duration(hours: 6));
-          final windowEnd = activity.timestamp!.add(const Duration(hours: 6));
-
-          final candidates = await isar.activityModels
+          // 1. Buscar por TOKEN (Identidad fuerte)
+          ActivityModel? match = await isar.activityModels
               .filter()
-              .timestampBetween(windowStart, windowEnd)
-              .findAll();
+              .tokenEqualTo(activity.token)
+              .findFirst();
 
-          ActivityModel? match;
+          // 2. Si no hay token match (migración?), buscar por Fuzzy Logic con ServerId + Time
+          if (match == null && activity.serverId != null) {
+            final windowStart =
+                activity.entryTimestamp.subtract(const Duration(hours: 12));
+            final windowEnd =
+                activity.entryTimestamp.add(const Duration(hours: 12));
 
-          // Buscamos el mejor candidato dentro de los encontrados por fecha
-          for (final c in candidates) {
-            // Prioridad 1: Coincide DocumentID (si existe)
-            if (c.documentId != null &&
-                activity.documentId != null &&
-                c.documentId == activity.documentId) {
-              match = c;
-              break;
-            }
-
-            // Prioridad 2: Coincide ServerID y Motive
-            // Usamos OR para ser más laxos si ServerID falta en local
-            bool sameServerId =
-                (c.serverId != null && c.serverId == activity.serverId);
-            bool sameMotive = (c.motive == activity.motive);
-
-            if (sameServerId && sameMotive) {
-              match = c;
-              break;
-            }
-
-            // Prioridad 3: Solo coincide Motive y está muy cerca en el tiempo
-            if (sameMotive) {
-              // Si es el mismo motivo y está en la ventana de tiempo, asumimos que es el mismo
-              // (Asumiendo que no haces 2 entradas en < 6 horas, que es lógico)
-              match = c;
-              break;
-            }
+            match = await isar.activityModels
+                .filter()
+                .serverIdEqualTo(activity.serverId)
+                .entryTimestampBetween(windowStart, windowEnd)
+                .findFirst();
           }
 
-          // Si encontramos match, actualizamos el existente
+          // Si encontramos match, actualizamos el existente manteniendo su ID local
           if (match != null) {
             activity.id = match.id;
           }

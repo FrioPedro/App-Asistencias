@@ -98,8 +98,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (_selectedCollaborators.isEmpty) {
-      _snack('Selecciona al menos un colaborador',
-          color: Colors.orange);
+      _snack('Selecciona al menos un colaborador', color: Colors.orange);
       return;
     }
 
@@ -141,7 +140,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     if (confirmed != true) return;
 
     final connectivity = await Connectivity().checkConnectivity();
-    if (connectivity == ConnectivityResult.none) {
+    if (connectivity.contains(ConnectivityResult.none)) {
       _snack('❌ No hay conexión a internet', color: Colors.red);
       return;
     }
@@ -154,8 +153,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
 
       if (!mounted) return;
 
-      _snack('✅ Asignación creada correctamente',
-          color: Colors.green);
+      _snack('✅ Asignación creada correctamente', color: Colors.green);
       Navigator.pop(context);
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
@@ -207,16 +205,13 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
         title: const Text(
           'Crear Actividad',
           style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold),
+              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -235,7 +230,6 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 _buildFormField(
                   label: 'Descripción',
                   child: Container(
@@ -247,26 +241,22 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                       controller: _descriptionController,
                       style: const TextStyle(color: Colors.white),
                       maxLines: 4,
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty)
-                              ? 'Ingrese una descripción'
-                              : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Ingrese una descripción'
+                          : null,
                       decoration: InputDecoration(
                         hintText: 'Ingrese detalles...',
                         hintStyle: TextStyle(color: Colors.grey[600]),
                         border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.all(16.0),
+                        contentPadding: const EdgeInsets.all(16.0),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 _buildFormField(
                   label: 'Colaboradores',
-                  child:
-                      CustomDropdown<String>.multiSelectSearch(
+                  child: CustomDropdown<String>.multiSelectSearch(
                     hintText: 'Seleccionar colaboradores',
                     items: _collaborators,
                     decoration: darkDropdownDecoration,
@@ -276,36 +266,28 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 _buildFormField(
                   label: 'Tipo de actividad',
                   child: CustomDropdown<String>(
                     items: _types,
                     initialItem: _selectedType,
                     decoration: darkDropdownDecoration,
-                    onChanged: (v) =>
-                        setState(() => _selectedType = v!),
-                    headerBuilder:
-                        (context, selectedItem, enabled) {
+                    onChanged: (v) => setState(() => _selectedType = v!),
+                    headerBuilder: (context, selectedItem, enabled) {
                       return Text(
                         _typeLabel[selectedItem] ?? selectedItem,
-                        style:
-                            const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                       );
                     },
-                    listItemBuilder:
-                        (context, item, isSelected, onSelect) {
+                    listItemBuilder: (context, item, isSelected, onSelect) {
                       return InkWell(
                         onTap: onSelect,
                         child: Padding(
-                          padding:
-                              const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 12),
                           child: Text(
                             _typeLabel[item] ?? item,
-                            style: const TextStyle(
-                                color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                           ),
                         ),
                       );
@@ -313,31 +295,26 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 _buildFormField(
                   label: 'Zona',
                   child: CustomDropdown<String>(
                     items: _zones,
                     initialItem: _selectedZone,
                     decoration: darkDropdownDecoration,
-                    onChanged: (v) =>
-                        setState(() => _selectedZone = v),
+                    onChanged: (v) => setState(() => _selectedZone = v),
                   ),
                 ),
                 const SizedBox(height: 40),
-
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed:
-                        _isSubmitting ? null : _onSubmit,
+                    onPressed: _isSubmitting ? null : _onSubmit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primary,
                       disabledBackgroundColor: Colors.grey,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                     ),
@@ -355,8 +332,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
-                                fontWeight:
-                                    FontWeight.bold),
+                                fontWeight: FontWeight.bold),
                           ),
                   ),
                 ),
@@ -368,8 +344,7 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
     );
   }
 
-  Widget _buildFormField(
-      {required String label, required Widget child}) {
+  Widget _buildFormField({required String label, required Widget child}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

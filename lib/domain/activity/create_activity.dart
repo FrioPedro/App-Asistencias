@@ -1,4 +1,3 @@
-
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/models/activity_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
@@ -6,11 +5,11 @@ import 'package:app_asistencias/models/assigment_model.dart';
 import 'get_activity.dart';
 
 class CreateActivity {
-  /// Guarda una marcación "pura" (sin inventar registros, sin modificar descripción).
-  static Future<ActivityModel> storeActivity({
+  /// Iniciar una SESIÓN (Entrada)
+  /// Crea una nueva fila en DB con Token autogenerado y datos de entrada.
+  static Future<ActivityModel> storeEntry({
     required AssigmentModel assignment,
     required TaskType task,
-    required MotiveType motive,
     double? latitude,
     double? longitude,
     DateTime? timestamp,
@@ -18,20 +17,23 @@ class CreateActivity {
     final isar = await Database.instance();
 
     final activity = ActivityModel(
+      // Entrada
+      entryTimestamp: timestamp ?? DateTime.now(),
+      entryLatitude: latitude,
+      entryLongitude: longitude,
+
+      // Metadatos
       serverId: assignment.serverId,
       documentId: assignment.documentId,
       client: assignment.client,
       description: assignment.description,
       collaborator: null,
-      motiveText: motive.label, // opcional (puedes poner null si no lo usas)
-      motive: motive,
       task: task,
       activityType: assignment.assigmentType,
-      latitude: latitude,
-      longitude: longitude,
-      timestamp: timestamp ?? DateTime.now(),
       isSynced: false,
     );
+
+    // Salida es null por defecto -> Sesión Abierta
 
     await isar.writeTxn(() async {
       await isar.activityModels.put(activity);
@@ -40,28 +42,8 @@ class CreateActivity {
     return activity;
   }
 
-  /// Entrada pura
-  static Future<ActivityModel> storeEntry({
-    required AssigmentModel assignment,
-    required TaskType task,
-    double? latitude,
-    double? longitude,
-    DateTime? timestamp,
-  }) {
-    return storeActivity(
-      assignment: assignment,
-      task: task,
-      motive: MotiveType.entry,
-      latitude: latitude,
-      longitude: longitude,
-      timestamp: timestamp,
-    );
-  }
-
-  /// Salida pura:
-  /// - NO crea registros extras
-  /// - NO modifica nada
-  /// - Solo valida que exista un "activo" (último motive = entry) y crea 1 salida.
+  /// Cerrar una SESIÓN (Salida)
+  /// Busca la sesión abierta (Active) y actualiza sus campos de salida.
   static Future<ActivityModel?> storeExit({
     required int serverId,
     double? latitude,
@@ -70,29 +52,24 @@ class CreateActivity {
   }) async {
     final isar = await Database.instance();
 
+    // 1. Obtener sesión activa (la que tiene exitTimestamp == null)
     final active = await GetActivity.getActive(serverId);
-    if (active == null) return null;
+    if (active == null) {
+      print(
+          "Error: Intentando cerrar sesión para ServerID $serverId pero no hay ninguna abierta.");
+      return null;
+    }
 
-    final activity = ActivityModel(
-      serverId: active.serverId,
-      documentId: active.documentId,
-      client: active.client,
-      description: active.description,
-      collaborator: active.collaborator,
-      motiveText: MotiveType.exit.label, // opcional
-      motive: MotiveType.exit,
-      task: active.task,
-      activityType: active.activityType,
-      latitude: latitude,
-      longitude: longitude,
-      timestamp: timestamp ?? DateTime.now(),
-      isSynced: false,
-    );
+    // 2. Actualizar campos de salida
+    active.exitTimestamp = timestamp ?? DateTime.now();
+    active.exitLatitude = latitude;
+    active.exitLongitude = longitude;
+    active.isSynced = false; // Marcar para subir actualización
 
     await isar.writeTxn(() async {
-      await isar.activityModels.put(activity);
+      await isar.activityModels.put(active);
     });
 
-    return activity;
+    return active;
   }
 }

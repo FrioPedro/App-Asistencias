@@ -244,16 +244,29 @@ class _EventsScreenState extends State<EventsScreen> {
             timeDisplay = _formatDate(_activeStartTimes[eventKey]!);
           }
 
+          // Determinar nombre de tarea para mostrar
+          String displayTaskName = 'Oficina'; // Default
+          if (isParticipating) {
+            displayTaskName = _activeTaskNames[eventKey] ?? 'Oficina';
+          }
+
+          // Buscar si hay alguna tarea activa en OTRO evento
+          String? globalActiveTask;
+          if (!isParticipating && _activeTaskNames.isNotEmpty) {
+            globalActiveTask = _activeTaskNames.values.first;
+          }
+
           return EventCard(
             eventName: event.description ?? 'Sin descripción',
+            taskName: displayTaskName,
             companyName: event.client ?? 'Sin cliente',
             eventCode: event.documentId ?? '---',
-            dateTime: timeDisplay,
+            startTime: timeDisplay,
             assigmentType: event.assigmentType,
             isParticipating: isParticipating,
-            actionIcon: _participatingEvents[eventKey],
-            activeTaskName: _activeTaskNames[eventKey],
-            onTap: () => _handleCardTap(event, eventKey),
+            activeTaskName: globalActiveTask,
+            onEnter: () => _handleCardTap(event, eventKey),
+            onExit: () => _handleCardTap(event, eventKey),
           );
         },
       );

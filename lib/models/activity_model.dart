@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'assigment_model.dart';
@@ -48,7 +49,6 @@ extension TaskTypeX on TaskType {
     }
   }
 
-  /// Server -> enum por texto ("Servicio", "Oficina", etc.)
   static TaskType fromLabel(String? label) {
     final s = (label ?? '').trim().toLowerCase();
     if (s == 'oficina') return TaskType.office;
@@ -72,79 +72,38 @@ extension TaskTypeX on TaskType {
   }
 }
 
-/// ✅ Motivo de marcación: 1 entrada, 2 salida
-enum MotiveType { entry, exit }
-
-extension MotiveTypeX on MotiveType {
-  int get id {
-    switch (this) {
-      case MotiveType.entry:
-        return 1;
-      case MotiveType.exit:
-        return 2;
-    }
-  }
-
-  String get label {
-    switch (this) {
-      case MotiveType.entry:
-        return 'Entrada';
-      case MotiveType.exit:
-        return 'Salida';
-    }
-  }
-
-  static MotiveType fromId(int? id) {
-    switch (id) {
-      case 1:
-        return MotiveType.entry;
-      case 2:
-        return MotiveType.exit;
-      default:
-        return MotiveType.entry;
-    }
-  }
-
-  /// (Opcional) si el server a veces manda "Entrada"/"Salida" como texto
-  static MotiveType? fromLabel(String? label) {
-    final s = (label ?? '').trim().toLowerCase();
-    if (s == 'inicio de labores') return MotiveType.entry;
-    if (s == 'fin de labores') return MotiveType.exit;
-    return null;
-  }
+/// Helper para generar Token único (simulación de UUID)
+String _generateUniqueToken() {
+  final now = DateTime.now().millisecondsSinceEpoch;
+  final random = Random().nextInt(1000000); // 0 a 999999
+  return 'SESS-$now-$random';
 }
 
 DateTime _parseServerTimestamp(dynamic v) {
-  // 👇 fecha antigua por defecto
   final fallback = DateTime.fromMillisecondsSinceEpoch(0);
-
   if (v == null) return fallback;
-
   if (v is DateTime) return v;
-
-  if (v is int) {
-    return DateTime.fromMillisecondsSinceEpoch(v);
-  }
-
+  if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
   if (v is String) {
     final iso = DateTime.tryParse(v);
     if (iso != null) return iso;
-
     final fixed = v.replaceFirst(' ', 'T');
     final iso2 = DateTime.tryParse(fixed);
     if (iso2 != null) return iso2;
   }
-
   return fallback;
 }
 
 DateTime _floorToSecond(DateTime dt) =>
     DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second);
 
-
 @collection
 class ActivityModel {
   Id id = Isar.autoIncrement;
+
+  /// 🔑 TOKEN DE SESIÓN (Unifica Entrada + Salida)
+  @Index(unique: true, replace: true)
+  String token = '';
 
   @Index()
   int? serverId;
@@ -152,19 +111,12 @@ class ActivityModel {
   @Index()
   String? documentId;
 
-  /// ✅ Cliente (ej: "FRIOPACKING S.A.C.")
+  /// Cliente (ej: "FRIOPACKING S.A.C.")
   @Index()
   String? client;
 
   String? description;
   String? collaborator;
-
-  /// Texto que llega del server
-  String? motiveText;
-
-  @Index()
-  @enumerated
-  MotiveType motive = MotiveType.entry;
 
   @Index()
   @enumerated
@@ -174,53 +126,70 @@ class ActivityModel {
   @enumerated
   AssigmentType activityType = AssigmentType.other;
 
-  double? latitude;
-  double? longitude;
+  // ---------------- DATOS DE ENTRADA (MANDATORIOS) ----------------
+  DateTime entryTimestamp = DateTime.fromMillisecondsSinceEpoch(0);
+  double? entryLatitude;
+  double? entryLongitude;
 
-  late DateTime timestamp;
+  // ---------------- DATOS DE SALIDA (OPCIONALES / FUTUROS) ----------------
+  DateTime? exitTimestamp;
+  double? exitLatitude;
+  double? exitLongitude;
 
-  @Index(unique: true, replace: true)
-  late String dedupKey;
-
-  /// Estado de sincronización
+  /// Estado de sincronización (Local -> Server)
   @Index()
-  bool? isSynced;
+  bool isSynced = false;
+
+  /// Clave de deduplicación histórica (opcional si usamos Token)
+  @Index()
+  String dedupKey = '';
+
+  @ignore
+  bool get isOpen => exitTimestamp == null;
+
+  @ignore
+  bool get isClosed => exitTimestamp != null;
 
   ActivityModel({
+    this.token = '',
     this.serverId,
     this.documentId,
     this.client,
     this.description,
     this.collaborator,
-    this.motiveText,
-    this.motive = MotiveType.entry,
     this.task = TaskType.office,
     this.activityType = AssigmentType.other,
-    this.latitude,
-    this.longitude,
-    required this.timestamp,
+
+    // Entrada
+    required this.entryTimestamp,
+    this.entryLatitude,
+    this.entryLongitude,
+
+    // Salida (puede venir null)
+    this.exitTimestamp,
+    this.exitLatitude,
+    this.exitLongitude,
     this.isSynced = false,
-  }){
-    // 🔐 SE CONSTRUYE AUTOMÁTICAMENTE
-    dedupKey = buildDedupKey(
-                serverId: serverId ?? 0,
-                motive: motive,
-                task: task,
-                activityType: activityType,
-              );
+    this.dedupKey = '',
+  }) {
+    if (token.isEmpty) {
+      token = _generateUniqueToken();
+    }
+    if (dedupKey.isEmpty) {
+      dedupKey = buildDedupKey();
+    }
   }
 
-  /// ✅ Del server (evento / historial)
+  /// 📥 Construir desde Server (Sesión completa o parcial)
   ActivityModel.fromServer(Map<String, dynamic> json) {
     serverId = json['Identifier'];
+    token = json['SessionToken'] ??
+        json['Token'] ??
+        _generateUniqueToken(); // Server debe devolver Token
     documentId = json['Document'] as String?;
-    client = json['Client'] as String?; // 👈 NUEVO
+    client = json['Client'] as String?;
     description = json['Description'] as String?;
     collaborator = json['Collaborator'] as String?;
-    motiveText = json['Motive'] as String?;
-
-    final maybeMotive = MotiveTypeX.fromLabel(motiveText);
-    if (maybeMotive != null) motive = maybeMotive;
 
     task = TaskTypeX.fromLabel(json['Task'] as String?);
 
@@ -228,60 +197,65 @@ class ActivityModel {
     final prefix = doc.length >= 3 ? doc.substring(0, 3) : '';
     activityType = AssigmentTypeX.fromCode(prefix);
 
-    latitude = (json['Latitude'] as num?)?.toDouble();
-    longitude = (json['Longitude'] as num?)?.toDouble();
-    timestamp = _parseServerTimestamp(json['Timestamp'] ?? DateTime.now() );
+    // Mapeo Espejo
+    entryLatitude = (json['EntryLatitude'] as num?)?.toDouble();
+    entryLongitude = (json['EntryLongitude'] as num?)?.toDouble();
+    entryTimestamp =
+        _parseServerTimestamp(json['EntryTimestamp'] ?? json['Timestamp']);
 
-    isSynced = true; // viene del server → sincronizado
+    // Salida (si existe en server)
+    if (json['ExitTimestamp'] != null) {
+      exitTimestamp = _parseServerTimestamp(json['ExitTimestamp']);
+      exitLatitude = (json['ExitLatitude'] as num?)?.toDouble();
+      exitLongitude = (json['ExitLongitude'] as num?)?.toDouble();
+    }
 
-    dedupKey = buildDedupKey(
-      serverId: serverId ?? 0,
-      motive: motive,
-      task: task,
-      activityType: activityType,
-    );
+    isSynced = true; // Viene del server
+
+    dedupKey = buildDedupKey();
   }
 
-  /// Payload para enviar marcación (NO incluye client)
+  /// 📤 Payload para Sincronización
   Map<String, dynamic> toMarkPayload({
     required int project,
     required String collaboratorId,
     required String zone,
-    required DateTime timestamp,
   }) {
-    final ts = (timestamp)
-        .toIso8601String()
-        .replaceFirst('T', ' ')
-        .split('.')
-        .first;
+    // Formato de fecha server-friendly
+    String formatTs(DateTime dt) =>
+        dt.toIso8601String().replaceFirst('T', ' ').split('.').first;
 
-    return {
+    final base = {
+      'token': token,
       'project': project,
-      'motive': motive.id,
       'collaborator': collaboratorId,
-      'latitude': latitude,
-      'longitude': longitude,
-      'timestamp': ts,
       'zone': zone,
       'task': task.id,
     };
+
+    if (isClosed) {
+      // PAYLOAD CIERRE / SALIDA
+      return {
+        ...base,
+        'motive': 2, // 2 = Salida
+        'latitude': exitLatitude,
+        'longitude': exitLongitude,
+        'timestamp': formatTs(exitTimestamp!),
+      };
+    } else {
+      // PAYLOAD APERTURA / ENTRADA
+      return {
+        ...base,
+        'motive': 1, // 1 = Entrada
+        'latitude': entryLatitude,
+        'longitude': entryLongitude,
+        'timestamp': formatTs(entryTimestamp),
+      };
+    }
   }
 
-  String _norm(String? s) => (s ?? '').trim().toLowerCase();
-
-  String buildDedupKey({
-    required int serverId,
-    required MotiveType motive,
-    required TaskType task,
-    required AssigmentType activityType,
-  }) {
-
-    return [
-      'id:${_norm(serverId.toString())}',
-      'm:${motive.index}',
-      't:${task.index}',
-      'a:${activityType.index}',
-      'dt:${_floorToSecond(timestamp).toString()}',
-    ].join('|');
+  /// Genera clave única combinando Token + Timestamp base
+  String buildDedupKey() {
+    return 'token:$token|ts:${_floorToSecond(entryTimestamp).millisecondsSinceEpoch}';
   }
 }
