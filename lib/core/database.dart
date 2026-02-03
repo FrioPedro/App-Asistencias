@@ -5,6 +5,7 @@ import 'package:app_asistencias/models/activity_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/user_model.dart';
 import 'package:app_asistencias/models/note_model.dart';
+import 'package:app_asistencias/models/log_model.dart';
 
 class Database {
   static Isar? _instance;
@@ -37,6 +38,7 @@ class Database {
         AssigmentModelSchema,
         UserModelSchema,
         NoteModelSchema,
+        LogModelSchema,
       ],
       directory: dir.path,
       inspector: true,
