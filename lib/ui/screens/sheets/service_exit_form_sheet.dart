@@ -8,6 +8,8 @@ import '../../../core/picker_localization.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/events_provider.dart';
 import '../../../providers/report_form_provider.dart';
+import '../../../providers/log_provider.dart';
+import '../../../models/log_model.dart';
 import '../../widgets/custom_snackbar.dart';
 
 class ServiceExitFormScreen extends StatefulWidget {
@@ -197,6 +199,11 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       setState(() => _uploadProgress = 1.0);
 
       if (mounted) {
+        LogProvider.log(
+          'Formulario de Servicio subido para OT: ${widget.event.documentId}',
+          type: LogType.info,
+          origin: 'ServiceExitFormScreen',
+        );
         CustomSnackBar.show(context, 'Servicio finalizado correctamente',
             isError: false);
         Navigator.pop(context, true);

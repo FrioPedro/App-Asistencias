@@ -7,6 +7,8 @@ import '../../widgets/custom_snackbar.dart';
 import '../../widgets/action_option.dart';
 import 'service_exit_form_sheet.dart';
 import 'office_workshop_exit_sheet.dart';
+import '../../../providers/log_provider.dart';
+import '../../../models/log_model.dart';
 
 class EventActionModal extends StatefulWidget {
   final AssigmentModel event;
@@ -142,6 +144,12 @@ class _EventActionModalState extends State<EventActionModal> {
       );
 
       if (mounted) {
+        final actionType = widget.isActiveSession ? 'Cambio' : 'Inicio';
+        LogProvider.log(
+          '$actionType de turno: $title (${widget.event.description})',
+          type: widget.isActiveSession ? LogType.warning : LogType.info,
+          origin: 'EventActionModal',
+        );
         widget.onSessionStarted(widget.eventKey, icon, title);
         Navigator.pop(context);
         _showCustomSnackBar('Participando: $title', isError: false);
@@ -216,6 +224,11 @@ class _EventActionModalState extends State<EventActionModal> {
       }
 
       if (mounted) {
+        LogProvider.log(
+          'Salida directa registrada: ${widget.event.description}',
+          type: LogType.warning,
+          origin: 'EventActionModal',
+        );
         Navigator.pop(context);
         _showCustomSnackBar('Salida registrada', isError: false);
       }
@@ -276,7 +289,14 @@ class _EventActionModalState extends State<EventActionModal> {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.grey, size: 28),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                LogProvider.log(
+                  'Modal de Inicio: Cerrado con X',
+                  type: LogType.info,
+                  origin: 'EventActionModal',
+                );
+                Navigator.pop(context);
+              },
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -334,7 +354,14 @@ class _EventActionModalState extends State<EventActionModal> {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.grey, size: 28),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                LogProvider.log(
+                  'Modal de Gestión: Cerrado con X',
+                  type: LogType.info,
+                  origin: 'EventActionModal',
+                );
+                Navigator.pop(context);
+              },
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),

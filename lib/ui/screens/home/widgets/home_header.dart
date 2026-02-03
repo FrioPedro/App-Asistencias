@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../history_screen.dart';
 import '../../profile_screen.dart';
 import '../../../../providers/profile_provider.dart';
+import '../../../../providers/log_provider.dart';
+import '../../../../models/log_model.dart';
 
 class HomeHeader extends StatefulWidget {
   const HomeHeader({super.key});
@@ -71,10 +73,17 @@ class _HomeHeaderState extends State<HomeHeader> {
 
             // Botón de Perfil con Iniciales
             GestureDetector(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              ),
+              onTap: () {
+                LogProvider.log(
+                  'Perfil: Abriendo sidebar/perfil',
+                  type: LogType.info,
+                  origin: 'HomeHeader',
+                );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
               child: Container(
                 width: 40,
                 height: 40,

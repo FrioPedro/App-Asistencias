@@ -4,6 +4,8 @@ import '../../../models/assigment_model.dart';
 import '../../../models/activity_model.dart';
 import '../../../providers/events_provider.dart';
 import 'package:app_asistencias/providers/notes_provider.dart';
+import 'package:app_asistencias/providers/log_provider.dart';
+import 'package:app_asistencias/models/log_model.dart';
 
 class OfficeWorkshopExitModal extends StatefulWidget {
   final AssigmentModel event;
@@ -133,6 +135,11 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
       }
 
       if (mounted) {
+        LogProvider.log(
+          'Formulario ${widget.task.label} subido para OT: ${widget.event.documentId}',
+          type: LogType.info,
+          origin: 'OfficeWorkshopExitModal',
+        );
         Navigator.pop(context, true);
       }
     } catch (e) {
