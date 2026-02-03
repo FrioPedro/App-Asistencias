@@ -3,6 +3,8 @@ import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
 import '../../models/user_model.dart';
 import '../../providers/profile_provider.dart';
+import '../../providers/log_provider.dart';
+import '../../models/log_model.dart';
 import 'log_viewer_screen.dart'; // Ahora en screens
 
 // ✅ Importamos el modelo y la extensión
@@ -140,6 +142,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // ✅ Mensaje de Éxito Personalizado
           _showCustomSnackBar('Zona actualizada a: $newZoneLabel',
               isError: false);
+
+          LogProvider.log(
+            'Zona actualizada a: $newZoneLabel',
+            type: LogType.info,
+            origin: 'ProfileScreen',
+          );
         }
       }
 
@@ -151,6 +159,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _showCustomSnackBar('Error al actualizar zona', isError: true);
         setState(() => _isLoading = false);
       }
+      LogProvider.log(
+        'Error al actualizar zona a: $newZoneLabel - $e',
+        type: LogType.error,
+        origin: 'ProfileScreen',
+      );
     }
   }
 
@@ -208,6 +221,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 50,
             child: ElevatedButton(
               onPressed: () async {
+                LogProvider.log(
+                  'Cierre de sesión iniciado para el usuario: ${_user?.nationalId ?? 'Desconocido'}',
+                  type: LogType.info,
+                  origin: 'ProfileScreen',
+                );
                 await _profileService.logout();
               },
               style: ElevatedButton.styleFrom(
