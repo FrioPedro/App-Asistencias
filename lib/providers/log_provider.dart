@@ -4,61 +4,16 @@ import '../models/log_model.dart';
 import '../core/database.dart';
 
 class LogProvider {
-  /// Obtiene los logs de la base de datos Isar
+  /// Obtiene los logs de la base de datos Isar ordenados por fecha (más recientes primero)
   Future<List<LogModel>> fetchLogs() async {
-    final isar = await Database.instance();
-    final logs = await isar.logModels.where().sortByTimestampDesc().findAll();
-
-    if (logs.isEmpty) {
-      // Si no hay logs reales, generamos algunos de prueba
-      return _generateMockLogs();
+    try {
+      final isar = await Database.instance();
+      // Obtenemos logs reales ordenados por fecha descendente
+      return await isar.logModels.where().sortByTimestampDesc().findAll();
+    } catch (e) {
+      debugPrint('Error fetching logs: $e');
+      return [];
     }
-    return logs;
-  }
-
-  /// Genera logs de prueba
-  List<LogModel> _generateMockLogs() {
-    final now = DateTime.now();
-
-    // 2. Retornar datos simulados variados
-    return [
-      LogModel(
-          message: 'Inicio de sesión exitoso (Usuario: admin)',
-          type: LogType.info,
-          timestamp: now.subtract(const Duration(minutes: 5))),
-      LogModel(
-          message: 'Sincronización en segundo plano iniciada',
-          type: LogType.info,
-          timestamp: now.subtract(const Duration(minutes: 15))),
-      LogModel(
-          message: 'Tiempo de espera agotado en API /assignments',
-          type: LogType.warning,
-          timestamp: now.subtract(const Duration(hours: 2))),
-      LogModel(
-          message: 'Error de conexión: SocketException',
-          type: LogType.error,
-          timestamp: now.subtract(const Duration(hours: 5))),
-
-      // Ayer
-      LogModel(
-          message: 'Base de datos local compactada',
-          type: LogType.info,
-          timestamp: now.subtract(const Duration(days: 1))),
-      LogModel(
-          message: 'Intento de acceso no autorizado',
-          type: LogType.warning,
-          timestamp: now.subtract(const Duration(days: 1, hours: 4))),
-
-      // Semana pasada
-      LogModel(
-          message: 'Actualización de la app detectada (v1.0.2)',
-          type: LogType.info,
-          timestamp: now.subtract(const Duration(days: 7))),
-      LogModel(
-          message: 'Fallo crítico en módulo de reportes',
-          type: LogType.error,
-          timestamp: now.subtract(const Duration(days: 7, hours: 2))),
-    ];
   }
 
   /// Guarda un nuevo log en la base de datos

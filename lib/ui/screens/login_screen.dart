@@ -96,72 +96,75 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // LOGO
-                Image.asset(
-                  'assets/images/logo_frioteam.png',
-                  height: 120,
-                  fit: BoxFit.contain,
-                ),
-
-                const SizedBox(height: 80),
-
-                // INPUT USUARIO
-                _buildTextField(
-                  controller: _userController, // <--- Conectamos controlador
-                  hintText: 'Usuario',
-                  icon: Icons.person_outline,
-                ),
-                const SizedBox(height: 16),
-
-                // INPUT CONTRASEÑA
-                _buildTextField(
-                  controller: _passController, // <--- Conectamos controlador
-                  hintText: 'Contraseña',
-                  icon: Icons.lock_outline,
-                  isPassword: true,
-                ),
-                const SizedBox(height: 24),
-
-                // BOTÓN DE LOGIN
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    // Si está cargando, deshabilitamos el botón (null)
-                    onPressed: _isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      disabledBackgroundColor:
-                          Colors.grey, // Color cuando está deshabilitado
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                                color: Colors.white, strokeWidth: 2),
-                          )
-                        : const Text(
-                            'Continuar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // LOGO
+                  Image.asset(
+                    'assets/images/logo_frioteam.png',
+                    height: 120,
+                    fit: BoxFit.contain,
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 80),
+
+                  // INPUT USUARIO
+                  _buildTextField(
+                    controller: _userController, // <--- Conectamos controlador
+                    hintText: 'Usuario',
+                    icon: Icons.person_outline,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // INPUT CONTRASEÑA
+                  _buildTextField(
+                    controller: _passController, // <--- Conectamos controlador
+                    hintText: 'Contraseña',
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                  ),
+                  const SizedBox(height: 24),
+
+                  // BOTÓN DE LOGIN
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      // Si está cargando, deshabilitamos el botón (null)
+                      onPressed: _isLoading ? null : _handleLogin,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        disabledBackgroundColor:
+                            Colors.grey, // Color cuando está deshabilitado
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2),
+                            )
+                          : const Text(
+                              'Continuar',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -178,6 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }) {
     return TextField(
       controller: controller, // Asignamos el controlador
+      autofocus: false,
       obscureText: isPassword ? _isObscured : false,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(

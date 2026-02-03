@@ -68,11 +68,37 @@ const LogModelSchema = CollectionSchema(
     r'serverId': IndexSchema(
       id: -7950187970872907662,
       name: r'serverId',
-      unique: true,
+      unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
           name: r'serverId',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'type': IndexSchema(
+      id: 5117122708147080838,
+      name: r'type',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'type',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'timestamp': IndexSchema(
+      id: 1852253767416892198,
+      name: r'timestamp',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'timestamp',
           type: IndexType.value,
           caseSensitive: false,
         )
@@ -210,61 +236,6 @@ void _logModelAttach(IsarCollection<dynamic> col, Id id, LogModel object) {
   object.id = id;
 }
 
-extension LogModelByIndex on IsarCollection<LogModel> {
-  Future<LogModel?> getByServerId(int? serverId) {
-    return getByIndex(r'serverId', [serverId]);
-  }
-
-  LogModel? getByServerIdSync(int? serverId) {
-    return getByIndexSync(r'serverId', [serverId]);
-  }
-
-  Future<bool> deleteByServerId(int? serverId) {
-    return deleteByIndex(r'serverId', [serverId]);
-  }
-
-  bool deleteByServerIdSync(int? serverId) {
-    return deleteByIndexSync(r'serverId', [serverId]);
-  }
-
-  Future<List<LogModel?>> getAllByServerId(List<int?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return getAllByIndex(r'serverId', values);
-  }
-
-  List<LogModel?> getAllByServerIdSync(List<int?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'serverId', values);
-  }
-
-  Future<int> deleteAllByServerId(List<int?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'serverId', values);
-  }
-
-  int deleteAllByServerIdSync(List<int?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'serverId', values);
-  }
-
-  Future<Id> putByServerId(LogModel object) {
-    return putByIndex(r'serverId', object);
-  }
-
-  Id putByServerIdSync(LogModel object, {bool saveLinks = true}) {
-    return putByIndexSync(r'serverId', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByServerId(List<LogModel> objects) {
-    return putAllByIndex(r'serverId', objects);
-  }
-
-  List<Id> putAllByServerIdSync(List<LogModel> objects,
-      {bool saveLinks = true}) {
-    return putAllByIndexSync(r'serverId', objects, saveLinks: saveLinks);
-  }
-}
-
 extension LogModelQueryWhereSort on QueryBuilder<LogModel, LogModel, QWhere> {
   QueryBuilder<LogModel, LogModel, QAfterWhere> anyId() {
     return QueryBuilder.apply(this, (query) {
@@ -276,6 +247,22 @@ extension LogModelQueryWhereSort on QueryBuilder<LogModel, LogModel, QWhere> {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'serverId'),
+      );
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhere> anyType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'type'),
+      );
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhere> anyTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'timestamp'),
       );
     });
   }
@@ -452,6 +439,186 @@ extension LogModelQueryWhere on QueryBuilder<LogModel, LogModel, QWhereClause> {
         lower: [lowerServerId],
         includeLower: includeLower,
         upper: [upperServerId],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> typeEqualTo(
+      LogType type) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'type',
+        value: [type],
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> typeNotEqualTo(
+      LogType type) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'type',
+              lower: [],
+              upper: [type],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'type',
+              lower: [type],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'type',
+              lower: [type],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'type',
+              lower: [],
+              upper: [type],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> typeGreaterThan(
+    LogType type, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'type',
+        lower: [type],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> typeLessThan(
+    LogType type, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'type',
+        lower: [],
+        upper: [type],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> typeBetween(
+    LogType lowerType,
+    LogType upperType, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'type',
+        lower: [lowerType],
+        includeLower: includeLower,
+        upper: [upperType],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> timestampEqualTo(
+      DateTime timestamp) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'timestamp',
+        value: [timestamp],
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> timestampNotEqualTo(
+      DateTime timestamp) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [],
+              upper: [timestamp],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [timestamp],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [timestamp],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'timestamp',
+              lower: [],
+              upper: [timestamp],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> timestampGreaterThan(
+    DateTime timestamp, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'timestamp',
+        lower: [timestamp],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> timestampLessThan(
+    DateTime timestamp, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'timestamp',
+        lower: [],
+        upper: [timestamp],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<LogModel, LogModel, QAfterWhereClause> timestampBetween(
+    DateTime lowerTimestamp,
+    DateTime upperTimestamp, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'timestamp',
+        lower: [lowerTimestamp],
+        includeLower: includeLower,
+        upper: [upperTimestamp],
         includeUpper: includeUpper,
       ));
     });

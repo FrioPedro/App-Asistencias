@@ -12,13 +12,16 @@ enum LogType {
 class LogModel {
   Id id = Isar.autoIncrement;
 
-  @Index(unique: true)
+  @Index()
   int? serverId;
 
   final String message;
 
   @enumerated
+  @Index()
   final LogType type;
+
+  @Index()
   final DateTime timestamp;
   final String? origin;
   final String? stackTrace;
