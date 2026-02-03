@@ -77,11 +77,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   IconData _getIconByType(LogType type) {
     switch (type) {
       case LogType.error:
-        return Icons.error_outline;
+        return Icons.bug_report_rounded; // O Icons.dangerous_rounded
       case LogType.warning:
-        return Icons.warning_amber;
+        return Icons.warning_amber_rounded; // O Icons.bolt_rounded
       case LogType.info:
-        return Icons.info_outline;
+        return Icons.info_rounded; // O Icons.article_rounded
     }
   }
 
@@ -277,7 +277,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
     final typeLabel = _getTypeLabel(log.type);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: const Color(0xFF1F1F1F),
@@ -342,7 +342,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
 
           // Contenido
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -354,7 +354,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     // Badge de tipo
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 6),
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: color.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
@@ -362,15 +362,15 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(icon, size: 14, color: color),
-                          const SizedBox(width: 4),
+                          Icon(icon, size: 12, color: color),
+                          const SizedBox(width: 2),
                           Text(
                             typeLabel,
                             style: TextStyle(
                               color: color,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                              letterSpacing: 0.2,
                             ),
                           ),
                         ],
@@ -392,8 +392,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                   log.message,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
-                    height: 1.4,
+                    fontSize: 12,
+                    height: 1.2,
                   ),
                 ),
               ],
