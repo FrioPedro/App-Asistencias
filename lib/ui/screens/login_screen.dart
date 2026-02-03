@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         LogProvider.log(
           'Intento de inicio de sesión fallido: ${_userController.text}',
-          type: LogType.warning,
+          type: LogType.error,
           origin: 'LoginScreen',
         );
         // ERROR: Mostrar mensaje
