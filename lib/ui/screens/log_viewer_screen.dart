@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../../models/log_model.dart';
 import '../../providers/log_provider.dart';
+import 'sheets/log_filter_sheet.dart';
 
 class LogViewerScreen extends StatefulWidget {
   const LogViewerScreen({super.key});
@@ -17,6 +18,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   List<LogModel> _filteredLogs = [];
   bool _isLoading = true;
   DateTimeRange? _selectedDateRange;
+  List<LogType> _selectedTypes = [];
 
   @override
   void initState() {
@@ -37,41 +39,47 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
 
   void _applyFilter() {
     setState(() {
-      _filteredLogs =
-          _logProvider.filterLogsByDate(_allLogs, _selectedDateRange);
+      _filteredLogs = _allLogs.where((log) {
+        // Filtro de Fecha
+        bool matchesDate = true;
+        if (_selectedDateRange != null) {
+          final start =
+              _selectedDateRange!.start.subtract(const Duration(seconds: 1));
+          final end = _selectedDateRange!.end.add(const Duration(days: 1));
+          matchesDate =
+              log.timestamp.isAfter(start) && log.timestamp.isBefore(end);
+        }
+
+        // Filtro de Tipo
+        bool matchesType = true;
+        if (_selectedTypes.isNotEmpty) {
+          matchesType = _selectedTypes.contains(log.type);
+        }
+
+        return matchesDate && matchesType;
+      }).toList();
     });
   }
 
-  Future<void> _pickDateRange() async {
-    final DateTimeRange? newDateRange = await showDateRangePicker(
+  void _openFilterSheet() {
+    showModalBottomSheet(
       context: context,
-      firstDate: DateTime(2023),
-      lastDate: DateTime.now(),
-      initialDateRange: _selectedDateRange,
-      saveText: 'FILTRAR',
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.dark().copyWith(
-            primaryColor: const Color(0xFF4CAF50),
-            colorScheme: const ColorScheme.dark(
-              primary: Color(0xFF4CAF50),
-              onPrimary: Colors.white,
-              surface: Color(0xFF1E1E1E),
-              onSurface: Colors.white,
-              secondary: Color(0xFF4CAF50),
-            ),
-          ),
-          child: child!,
-        );
-      },
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (context) => LogFilterSheet(
+        initialDateRange: _selectedDateRange,
+        initialTypes: _selectedTypes,
+        onApply: (range, types) {
+          setState(() {
+            _selectedDateRange = range;
+            _selectedTypes = types;
+          });
+          _applyFilter();
+        },
+      ),
     );
-
-    if (newDateRange != null) {
-      setState(() {
-        _selectedDateRange = newDateRange;
-      });
-      _applyFilter();
-    }
   }
 
   IconData _getIconByType(LogType type) {
@@ -116,8 +124,6 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDateFilterActive = _selectedDateRange != null;
-
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
@@ -136,9 +142,20 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
               _buildHeader(context),
               const SizedBox(height: 16),
 
-              // Chip de filtro
-              if (isDateFilterActive) ...[
-                _buildFilterChip(),
+              // Chips de filtros activos
+              if (_selectedDateRange != null || _selectedTypes.isNotEmpty) ...[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      if (_selectedDateRange != null) _buildFilterChip('Fecha'),
+                      if (_selectedTypes.isNotEmpty) ...[
+                        const SizedBox(width: 8),
+                        _buildFilterChip('Tipo (${_selectedTypes.length})'),
+                      ],
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 12),
               ],
 
@@ -174,11 +191,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
         Row(
           children: [
             _buildHeaderButton(
-              _selectedDateRange != null
-                  ? Icons.event_available
-                  : Icons.date_range,
-              () => _pickDateRange(),
-              isActive: _selectedDateRange != null,
+              (_selectedDateRange != null || _selectedTypes.isNotEmpty)
+                  ? Icons.filter_alt
+                  : Icons.filter_alt_outlined,
+              () => _openFilterSheet(),
+              isActive: _selectedDateRange != null || _selectedTypes.isNotEmpty,
             ),
             const SizedBox(width: 12),
             _buildHeaderButton(
@@ -205,31 +222,35 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
     );
   }
 
-  Widget _buildFilterChip() {
+  Widget _buildFilterChip(String label) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF4CAF50).withOpacity(0.15),
+        color: const Color(0xFF2E60C4).withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF4CAF50).withOpacity(0.5)),
+        border: Border.all(color: const Color(0xFF2E60C4).withOpacity(0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Filtrando: ${_selectedDateRange!.start.day}/${_selectedDateRange!.start.month} - ${_selectedDateRange!.end.day}/${_selectedDateRange!.end.month}',
+            label,
             style: const TextStyle(
-                color: Color(0xFF4CAF50),
+                color: Color(0xFF2E60C4),
                 fontSize: 12,
                 fontWeight: FontWeight.bold),
           ),
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () {
-              setState(() => _selectedDateRange = null);
+              if (label == 'Fecha') {
+                setState(() => _selectedDateRange = null);
+              } else {
+                setState(() => _selectedTypes = []);
+              }
               _applyFilter();
             },
-            child: const Icon(Icons.close, color: Color(0xFF4CAF50), size: 18),
+            child: const Icon(Icons.close, color: Color(0xFF2E60C4), size: 18),
           )
         ],
       ),
