@@ -145,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           LogProvider.log(
             'Zona actualizada a: $newZoneLabel',
-            type: LogType.info,
+            type: LogType.warning,
             origin: 'ProfileScreen',
           );
         }
@@ -223,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () async {
                 LogProvider.log(
                   'Cierre de sesión iniciado para el usuario: ${_user?.nationalId ?? 'Desconocido'}',
-                  type: LogType.info,
+                  type: LogType.warning,
                   origin: 'ProfileScreen',
                 );
                 await _profileService.logout();
