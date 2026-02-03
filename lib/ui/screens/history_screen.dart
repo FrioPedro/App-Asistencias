@@ -9,6 +9,9 @@ import '../widgets/event_card_skeleton.dart';
 import '../widgets/custom_search_bar.dart';
 import '../widgets/calendar_modal.dart';
 import '../../domain/activity/get_activity.dart';
+import '../../providers/log_provider.dart';
+import '../../models/log_model.dart';
+import 'package:intl/intl.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -77,6 +80,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
           setState(() {
             _selectedDate = date;
           });
+          LogProvider.log(
+            'Histórico: Filtrado por fecha ${DateFormat('dd/MM/yyyy').format(date)}',
+            type: LogType.info,
+            origin: 'HistoryScreen',
+          );
         },
       ),
     );
@@ -86,6 +94,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
     setState(() {
       _selectedDate = null;
     });
+    LogProvider.log(
+      'Histórico: Filtro de fecha limpiado',
+      type: LogType.info,
+      origin: 'HistoryScreen',
+    );
   }
 
   void _showDebugInfo() async {
