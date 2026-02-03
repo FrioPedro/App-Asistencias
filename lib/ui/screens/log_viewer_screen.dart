@@ -355,7 +355,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                       Colors.transparent,
                       Colors.black,
                     ],
-                    stops: [0.0, 0.3, 1.0],
+                    stops: [0.0, 0.25, 1.0],
                   ).createShader(rect);
                 },
                 blendMode: BlendMode.dstIn,
@@ -368,7 +368,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                         child: Icon(
                           icon,
                           size: 80,
-                          color: color.withOpacity(0.4),
+                          color: color.withOpacity(0.8),
                         ),
                       ),
                     ),
@@ -394,8 +394,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
               children: [
                 // Fila superior: Tipo y Timestamp
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Badge de tipo
                     Container(
@@ -422,24 +422,31 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
                     // Timestamp
                     Text(
                       _formatTimestamp(log.timestamp),
                       style: TextStyle(
                         color: Colors.grey[500],
-                        fontSize: 12,
+                        fontSize: 11,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 // Mensaje
-                Text(
-                  log.message,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    height: 1.2,
+                Padding(
+                  padding: const EdgeInsets.only(
+                      right: 60), // Espacio para no tapar el ícono
+                  child: Text(
+                    log.message,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      height: 1.2,
+                    ),
                   ),
                 ),
               ],
