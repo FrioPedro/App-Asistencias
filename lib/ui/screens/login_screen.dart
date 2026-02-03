@@ -38,6 +38,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Validaciones básicas antes de llamar al provider
     if (_userController.text.isEmpty || _passController.text.isEmpty) {
+      LogProvider.log(
+        'Intento de login con campos vacíos',
+        type: LogType.warning,
+        origin: 'LoginScreen',
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Por favor ingrese usuario y contraseña'),
