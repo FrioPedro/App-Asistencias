@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../core/permission_guard.dart'; // <--- Importamos PermissionGuard
-import '../../providers/auth_provider.dart'; // <--- Importamos el provider
+import '../../core/permission_guard.dart';
+import '../../providers/auth_provider.dart';
+import '../../providers/log_provider.dart';
+import '../../models/log_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -52,6 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     // Llamar al provider
+    LogProvider.log(
+      'Intento de inicio de sesión iniciado',
+      type: LogType.info,
+      origin: 'LoginScreen',
+    );
+
     final bool success = await _authProvider.login(
       _userController.text.trim(),
       _passController.text.trim(),
@@ -62,8 +70,18 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
 
       if (success) {
+        LogProvider.log(
+          'Inicio de sesión exitoso: ${_userController.text}',
+          type: LogType.info,
+          origin: 'LoginScreen',
+        );
         // ÉXITO: El GoRouter redirigirá automáticamente
       } else {
+        LogProvider.log(
+          'Intento de inicio de sesión fallido: ${_userController.text}',
+          type: LogType.warning,
+          origin: 'LoginScreen',
+        );
         // ERROR: Mostrar mensaje
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
