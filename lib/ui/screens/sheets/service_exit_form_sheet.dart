@@ -157,7 +157,14 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
   Future<void> _onSubmit() async {
     if (_isSubmitting) return;
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      LogProvider.log(
+        'Intento de envío de formulario de servicio fallido: Campos obligatorios incompletos',
+        type: LogType.warning,
+        origin: 'ServiceExitFormScreen',
+      );
+      return;
+    }
 
     // Fotos ya no son obligatorias por solicitud
     // if (_photosAntes.isEmpty) { ... }
@@ -382,6 +389,11 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
           'DEBUG: Resultado del picker: ${result?.length ?? 0} fotos seleccionadas');
 
       if (result != null && result.isNotEmpty) {
+        LogProvider.log(
+          '${result.length} foto(s) añadidas desde Galería (${isAntes ? "Antes" : "Después"})',
+          type: LogType.info,
+          origin: 'ServiceExitFormScreen',
+        );
         setState(() {
           if (isAntes) {
             _photosAntes = [..._photosAntes, ...result]
@@ -412,6 +424,11 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       );
 
       if (result != null) {
+        LogProvider.log(
+          'Foto añadida desde Cámara (${isAntes ? "Antes" : "Después"})',
+          type: LogType.info,
+          origin: 'ServiceExitFormScreen',
+        );
         setState(() {
           if (isAntes) {
             if (_photosAntes.length < _maxPhotosPerSection) {

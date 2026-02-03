@@ -5,6 +5,8 @@ import 'package:app_asistencias/core/enpoinService.dart';
 import 'package:app_asistencias/domain/connectivity/network_info.dart';
 import 'package:app_asistencias/models/note_model.dart';
 import 'package:isar/isar.dart';
+import 'package:app_asistencias/providers/log_provider.dart';
+import 'package:app_asistencias/models/log_model.dart';
 
 class NoteSyncService {
   final NetworkInfo _net;
@@ -21,6 +23,11 @@ class NoteSyncService {
 
     if (!connected) {
       print('[NOTE_SYNC] Aborting sync: no connection');
+      LogProvider.log(
+        'Sincronización de notas abortada: Sin conexión',
+        type: LogType.warning,
+        origin: 'NoteSyncService',
+      );
       return;
     }
 
@@ -49,6 +56,11 @@ class NoteSyncService {
     }
 
     print('[NOTE_SYNC] Sending ${pending.length} notes');
+    LogProvider.log(
+      'Sincronización de notas iniciada: ${pending.length} notas pendientes',
+      type: LogType.info,
+      origin: 'NoteSyncService',
+    );
 
     for (final n in pending) {
       print(
@@ -102,6 +114,11 @@ class NoteSyncService {
           });
 
           print('[NOTE_SYNC] Note marked as synced');
+          LogProvider.log(
+            'Nota sincronizada con éxito (ID local: ${n.id})',
+            type: LogType.info,
+            origin: 'NoteSyncService',
+          );
         } else {
           await isar.writeTxn(() async {
             n.syncStatus = SyncStatus.failed;
@@ -110,6 +127,11 @@ class NoteSyncService {
 
           print(
               '[NOTE_SYNC] Server returned ${res.statusCode}, note marked failed');
+          LogProvider.log(
+            'Error al sincronizar nota: Servidor retornó código ${res.statusCode}',
+            type: LogType.error,
+            origin: 'NoteSyncService',
+          );
         }
       } catch (e) {
         await isar.writeTxn(() async {
@@ -118,6 +140,11 @@ class NoteSyncService {
         });
 
         print('[NOTE_SYNC] Error sending note: $e');
+        LogProvider.log(
+          'Error crítico al sincronizar nota: $e',
+          type: LogType.error,
+          origin: 'NoteSyncService',
+        );
       }
     }
 

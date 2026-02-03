@@ -4,6 +4,8 @@ import 'package:app_asistencias/domain/connectivity/network_info.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/models/activity_model.dart';
 import 'package:isar/isar.dart';
+import 'package:app_asistencias/providers/log_provider.dart';
+import 'package:app_asistencias/models/log_model.dart';
 
 class ActivitySyncService {
   final NetworkInfo _net;
@@ -50,6 +52,11 @@ class ActivitySyncService {
       final connected = await _net.hasConnection();
       if (!connected) {
         print('[SYNC] Aborting sync: no connection');
+        LogProvider.log(
+          'Sincronización abortada: Sin conexión a internet',
+          type: LogType.warning,
+          origin: 'ActivitySyncService',
+        );
         return;
       }
 
@@ -83,6 +90,11 @@ class ActivitySyncService {
     }
 
     print('[SYNC] Sending ${pendingModels.length} activities');
+    LogProvider.log(
+      'Sincronización iniciada: Enviando ${pendingModels.length} actividades pendientes',
+      type: LogType.info,
+      origin: 'ActivitySyncService',
+    );
 
     for (final a in pendingModels) {
       try {
@@ -126,6 +138,11 @@ class ActivitySyncService {
 
         if (resEntry.statusCode != 200 && resEntry.statusCode != 201) {
           print('[SYNC] Entry failed: ${resEntry.statusCode}');
+          LogProvider.log(
+            'Error al sincronizar entrada (Token: ${a.token.substring(0, 8)}...): Código ${resEntry.statusCode}',
+            type: LogType.error,
+            origin: 'ActivitySyncService',
+          );
           success = false;
         }
 
@@ -149,6 +166,11 @@ class ActivitySyncService {
 
           if (resExit.statusCode != 200 && resExit.statusCode != 201) {
             print('[SYNC] Exit failed: ${resExit.statusCode}');
+            LogProvider.log(
+              'Error al sincronizar salida (Token: ${a.token.substring(0, 8)}...): Código ${resExit.statusCode}',
+              type: LogType.error,
+              origin: 'ActivitySyncService',
+            );
             success = false;
           }
         }
@@ -163,9 +185,19 @@ class ActivitySyncService {
             }
           });
           print('[SYNC] Synced success: ${a.token}');
+          LogProvider.log(
+            'Actividad sincronizada con éxito: ${a.token.substring(0, 8)}...',
+            type: LogType.info,
+            origin: 'ActivitySyncService',
+          );
         }
       } catch (e) {
         print('[SYNC] Error sending activity ${a.token}: $e');
+        LogProvider.log(
+          'Error crítico en sincronización (Token: ${a.token.substring(0, 8)}...): $e',
+          type: LogType.error,
+          origin: 'ActivitySyncService',
+        );
       }
     }
 
