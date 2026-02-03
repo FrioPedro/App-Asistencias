@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../../models/log_model.dart';
 import '../../providers/log_provider.dart';
+import '../widgets/custom_search_bar.dart';
 import 'sheets/log_filter_sheet.dart';
 
 class LogViewerScreen extends StatefulWidget {
@@ -19,11 +20,20 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   bool _isLoading = true;
   DateTimeRange? _selectedDateRange;
   List<LogType> _selectedTypes = [];
+  late TextEditingController _searchController;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController();
     _loadLogs();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadLogs() async {
@@ -40,6 +50,10 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   void _applyFilter() {
     setState(() {
       _filteredLogs = _allLogs.where((log) {
+        // Filtro de Texto
+        final matchesSearch = _searchQuery.isEmpty ||
+            log.message.toLowerCase().contains(_searchQuery.toLowerCase());
+
         // Filtro de Fecha
         bool matchesDate = true;
         if (_selectedDateRange != null) {
@@ -56,7 +70,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
           matchesType = _selectedTypes.contains(log.type);
         }
 
-        return matchesDate && matchesType;
+        return matchesSearch && matchesDate && matchesType;
       }).toList();
     });
   }
@@ -140,6 +154,17 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
             children: [
               // Header
               _buildHeader(context),
+              const SizedBox(height: 16),
+
+              // Buscador
+              CustomSearchBar(
+                controller: _searchController,
+                hintText: 'Buscar en logs',
+                onChanged: (val) {
+                  setState(() => _searchQuery = val);
+                  _applyFilter();
+                },
+              ),
               const SizedBox(height: 16),
 
               // Chips de filtros activos
