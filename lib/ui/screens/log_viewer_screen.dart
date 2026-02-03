@@ -88,11 +88,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   String _getTypeLabel(LogType type) {
     switch (type) {
       case LogType.error:
-        return 'ERROR';
+        return 'ERR';
       case LogType.warning:
-        return 'WARN';
+        return 'ADV';
       case LogType.info:
-        return 'INFO';
+        return 'INF';
     }
   }
 
@@ -282,7 +282,6 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF1F1F1F),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.15),
@@ -343,7 +342,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
 
           // Contenido
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -358,7 +357,6 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                           horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: color.withOpacity(0.2),
-                        border: Border.all(color: color),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
