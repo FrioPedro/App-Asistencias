@@ -3,6 +3,7 @@ import '../../core/permission_guard.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/log_provider.dart';
 import '../../models/log_model.dart';
+import '../widgets/custom_snackbar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,11 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
         type: LogType.warning,
         origin: 'LoginScreen',
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Por favor ingrese usuario y contraseña'),
-            backgroundColor: Colors.orange),
-      );
+      CustomSnackBar.show(context, 'Por favor ingrese usuario y contraseña',
+          isError: true);
       return;
     }
 
@@ -88,11 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
           origin: 'LoginScreen',
         );
         // ERROR: Mostrar mensaje
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Credenciales incorrectas'),
-              backgroundColor: Colors.red),
-        );
+        CustomSnackBar.show(context, 'Credenciales incorrectas', isError: true);
       }
     }
   }
