@@ -1,4 +1,4 @@
-import 'package:app_asistencias/models/user_model.dart';
+import 'package:app_asistencias/models/user/user_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

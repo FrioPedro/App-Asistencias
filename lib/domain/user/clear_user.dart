@@ -1,5 +1,5 @@
 import 'package:app_asistencias/core/database.dart';
-import 'package:app_asistencias/models/user_model.dart';
+import 'package:app_asistencias/models/user/user_model.dart';
 
 class ClearUser {
   static Future<void> clearLocalData() async {

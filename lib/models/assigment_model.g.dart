@@ -138,7 +138,7 @@ AssigmentModel _assigmentModelDeserialize(
     client: reader.readStringOrNull(offsets[2]),
     description: reader.readStringOrNull(offsets[3]),
     documentId: reader.readStringOrNull(offsets[4]),
-    serverId: reader.readLongOrNull(offsets[5]),
+    serverId: reader.readLongOrNull(offsets[5]) ?? 0,
   );
   object.id = id;
   object.updatedAt = reader.readDateTime(offsets[6]);
@@ -165,7 +165,7 @@ P _assigmentModelDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 6:
       return (reader.readDateTime(offset)) as P;
     default:
@@ -210,38 +210,38 @@ void _assigmentModelAttach(
 }
 
 extension AssigmentModelByIndex on IsarCollection<AssigmentModel> {
-  Future<AssigmentModel?> getByServerId(int? serverId) {
+  Future<AssigmentModel?> getByServerId(int serverId) {
     return getByIndex(r'serverId', [serverId]);
   }
 
-  AssigmentModel? getByServerIdSync(int? serverId) {
+  AssigmentModel? getByServerIdSync(int serverId) {
     return getByIndexSync(r'serverId', [serverId]);
   }
 
-  Future<bool> deleteByServerId(int? serverId) {
+  Future<bool> deleteByServerId(int serverId) {
     return deleteByIndex(r'serverId', [serverId]);
   }
 
-  bool deleteByServerIdSync(int? serverId) {
+  bool deleteByServerIdSync(int serverId) {
     return deleteByIndexSync(r'serverId', [serverId]);
   }
 
-  Future<List<AssigmentModel?>> getAllByServerId(List<int?> serverIdValues) {
+  Future<List<AssigmentModel?>> getAllByServerId(List<int> serverIdValues) {
     final values = serverIdValues.map((e) => [e]).toList();
     return getAllByIndex(r'serverId', values);
   }
 
-  List<AssigmentModel?> getAllByServerIdSync(List<int?> serverIdValues) {
+  List<AssigmentModel?> getAllByServerIdSync(List<int> serverIdValues) {
     final values = serverIdValues.map((e) => [e]).toList();
     return getAllByIndexSync(r'serverId', values);
   }
 
-  Future<int> deleteAllByServerId(List<int?> serverIdValues) {
+  Future<int> deleteAllByServerId(List<int> serverIdValues) {
     final values = serverIdValues.map((e) => [e]).toList();
     return deleteAllByIndex(r'serverId', values);
   }
 
-  int deleteAllByServerIdSync(List<int?> serverIdValues) {
+  int deleteAllByServerIdSync(List<int> serverIdValues) {
     final values = serverIdValues.map((e) => [e]).toList();
     return deleteAllByIndexSync(r'serverId', values);
   }
@@ -353,29 +353,7 @@ extension AssigmentModelQueryWhere
   }
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterWhereClause>
-      serverIdIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'serverId',
-        value: [null],
-      ));
-    });
-  }
-
-  QueryBuilder<AssigmentModel, AssigmentModel, QAfterWhereClause>
-      serverIdIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'serverId',
-        lower: [null],
-        includeLower: false,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<AssigmentModel, AssigmentModel, QAfterWhereClause>
-      serverIdEqualTo(int? serverId) {
+      serverIdEqualTo(int serverId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r'serverId',
@@ -385,7 +363,7 @@ extension AssigmentModelQueryWhere
   }
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterWhereClause>
-      serverIdNotEqualTo(int? serverId) {
+      serverIdNotEqualTo(int serverId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -421,7 +399,7 @@ extension AssigmentModelQueryWhere
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterWhereClause>
       serverIdGreaterThan(
-    int? serverId, {
+    int serverId, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -436,7 +414,7 @@ extension AssigmentModelQueryWhere
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterWhereClause>
       serverIdLessThan(
-    int? serverId, {
+    int serverId, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -451,8 +429,8 @@ extension AssigmentModelQueryWhere
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterWhereClause>
       serverIdBetween(
-    int? lowerServerId,
-    int? upperServerId, {
+    int lowerServerId,
+    int upperServerId, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -1054,25 +1032,7 @@ extension AssigmentModelQueryFilter
   }
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
-      serverIdIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'serverId',
-      ));
-    });
-  }
-
-  QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
-      serverIdIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'serverId',
-      ));
-    });
-  }
-
-  QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
-      serverIdEqualTo(int? value) {
+      serverIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'serverId',
@@ -1083,7 +1043,7 @@ extension AssigmentModelQueryFilter
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
       serverIdGreaterThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1097,7 +1057,7 @@ extension AssigmentModelQueryFilter
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
       serverIdLessThan(
-    int? value, {
+    int value, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1111,8 +1071,8 @@ extension AssigmentModelQueryFilter
 
   QueryBuilder<AssigmentModel, AssigmentModel, QAfterFilterCondition>
       serverIdBetween(
-    int? lower,
-    int? upper, {
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
@@ -1486,7 +1446,7 @@ extension AssigmentModelQueryProperty
     });
   }
 
-  QueryBuilder<AssigmentModel, int?, QQueryOperations> serverIdProperty() {
+  QueryBuilder<AssigmentModel, int, QQueryOperations> serverIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'serverId');
     });

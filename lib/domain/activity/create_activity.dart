@@ -1,9 +1,9 @@
 import 'package:app_asistencias/core/database.dart';
-import 'package:app_asistencias/models/activity_model.dart';
+import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
-import 'package:app_asistencias/models/user_zone.dart';
-import 'package:app_asistencias/models/motiveActivity_model.dart';
+import 'package:app_asistencias/models/user/user_zone.dart';
+import 'package:app_asistencias/models/activity/motiveActivity_model.dart';
 import 'get_activity.dart';
 
 class CreateActivity {
@@ -30,9 +30,9 @@ class CreateActivity {
       task: task,
       activityType: assignment.assigmentType,
       motiveActivity: MotiveActivity.startWork,
-      timestamp:timestamp,
-      latitude:latitude,
-      longitude:longitude,
+      timestamp: timestamp,
+      latitude: latitude,
+      longitude: longitude,
       isSynced: false,
     );
 
@@ -45,26 +45,29 @@ class CreateActivity {
 
   /// Cerrar una SESIÓN (Salida)
   static Future<ActivityModel?> storeExit({
-    required int serverId,
+    required String keyGroup,
     double? latitude,
     double? longitude,
     DateTime? timestamp,
   }) async {
     final isar = await Database.instance();
 
-    // 1. Obtener sesión activa (la que tiene exitTimestamp == null)
-    final active = await GetActivity.getActive(serverId);
+    // 1) Obtener sesión activa por keyGroup
+    final active = await GetActivity.getActive(keyGroup);
     if (active == null) {
       print(
-          "Error: Intentando cerrar sesión para ServerID $serverId pero no hay ninguna abierta.");
+        "Error: Intentando cerrar sesión para keyGroup $keyGroup pero no hay ninguna abierta.",
+      );
       return null;
     }
 
-    // 2. Actualizar campos de salida
-    active.exitTimestamp = timestamp ?? DateTime.now();
-    active.exitLatitude = latitude;
-    active.exitLongitude = longitude;
-    active.isSynced = false; // Marcar para subir actualización
+    // 2) Actualizar el mismo registro (cerrar)
+    active.motiveActivity =
+        MotiveActivity.endWork;
+    active.timestamp = timestamp ?? DateTime.now();
+    active.latitude = latitude;
+    active.longitude = longitude;
+    active.isSynced = false;
 
     await isar.writeTxn(() async {
       await isar.activityModels.put(active);

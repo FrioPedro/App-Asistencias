@@ -64,7 +64,7 @@ class GetAssigned {
         if (activa != null) {
           try {
             await ActivityRegistrar.registerExitWithGPS(
-              serverId: activa.serverId,
+              keyGroup: activa.keyGroup,
               // si necesitas task/timestamp también:
               // task: activa.task,
               // timestamp: activa.timestamp,

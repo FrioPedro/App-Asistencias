@@ -1,19 +1,19 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:app_asistencias/models/activity_model.dart';
+import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
 
 class ActiveSessionStorage {
-  static const _kActiveassigmentId = 'active_event_key';
+  static const _kActivekeyGroup = 'active_event_key';
   static const _kActiveTaskId = 'active_task_id';
   static const _kActiveServerId = 'active_server_id';
   // 1. Nueva clave para la hora
   static const _kActiveTimestamp = 'active_timestamp'; 
 
   // 2. Actualizamos el retorno para incluir 'timestamp'
-  Future<({String assigmentId, TaskType task, int serverId, DateTime timestamp})?> read() async {
+  Future<({String keyGroup, TaskType task, int serverId, DateTime timestamp})?> read() async {
     final sp = await SharedPreferences.getInstance();
 
-    final key = sp.getString(_kActiveassigmentId);
+    final key = sp.getString(_kActivekeyGroup);
     final taskId = sp.getInt(_kActiveTaskId);
     final serverId = sp.getInt(_kActiveServerId);
     final tsMillis = sp.getInt(_kActiveTimestamp); // Leemos milisegundos
@@ -23,7 +23,7 @@ class ActiveSessionStorage {
     }
 
     return (
-      assigmentId: key,
+      keyGroup: key,
       task: TaskTypeX.fromId(taskId),
       serverId: serverId,
       timestamp: DateTime.fromMillisecondsSinceEpoch(tsMillis), // Convertimos a DateTime
@@ -31,13 +31,13 @@ class ActiveSessionStorage {
   }
 
   Future<void> save({
-    required String assigmentId,
+    required String keyGroup,
     required TaskType task,
     required int serverId,
     required DateTime timestamp, // 3. Pedimos la fecha al guardar
   }) async {
     final sp = await SharedPreferences.getInstance();
-    await sp.setString(_kActiveassigmentId, assigmentId);
+    await sp.setString(_kActivekeyGroup, keyGroup);
     await sp.setInt(_kActiveTaskId, task.id);
     await sp.setInt(_kActiveServerId, serverId);
     await sp.setInt(_kActiveTimestamp, timestamp.millisecondsSinceEpoch); // Guardamos milisegundos
@@ -45,7 +45,7 @@ class ActiveSessionStorage {
 
   Future<void> clear() async {
     final sp = await SharedPreferences.getInstance();
-    await sp.remove(_kActiveassigmentId);
+    await sp.remove(_kActivekeyGroup);
     await sp.remove(_kActiveTaskId);
     await sp.remove(_kActiveServerId);
     await sp.remove(_kActiveTimestamp); // Limpiamos fecha

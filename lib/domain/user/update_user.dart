@@ -1,7 +1,7 @@
 // lib/domain/user/update_user.dart
 import 'package:app_asistencias/core/database.dart';
-import 'package:app_asistencias/models/user_model.dart';
-import 'package:app_asistencias/models/user_zone.dart';
+import 'package:app_asistencias/models/user/user_model.dart';
+import 'package:app_asistencias/models/user/user_zone.dart';
 import 'package:isar/isar.dart';
 
 class UpdateUser {

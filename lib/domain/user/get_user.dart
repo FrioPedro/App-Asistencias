@@ -1,7 +1,7 @@
 import 'package:isar/isar.dart';
 import 'package:app_asistencias/core/enpoinService.dart';
 import 'package:app_asistencias/core/database.dart';
-import 'package:app_asistencias/models/user_model.dart';
+import 'package:app_asistencias/models/user/user_model.dart';
 
 class GetUser {
   /// Trae del API y guarda LOCALMENTE (único usuario)

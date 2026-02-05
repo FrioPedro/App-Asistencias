@@ -2,10 +2,9 @@ import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/core/enpoinService.dart';
 import 'package:app_asistencias/domain/connectivity/network_info.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
-import 'package:app_asistencias/models/activity_model.dart';
+import 'package:app_asistencias/models/activity/activity_model.dart';
+import 'package:app_asistencias/domain/activity/get_activity.dart';
 import 'package:isar/isar.dart';
-import 'package:app_asistencias/providers/log_provider.dart';
-import 'package:app_asistencias/models/log_model.dart';
 
 class ActivitySyncService {
   final NetworkInfo _net;
@@ -13,32 +12,6 @@ class ActivitySyncService {
 
   ActivitySyncService({NetworkInfo? net}) : _net = net ?? NetworkInfo();
 
-  DateTime _floorToSecond(DateTime dt) =>
-      DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second);
-
-  List<ActivityModel> _dedupeByToken(List<ActivityModel> list) {
-    final Map<String, ActivityModel> byKey = {};
-
-    for (final a in list) {
-      final key = a.token;
-
-      if (!byKey.containsKey(key)) {
-        byKey[key] = a;
-        continue;
-      }
-
-      final existing = byKey[key]!;
-
-      // Si ambos existen, nos quedamos con el que tenga más datos (ej. cerrado vs abierto)
-      if (a.isClosed && !existing.isClosed) {
-        byKey[key] = a;
-      }
-    }
-
-    return byKey.values.toList();
-  }
-
-  /// Wi-Fi o datos móviles
   Future<void> syncIfPossible() async {
     if (_running) {
       print('[SYNC] Skipped: already running');
@@ -47,16 +20,9 @@ class ActivitySyncService {
     _running = true;
 
     try {
-      print('[SYNC] syncIfPossible called');
-
       final connected = await _net.hasConnection();
       if (!connected) {
-        print('[SYNC] Aborting sync: no connection');
-        LogProvider.log(
-          'Sincronización abortada: Sin conexión a internet',
-          type: LogType.warning,
-          origin: 'ActivitySyncService',
-        );
+        print('[SYNC] Aborting: no connection');
         return;
       }
 
@@ -67,8 +33,6 @@ class ActivitySyncService {
   }
 
   Future<void> syncPending({int batchSize = 100}) async {
-    print('[SYNC] syncPending started');
-
     final isar = await Database.instance();
     final api = EndpointService.instance;
 
@@ -80,124 +44,47 @@ class ActivitySyncService {
       return;
     }
 
-    // 1) Cargar pendientes
-    final pendingModels =
-        await isar.activityModels.filter().isSyncedEqualTo(false).findAll();
+    // 1) Cargar pendientes (orden cronológico recomendado)
+    final pending = await GetActivity.getPendingSync();
 
-    if (pendingModels.isEmpty) {
+    if (pending.isEmpty) {
       print('[SYNC] No pending activities');
       return;
     }
 
-    print('[SYNC] Sending ${pendingModels.length} activities');
-    LogProvider.log(
-      'Sincronización iniciada: Enviando ${pendingModels.length} actividades pendientes',
-      type: LogType.info,
-      origin: 'ActivitySyncService',
-    );
+    print('[SYNC] Sending ${pending.length} activities');
 
-    for (final a in pendingModels) {
+    for (final a in pending) {
       try {
-        // --- LÓGICA DE DOBLE ENVÍO PARA SESIONES COMPLETAS OFFLINE ---
-        // Si la sesión está CERRADA, debemos garantizar que el server tenga la ENTRADA primero.
-        // Como no sabemos si la entrada ya se envió (isSynced es un solo bool),
-        // Por seguridad, enviamos ENTRADA primero. Si el server es idempotente (upsert), no pasa nada.
+        // 2) Payload directo (1 request por actividad)
+        final payload = a.toServerPayload();
 
-        bool success = true;
+        // Si tu server requiere keys/token, agrégalo aquí:
+        // payload['keys'] = a.keyGroup;
 
-        // 1. Enviar ENTRADA (Motive 1)
-        // Forzamos "isOpen" visualmente para generar payload de entrada??
-        // No, el toMarkPayload usa "isClosed" para decidir.
-        // Haremos un truco: generamos payload manual o modificamos toMarkPayload?
-        // Mejor: Construimos payload manualmente aquí para tener control absoluto.
+        // Si collaborator puede venir null, fuerza desde user
+        payload['collaborator'] ??= user.nationalId ?? '';
 
-        final basePayload = {
-          'token': a.token,
-          'project': a.serverId ?? 0,
-          'collaborator': user.nationalId ?? '',
-          'zone': user.zone ?? '',
-          'task': a.task.id,
-        };
+        final res = await api.post('/api/attendance/v2', data: payload);
 
-        // PAYLOAD 1: ENTRADA
-        final payloadEntry = {
-          ...basePayload,
-          'motive': 1,
-          'latitude': a.entryLatitude,
-          'longitude': a.entryLongitude,
-          'timestamp': a.entryTimestamp
-              .toIso8601String()
-              .replaceFirst('T', ' ')
-              .split('.')
-              .first,
-        };
-
-        print('[SYNC] Sending ENTRY for ${a.token}...');
-        final resEntry =
-            await api.post('/api/attendance/v2', data: payloadEntry);
-
-        if (resEntry.statusCode != 200 && resEntry.statusCode != 201) {
-          print('[SYNC] Entry failed: ${resEntry.statusCode}');
-          LogProvider.log(
-            'Error al sincronizar entrada (Token: ${a.token.substring(0, 8)}...): Código ${resEntry.statusCode}',
-            type: LogType.error,
-            origin: 'ActivitySyncService',
-          );
-          success = false;
+        final ok = res.statusCode == 200 || res.statusCode == 201;
+        if (!ok) {
+          print('[SYNC] Failed ${a.id}: ${res.statusCode}');
+          continue;
         }
 
-        // 2. Si está CERRADA y Entry fue ok, enviar SALIDA (Motive 2)
-        if (success && a.isClosed) {
-          final payloadExit = {
-            ...basePayload,
-            'motive': 2,
-            'latitude': a.exitLatitude,
-            'longitude': a.exitLongitude,
-            'timestamp': a.exitTimestamp!
-                .toIso8601String()
-                .replaceFirst('T', ' ')
-                .split('.')
-                .first,
-          };
-
-          print('[SYNC] Sending EXIT for ${a.token}...');
-          final resExit =
-              await api.post('/api/attendance/v2', data: payloadExit);
-
-          if (resExit.statusCode != 200 && resExit.statusCode != 201) {
-            print('[SYNC] Exit failed: ${resExit.statusCode}');
-            LogProvider.log(
-              'Error al sincronizar salida (Token: ${a.token.substring(0, 8)}...): Código ${resExit.statusCode}',
-              type: LogType.error,
-              origin: 'ActivitySyncService',
-            );
-            success = false;
+        // 3) Marcar como sincronizado
+        await isar.writeTxn(() async {
+          final fresh = await isar.activityModels.get(a.id);
+          if (fresh != null) {
+            fresh.isSynced = true;
+            await isar.activityModels.put(fresh);
           }
-        }
+        });
 
-        // 3. Si todo OK, marcar synced
-        if (success) {
-          await isar.writeTxn(() async {
-            final fresh = await isar.activityModels.get(a.id);
-            if (fresh != null) {
-              fresh.isSynced = true;
-              await isar.activityModels.put(fresh);
-            }
-          });
-          print('[SYNC] Synced success: ${a.token}');
-          LogProvider.log(
-            'Actividad sincronizada con éxito: ${a.token.substring(0, 8)}...',
-            type: LogType.info,
-            origin: 'ActivitySyncService',
-          );
-        }
+        print('[SYNC] Synced OK id=${a.id} keyGroup=${a.keyGroup}');
       } catch (e) {
-        print('[SYNC] Error sending activity ${a.token}: $e');
-        LogProvider.log(
-          'Error crítico en sincronización (Token: ${a.token.substring(0, 8)}...): $e',
-          type: LogType.error,
-          origin: 'ActivitySyncService',
-        );
+        print('[SYNC] Error sending id=${a.id}: $e');
       }
     }
 

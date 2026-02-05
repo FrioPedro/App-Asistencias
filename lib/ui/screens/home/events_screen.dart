@@ -9,7 +9,7 @@ import '../create_activity_screen.dart';
 import 'widgets/restricted_access_dialog.dart';
 import '../sheets/event_action_sheet.dart';
 import 'widgets/home_header.dart';
-import '../../../models/activity_model.dart';
+import '../../../models/activity/activity_model.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});

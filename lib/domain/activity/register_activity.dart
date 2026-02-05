@@ -4,12 +4,15 @@ import 'package:app_asistencias/domain/activity/create_activity.dart';
 import 'package:app_asistencias/domain/activity/get_location.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
+import 'package:app_asistencias/models/user/user_zone.dart';
 
 class ActivityRegistrar {
   /// Registra ENTRADA tomando GPS internamente (sin params lat/lng)
   static Future<void> registerEntryWithGPS({
     required AssigmentModel assignment,
     required TaskType task,
+    required String collaboratorDocumentId,
+    required UserZone userZone,
     DateTime? timestamp,
   }) async {
     print('[ACTIVITY] registerEntryWithGPS called');
@@ -22,12 +25,15 @@ class ActivityRegistrar {
     if (gps == null) {
       print('[ACTIVITY] GPS not available, saving entry WITHOUT coordinates');
     } else {
-      print('[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
+      print(
+          '[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
     }
 
     await CreateActivity.storeEntry(
       assignment: assignment,
       task: task,
+      collaboratorDocumentId: collaboratorDocumentId,
+      userZone: userZone,
       latitude: gps?.latitude,
       longitude: gps?.longitude,
       timestamp: timestamp,
@@ -38,11 +44,11 @@ class ActivityRegistrar {
 
   /// Registra SALIDA tomando GPS internamente (sin params lat/lng)
   static Future<void> registerExitWithGPS({
-    required int serverId,
+    required String keyGroup,
     DateTime? timestamp,
   }) async {
     print('[ACTIVITY] registerExitWithGPS called');
-    print('[ACTIVITY] ServerId: $serverId');
+    print('[ACTIVITY] ServerId: $keyGroup');
     print('[ACTIVITY] Timestamp override: $timestamp');
 
     final gps = await _getGpsOrNull();
@@ -50,11 +56,12 @@ class ActivityRegistrar {
     if (gps == null) {
       print('[ACTIVITY] GPS not available, saving exit WITHOUT coordinates');
     } else {
-      print('[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
+      print(
+          '[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
     }
 
     await CreateActivity.storeExit(
-      serverId: serverId,
+      keyGroup: keyGroup,
       latitude: gps?.latitude,
       longitude: gps?.longitude,
       timestamp: timestamp,

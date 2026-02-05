@@ -1,5 +1,5 @@
 // Para debugPrint
-import 'package:app_asistencias/models/activity_model.dart';
+import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/domain/activity/get_activity.dart';
 import 'package:app_asistencias/domain/activity/syncService.dart';
 

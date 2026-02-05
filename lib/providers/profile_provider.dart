@@ -1,6 +1,6 @@
-import '../models/user_model.dart';
+import '../models/user/user_model.dart';
 // ✅ IMPORTANTE: Asegúrate de importar el enum UserZone
-import '../models/user_zone.dart';
+import '../models/user/user_zone.dart';
 
 import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/domain/auth/session.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/permission_guard.dart';
 import '../../../models/assigment_model.dart';
-import '../../../models/activity_model.dart';
+import '../../../models/activity/activity_model.dart';
 import '../../../providers/events_provider.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/action_option.dart';
