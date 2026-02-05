@@ -5,10 +5,11 @@ import 'package:app_asistencias/domain/activity/get_location.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:app_asistencias/models/user/user_zone.dart';
+import 'package:app_asistencias/models/activity/activity_model.dart';
 
 class ActivityRegistrar {
   /// Registra ENTRADA tomando GPS internamente (sin params lat/lng)
-  static Future<void> registerEntryWithGPS({
+  static Future<ActivityModel> registerEntryWithGPS({
     required AssigmentModel assignment,
     required TaskType task,
     required String collaboratorDocumentId,
@@ -29,7 +30,7 @@ class ActivityRegistrar {
           '[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
     }
 
-    await CreateActivity.storeEntry(
+    final _activityModel= await CreateActivity.storeEntry(
       assignment: assignment,
       task: task,
       collaboratorDocumentId: collaboratorDocumentId,
@@ -40,6 +41,7 @@ class ActivityRegistrar {
     );
 
     print('[ACTIVITY] Entry stored locally');
+    return _activityModel;
   }
 
   /// Registra SALIDA tomando GPS internamente (sin params lat/lng)

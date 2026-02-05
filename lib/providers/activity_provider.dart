@@ -7,12 +7,15 @@ import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/domain/activity/syncService.dart';
 import 'package:app_asistencias/domain/note/sync_note.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
+import 'package:app_asistencias/models/user/user_model.dart';
+import 'package:app_asistencias/domain/user/get_user.dart';
+import 'package:app_asistencias/models/user/user_zone.dart';
 
 class activityProvider {
   final ActiveSessionStorage _storage;
   final ActivitySyncService _sync = ActivitySyncService();
   final NoteSyncService _sync2 = NoteSyncService();
-
+  
   activityProvider({ActiveSessionStorage? storage})
       : _storage = storage ?? ActiveSessionStorage();
 
@@ -33,9 +36,16 @@ class activityProvider {
     required AssigmentModel assignment,
     required TaskType task,
   }) async {
+    final user = await GetUser.getUserLocal();
+
     final newServerId = assignment.serverId;
+
     if (newServerId == null) {
       throw Exception('No se puede iniciar: serverId es null');
+    }
+
+    if (user == null) {
+      throw Exception('No se puede iniciar: usuario no disponible');
     }
 
     // Capturamos el tiempo BASE
@@ -48,23 +58,30 @@ class activityProvider {
     final active = await _storage.read();
     if (active != null) {
       await ActivityRegistrar.registerExitWithGPS(
-        serverId: active.serverId,
+        keyGroup: active.keyGroup,
         timestamp: now,
       );
       await _storage.clear();
     }
 
     // 2) marca la nueva entrada (Hora base + 100ms)
-    await ActivityRegistrar.registerEntryWithGPS(
+    final _activity =  await ActivityRegistrar.registerEntryWithGPS(
+      collaboratorDocumentId: user.nationalId ?? '',
+      userZone: user.zone,
       assignment: assignment,
       task: task,
       timestamp: entryTime,
     );
 
     // 3) guarda nuevo activo
-    final eventKey = assignment.documentId ?? assignment.id.toString();
+    final eventKey = _activity.keyGroup;
+
+    if (eventKey == null) {
+      throw Exception('No se puede iniciar: eventKey es null');
+    }
+
     await _storage.save(
-      eventKey: eventKey,
+      keyGroup: eventKey,
       task: task,
       serverId: newServerId,
       timestamp: entryTime,
@@ -75,11 +92,10 @@ class activityProvider {
   }
 
   Future<void> endAttendance({
-    required int serverId,
-    String? description,
+    required String keyGroup,
   }) async {
     await ActivityRegistrar.registerExitWithGPS(
-      serverId: serverId,
+      keyGroup: keyGroup,
     );
     await _storage.clear();
 
@@ -104,13 +120,4 @@ class activityProvider {
     return true;
   }
 
-  // Helper estático o de instancia
-  static TaskType taskFromTitle(String title) {
-    final s = title.trim().toLowerCase();
-    if (s == 'oficina') return TaskType.office;
-    if (s == 'taller') return TaskType.workshop;
-    if (s == 'servicio') return TaskType.service;
-    if (s == 'transporte') return TaskType.transport;
-    return TaskType.office; // Default
-  }
 }

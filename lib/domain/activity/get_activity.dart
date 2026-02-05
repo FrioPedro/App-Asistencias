@@ -6,7 +6,6 @@ import 'package:app_asistencias/core/enpoinService.dart';
 import 'package:app_asistencias/models/activity/activity_model.dart';
 
 class GetActivity {
-
   static Future<List<ActivityModel>> getLocalData() async {
     final isar = await Database.instance();
 
@@ -15,7 +14,6 @@ class GetActivity {
 
     return recent.reversed.toList();
   }
-
 
   static Future<List<ActivityModel>> getOnlineData() async {
     final apiService = EndpointService.instance;
@@ -47,7 +45,6 @@ class GetActivity {
     }
   }
 
-
   static Future<ActivityModel?> getActive(String keyGroup) async {
     final isar = await Database.instance();
 
@@ -76,4 +73,33 @@ class GetActivity {
         .findAll();
   }
 
+  static Future<List<ActivityModel>> getOnlineAndLocalPending({
+    int pendingLimit = 100,
+  }) async {
+    // 1) Obtener ambas fuentes en paralelo
+    final results = await Future.wait([
+      getOnlineData(),
+      getPendingSync(limit: pendingLimit),
+    ]);
+
+    final online = results[0];
+    final localPending = results[1];
+
+    // 2) Unir listas
+    final combined = <ActivityModel>[
+      ...online,
+      ...localPending,
+    ];
+
+    if (combined.isEmpty) return [];
+
+    // 3) Ordenar por timestamp DESC (más nuevo primero)
+    combined.sort((a, b) {
+      final ta = a.timestamp ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final tb = b.timestamp ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return tb.compareTo(ta); // DESC
+    });
+
+    return combined;
+  }
 }
