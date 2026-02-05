@@ -3,6 +3,10 @@ import '../assigment_model.dart';
 import '../taskType_model.dart';
 import 'motiveActivity_model.dart';
 import '../user/user_zone.dart';
+import 'package:crypto/crypto.dart';
+import 'package:convert/convert.dart';
+import 'dart:convert';
+
 part 'activity_model.g.dart';
 
 DateTime _parseServerTimestamp(dynamic v) {
@@ -28,6 +32,24 @@ String _toServerDateTime(DateTime dt) {
       '${_two(dt.hour)}:${_two(dt.minute)}:${_two(dt.second)}';
 }
 
+String makeKeyGroup16({
+  required int assigmentId,
+  required String collaboratorDocumentId,
+  required DateTime timestamp,
+}) {
+  final ts = timestamp.toUtc().microsecondsSinceEpoch;
+
+  final base = '$assigmentId|$collaboratorDocumentId|$ts';
+
+  final hash = sha256.convert(utf8.encode(base)).bytes;
+
+  // Tomamos 12 bytes = 96 bits
+  final first12 = hash.sublist(0, 12);
+
+  // Base64URL sin padding → 16 chars exactos
+  return base64UrlEncode(first12).replaceAll('=', '');
+}
+
 @collection
 class ActivityModel {
   Id id = Isar.autoIncrement;
@@ -46,10 +68,9 @@ class ActivityModel {
 
   String? description;
   String? collaboratordocumentId;
-  
+
   @enumerated
   UserZone zone = UserZone.centro;
-
 
   @Index()
   @enumerated
@@ -87,7 +108,11 @@ class ActivityModel {
     this.longitude,
     this.isSynced = false,
   }) {
-    this.keyGroup = keyGroup ?? "";
+    this.keyGroup = keyGroup ??
+        makeKeyGroup16(
+            assigmentId: assigmentId,
+            collaboratorDocumentId: collaboratordocumentId ?? '',
+            timestamp: timestamp ?? DateTime.now());
     this.timestamp = timestamp ?? DateTime.now();
   }
 
@@ -127,8 +152,43 @@ class ActivityModel {
       "latitude": latitude,
       "longitude": longitude,
       "timestamp": _toServerDateTime(timestamp ?? DateTime.now()),
-      "zone": zone,
+      "zone": zone.label,
       "task": task.id,
     };
+  }
+
+  ActivityModel copyWith({
+    int? assigmentId,
+    String? keyGroup,
+    String? documentId,
+    String? client,
+    String? description,
+    String? collaboratordocumentId,
+    UserZone? zone,
+    TaskType? task,
+    AssigmentType? activityType,
+    MotiveActivity? motiveActivity,
+    DateTime? timestamp,
+    double? latitude,
+    double? longitude,
+    bool? isSynced,
+  }) {
+    return ActivityModel(
+      assigmentId: assigmentId ?? this.assigmentId,
+      keyGroup: keyGroup ?? this.keyGroup,
+      documentId: documentId ?? this.documentId,
+      client: client ?? this.client,
+      description: description ?? this.description,
+      collaboratordocumentId:
+          collaboratordocumentId ?? this.collaboratordocumentId,
+      zone: zone ?? this.zone,
+      task: task ?? this.task,
+      activityType: activityType ?? this.activityType,
+      motiveActivity: motiveActivity ?? this.motiveActivity,
+      timestamp: timestamp ?? this.timestamp,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      isSynced: isSynced ?? this.isSynced,
+    );
   }
 }

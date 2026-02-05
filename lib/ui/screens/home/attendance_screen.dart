@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/assigment_model.dart';
-import '../../../providers/activity_provider.dart';
+import '../../../providers/attendance_provider.dart';
 import 'card.dart';
 import '../../widgets/event_card_skeleton.dart';
 import '../../widgets/custom_snackbar.dart';
@@ -10,25 +10,27 @@ import 'widgets/restricted_access_dialog.dart';
 import '../sheets/event_action_sheet.dart';
 import 'widgets/home_header.dart';
 import '../../../models/activity/activity_model.dart';
+import 'package:app_asistencias/models/taskType_model.dart';
 
-class EventsScreen extends StatefulWidget {
-  const EventsScreen({super.key});
+class AttendanceScreen extends StatefulWidget {
+  const AttendanceScreen({super.key});
 
   @override
-  State<EventsScreen> createState() => _EventsScreenState();
+  State<AttendanceScreen> createState() => _AttendanceScreenState();
 }
 
-class _EventsScreenState extends State<EventsScreen> {
-  final EventsProvider _eventsService = EventsProvider();
+class _AttendanceScreenState extends State<AttendanceScreen> {
+  final AttendanceProvider _attendanceService = AttendanceProvider();
 
   List<AssigmentModel> _assignments = [];
   bool _isLoading = true;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
-  final Map<String, IconData> _participatingEvents = {};
+  final Map<String, IconData> _participatingAttendance = {};
   final Map<String, DateTime> _activeStartTimes = {};
   final Map<String, String> _activeTaskNames = {};
+  final Map<String, String> _eventKeyToKeyGroup = {};
 
   @override
   void initState() {
@@ -43,22 +45,39 @@ class _EventsScreenState extends State<EventsScreen> {
   }
 
   Future<void> _loadData() async {
-    final loadedAssignments = await _eventsService.fetchEvents();
-    final active = await _eventsService.getActiveSession();
+    final loadedAssignments = await _attendanceService.fetchAssignment();
+    final active = await _attendanceService.getActiveSession();
+
+    print('--- LOAD DATA ---');
+    print('[ASSIGNMENTS] loaded = ${loadedAssignments.length}');
+
+    if (active == null) {
+      print('[ACTIVE] null');
+    } else {
+      // OJO: ActivityModel NO tiene serverId en tu modelo anterior
+      // así que si compila, "serverId" viene de otro modelo distinto.
+      print('[ACTIVE] keyGroup="${active.keyGroup}" '
+          'assigmentId="${active.serverId}" '
+          'timestamp="${active.timestamp}" '
+          'task="${active.task}"');
+    }
+
+    _participatingAttendance.clear();
+    _activeStartTimes.clear();
+    _activeTaskNames.clear();
+    _eventKeyToKeyGroup.clear();
 
     if (active != null) {
       final icon = _iconFromTask(active.task);
-      _participatingEvents.clear();
-      _activeStartTimes.clear();
-      _activeTaskNames.clear();
 
-      _participatingEvents[active.eventKey] = icon;
-      _activeStartTimes[active.eventKey] = active.timestamp;
-      _activeTaskNames[active.eventKey] = active.task.label;
-    } else {
-      _participatingEvents.clear();
-      _activeStartTimes.clear();
-      _activeTaskNames.clear();
+      // ESTE es el eventKey real de la card (asignación)
+      final eventKey = active.serverId.toString();
+
+      _participatingAttendance[eventKey] = icon;
+      _activeStartTimes[eventKey] = active.timestamp ?? DateTime.now();
+      _activeTaskNames[eventKey] = active.task.label;
+
+      _eventKeyToKeyGroup[eventKey] = active.keyGroup;
     }
 
     if (mounted) {
@@ -67,6 +86,10 @@ class _EventsScreenState extends State<EventsScreen> {
         _isLoading = false;
       });
     }
+
+    print(
+        '[MAPS AFTER LOAD] participating=${_participatingAttendance.keys.toList()}');
+    print('[MAPS AFTER LOAD] keyGroupMap=$_eventKeyToKeyGroup');
   }
 
   IconData _iconFromTask(TaskType task) {
@@ -107,7 +130,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   void _onSessionStarted(String eventKey, IconData icon, String taskName) {
     setState(() {
-      _participatingEvents[eventKey] = icon;
+      _participatingAttendance[eventKey] = icon;
       _activeStartTimes[eventKey] = DateTime.now();
       _activeTaskNames[eventKey] = taskName;
     });
@@ -115,7 +138,7 @@ class _EventsScreenState extends State<EventsScreen> {
 
   void _onSessionEnded(String eventKey) {
     setState(() {
-      _participatingEvents.remove(eventKey);
+      _participatingAttendance.remove(eventKey);
       _activeStartTimes.remove(eventKey);
       _activeTaskNames.remove(eventKey);
     });
@@ -125,26 +148,58 @@ class _EventsScreenState extends State<EventsScreen> {
     // Cerramos teclado por si acaso
     FocusScope.of(context).unfocus();
 
-    final bool isParticipating = _participatingEvents.containsKey(eventKey);
-    final bool isAnyEventActive = _participatingEvents.isNotEmpty;
+    final bool isParticipating = _participatingAttendance.containsKey(eventKey);
+    final bool isAnyEventActive = _participatingAttendance.isNotEmpty;
+
+    print('--- CARD TAP ---');
+    print('[TAP] keyGroupMap FULL = $_eventKeyToKeyGroup');
+    print(
+        '[TAP] containsKey(eventKey) = ${_eventKeyToKeyGroup.containsKey(eventKey)}');
+    print('[TAP] lookup direct = ${_eventKeyToKeyGroup[eventKey]}');
+    print('[TAP] lookup trimmed = ${_eventKeyToKeyGroup[eventKey.trim()]}');
+    print('[TAP] eventKey chars = ${eventKey.runes.toList()}');
+
+    print('[TAP] event.serverId = ${event.serverId}');
+    print('[TAP] event.id (local) = ${event.id}');
+    print('[TAP] event.documentId = ${event.documentId}');
+    print('[TAP] eventKey recibido = "$eventKey"');
+    print('[TAP] isParticipating = $isParticipating');
+    print('[TAP] isAnyEventActive = $isAnyEventActive');
+    print('[TAP] map eventKey->keyGroup = ${_eventKeyToKeyGroup[eventKey]}');
+    print(
+        '[TAP] participating keys = ${_participatingAttendance.keys.toList()}');
 
     if (isAnyEventActive && !isParticipating) {
       CustomSnackBar.show(
-          context, 'Ya tienes un turno activo. Debes marcar salida.',
-          isError: true);
+        context,
+        'Ya tienes un turno activo. Debes marcar salida.',
+        isError: true,
+      );
       return;
     }
 
-    // Usamos el método estático del widget extraído
-    EventActionModal.show(
+    final keyGroupToSend =
+        isParticipating ? (_eventKeyToKeyGroup[eventKey] ?? '') : eventKey;
+
+    print('[TAP] keyGroupToSend = "$keyGroupToSend"');
+    print('----------------');
+
+    AssigmentModal.show(
       context,
-      event: event,
-      eventKey: eventKey,
-      isActiveSession: isParticipating,
-      activeIcon: _participatingEvents[eventKey],
+      assignment: event,
+      eventKey: eventKey, // "622"
+      keyGroup: keyGroupToSend, // "mRZ..."
+      isActiveactivity: isParticipating,
+      activeIcon: _participatingAttendance[eventKey],
       activeTaskName: _activeTaskNames[eventKey],
-      onSessionStarted: _onSessionStarted,
-      onSessionEnded: _onSessionEnded,
+      onactivityStarted: (eventKey, keyGroup, icon, taskName) {
+        _eventKeyToKeyGroup[eventKey] = keyGroup;
+        _onSessionStarted(eventKey, icon, taskName);
+      },
+      onactivityEnded: (eventKey) {
+        _eventKeyToKeyGroup.remove(eventKey);
+        _onSessionEnded(eventKey);
+      },
     );
   }
 
@@ -184,7 +239,7 @@ class _EventsScreenState extends State<EventsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (!_eventsService.isCreationAllowed()) {
+          if (!_attendanceService.isCreationAllowed()) {
             RestrictedAccessDialog.show(context);
             return;
           }
@@ -207,11 +262,11 @@ class _EventsScreenState extends State<EventsScreen> {
     );
   }
 
-  Widget _buildEventList(List<AssigmentModel> events) {
+  Widget _buildEventList(List<AssigmentModel> Attendance) {
     // Definimos el contenido de la lista (vacía con mensaje o con elementos)
     Widget listContent;
 
-    if (events.isEmpty) {
+    if (Attendance.isEmpty) {
       // Usamos ListView con un solo hijo que ocupa todo el espacio para permitir el scroll y el refresh
       listContent = ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -232,29 +287,42 @@ class _EventsScreenState extends State<EventsScreen> {
     } else {
       listContent = ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: events.length,
+        itemCount: Attendance.length,
         itemBuilder: (context, index) {
-          final event = events[index];
-          final String eventKey = event.documentId ?? event.id.toString();
+          final event = Attendance[index];
+
+          // 1) eventKey = llave de la card (documentId)
+          final String eventKey = event.serverId.toString();
+
+          // 2) UI: está activo?
           final bool isParticipating =
-              _participatingEvents.containsKey(eventKey);
+              _participatingAttendance.containsKey(eventKey);
 
-          String timeDisplay = '';
-          if (isParticipating && _activeStartTimes.containsKey(eventKey)) {
-            timeDisplay = _formatDate(_activeStartTimes[eventKey]!);
-          }
+          // 3) Hora y task
+          final String timeDisplay =
+              (isParticipating && _activeStartTimes.containsKey(eventKey))
+                  ? _formatDate(_activeStartTimes[eventKey]!)
+                  : '';
 
-          // Determinar nombre de tarea para mostrar
-          String? displayTaskName; // Null por defecto (estado vacío)
-          if (isParticipating) {
-            displayTaskName = _activeTaskNames[eventKey];
-          }
+          final String? displayTaskName =
+              isParticipating ? _activeTaskNames[eventKey] : null;
 
-          // Buscar si hay alguna tarea activa en OTRO evento
+          // 4) Si tocan la card y está activa, hay que mandar keyGroup para cerrar
+          final String keyToSend = isParticipating
+              ? (_eventKeyToKeyGroup[eventKey] ??
+                  eventKey) // idealmente siempre existe
+              : eventKey;
+
+          // 5) tarea activa global
           String? globalActiveTask;
           if (!isParticipating && _activeTaskNames.isNotEmpty) {
             globalActiveTask = _activeTaskNames.values.first;
           }
+
+          print(
+              '[OPEN MODAL] eventKey="$eventKey" isParticipating=$isParticipating '
+              'mapKeyGroup="${_eventKeyToKeyGroup[eventKey]}" keyGroupToSend="$keyToSend" '
+              'fullMap=$_eventKeyToKeyGroup');
 
           return EventCard(
             eventName: event.description ?? 'Sin descripción',

@@ -1,45 +1,58 @@
 import 'package:flutter/material.dart';
 import '../../../core/permission_guard.dart';
 import '../../../models/assigment_model.dart';
-import '../../../models/activity/activity_model.dart';
-import '../../../providers/activity_provider.dart';
+import '../../../providers/attendance_provider.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/action_option.dart';
 import 'service_exit_form_sheet.dart';
 import 'office_workshop_exit_sheet.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
+import 'package:app_asistencias/models/taskType_model.dart';
 
-class EventActionModal extends StatefulWidget {
-  final AssigmentModel event;
+class AssigmentModal extends StatefulWidget {
+  final AssigmentModel assignment;
+
+  /// UI key (debe ser consistente con tu lista / maps). Ej: assignment.serverId.toString()
   final String eventKey;
-  final bool isActiveSession;
+
+  /// KeyGroup real de la sesión activa (para salida). Si no hay sesión activa, puede ser ''.
+  final String keyGroup;
+
+  final bool isActiveactivity;
   final IconData? activeIcon;
   final String? activeTaskName;
-  final Function(String eventKey, IconData icon, String taskName)
-      onSessionStarted;
-  final Function(String eventKey) onSessionEnded;
 
-  const EventActionModal({
+  /// eventKey, keyGroup, icon, taskName
+  final void Function(String eventKey, String keyGroup, IconData icon, String taskName)
+      onactivityStarted;
+
+  /// eventKey
+  final void Function(String eventKey) onactivityEnded;
+
+  const AssigmentModal({
     super.key,
-    required this.event,
+    required this.assignment,
     required this.eventKey,
-    required this.isActiveSession,
+    required this.keyGroup,
+    required this.isActiveactivity,
     this.activeIcon,
     this.activeTaskName,
-    required this.onSessionStarted,
-    required this.onSessionEnded,
+    required this.onactivityStarted,
+    required this.onactivityEnded,
   });
 
   static void show(
     BuildContext context, {
-    required AssigmentModel event,
+    required AssigmentModel assignment,
     required String eventKey,
-    required bool isActiveSession,
+    required String keyGroup,
+    required bool isActiveactivity,
     IconData? activeIcon,
     String? activeTaskName,
-    required Function(String, IconData, String) onSessionStarted,
-    required Function(String) onSessionEnded,
+    required void Function(String eventKey, String keyGroup, IconData icon, String taskName)
+        onactivityStarted,
+    required void Function(String eventKey) onactivityEnded,
   }) {
     showModalBottomSheet(
       context: context,
@@ -50,24 +63,25 @@ class EventActionModal extends StatefulWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => EventActionModal(
-        event: event,
+      builder: (context) => AssigmentModal(
+        assignment: assignment,
         eventKey: eventKey,
-        isActiveSession: isActiveSession,
+        keyGroup: keyGroup,
+        isActiveactivity: isActiveactivity,
         activeIcon: activeIcon,
         activeTaskName: activeTaskName,
-        onSessionStarted: onSessionStarted,
-        onSessionEnded: onSessionEnded,
+        onactivityStarted: onactivityStarted,
+        onactivityEnded: onactivityEnded,
       ),
     );
   }
 
   @override
-  State<EventActionModal> createState() => _EventActionModalState();
+  State<AssigmentModal> createState() => _EventActionModalState();
 }
 
-class _EventActionModalState extends State<EventActionModal> {
-  final EventsProvider _eventsService = EventsProvider();
+class _EventActionModalState extends State<AssigmentModal> {
+  final AttendanceProvider _attendanceService = AttendanceProvider();
   bool _isLoading = false;
 
   void _showCustomSnackBar(String message, {bool isError = false}) {
@@ -76,40 +90,31 @@ class _EventActionModalState extends State<EventActionModal> {
   }
 
   Future<void> _onActivitySelected(String title, IconData icon) async {
-    // Verificar permisos antes de procesar
-    final hasPermission =
-        await PermissionGuard.checkLocationPermission(context);
+    final hasPermission = await PermissionGuard.checkLocationPermission(context);
     if (!hasPermission) return;
 
-    // --- LÓGICA DE INTERCEPCIÓN DE FORMULARIOS ---
-    if (widget.isActiveSession) {
+    // --- Intercepción de formularios si hay actividad activa ---
+    if (widget.isActiveactivity) {
       final currentTaskName = widget.activeTaskName ?? '';
-      final currentTask = EventsProvider.taskFromTitle(currentTaskName);
+      final currentTask = TaskTypeX.fromLabel(currentTaskName);
 
-      // CASO 1: Si estoy en SERVICIO -> Formulario de Servicio
-      if (widget.activeIcon == Icons.construction ||
-          currentTask == TaskType.service) {
-        // Navegamos al formulario SIN cerrar este modal todavía
+      // Caso 1: Servicio -> Formulario de servicio (usa keyGroup)
+      if (widget.activeIcon == Icons.construction || currentTask == TaskType.service) {
         final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ServiceExitFormScreen(
-              event: widget.event,
-              eventKey: widget.eventKey,
+              event: widget.assignment,
+              eventKey: widget.keyGroup, // aquí "eventKey" es keyGroup en tu screen
             ),
           ),
         );
 
-        // Si no completó el formulario (volvió atrás), cancelamos el cambio
         if (result != true) return;
-
-        // Esperamos un momento para asegurar que el cierre anterior
-        // y el envío de notas se procesen completamente antes de iniciar B.
         await Future.delayed(const Duration(milliseconds: 1000));
       }
-      // CASO 2: Si estoy en OFICINA/TALLER -> Modal de Reporte
-      else if (currentTask == TaskType.office ||
-          currentTask == TaskType.workshop) {
+      // Caso 2: Oficina/Taller -> Modal de reporte (usa keyGroup)
+      else if (currentTask == TaskType.office || currentTask == TaskType.workshop) {
         final result = await showModalBottomSheet(
           context: context,
           backgroundColor: const Color(0xFF1E1E1E),
@@ -120,74 +125,89 @@ class _EventActionModalState extends State<EventActionModal> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           builder: (_) => OfficeWorkshopExitModal(
-            event: widget.event,
+            event: widget.assignment,
             task: currentTask,
-            eventKey: widget.eventKey,
+            eventKey: widget.keyGroup, // aquí "eventKey" es keyGroup en tu modal/screen
           ),
         );
 
         if (result != true) return;
-
         await Future.delayed(const Duration(milliseconds: 1000));
       }
-      // CASO 3: Transporte u otros -> Cambio directo (startAttendance maneja el timestamp perfecto)
+      // Caso 3: Transporte u otros -> cambio directo
     }
-    // ----------------------------------------------
 
     setState(() => _isLoading = true);
 
     try {
-      final task = EventsProvider.taskFromTitle(title);
-      await _eventsService.startAttendance(
-        assignment: widget.event,
+      final task = TaskTypeX.fromLabel(title);
+
+      // IMPORTANTE: asumo que startAttendance devuelve el keyGroup creado
+      final newKeyGroup = await _attendanceService.startAttendance(
+        assignment: widget.assignment,
         task: task,
       );
 
-      if (mounted) {
-        final actionType = widget.isActiveSession ? 'Cambio' : 'Inicio';
-        LogProvider.log(
-          '$actionType de turno: $title (${widget.event.description})',
-          type: widget.isActiveSession ? LogType.warning : LogType.info,
-          origin: 'EventActionModal',
-        );
-        widget.onSessionStarted(widget.eventKey, icon, title);
-        Navigator.pop(context);
-        _showCustomSnackBar('Participando: $title', isError: false);
-      }
+      print('[MODAL] startAttendance -> eventKey="${widget.eventKey}" newKeyGroup="$newKeyGroup"');
+
+      if (!mounted) return;
+
+      final actionType = widget.isActiveactivity ? 'Cambio' : 'Inicio';
+      LogProvider.log(
+        '$actionType de turno: $title (${widget.assignment.description})',
+        type: widget.isActiveactivity ? LogType.warning : LogType.info,
+        origin: 'EventActionModal',
+      );
+
+      // ✅ Notificamos al screen con el eventKey (UI) y el keyGroup real
+      widget.onactivityStarted(widget.eventKey, newKeyGroup, icon, title);
+
+      Navigator.pop(context);
+      _showCustomSnackBar('Participando: $title', isError: false);
     } catch (e) {
+      print('[MODAL] _onActivitySelected Exception: $e');
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _onExitSelected() async {
     final taskName = widget.activeTaskName ?? '';
-    final currentTask = EventsProvider.taskFromTitle(taskName);
+    final currentTask = TaskTypeX.fromLabel(taskName);
 
-    // 1. SI ES SERVICIO -> Formulario de Servicio
-    if (widget.activeIcon == Icons.construction ||
-        currentTask == TaskType.service) {
-      Navigator.pop(context); // Cierra este modal
+    print('--- EXIT SELECTED ---');
+    print('[EXIT] eventKey(UI) = "${widget.eventKey}"');
+    print('[EXIT] keyGroup(session) = "${widget.keyGroup}"');
+    print('[EXIT] isActive = ${widget.isActiveactivity}');
+    print('[EXIT] activeTaskName="${widget.activeTaskName}" -> currentTask=${currentTask.label}');
+    print('[EXIT] assignment.serverId=${widget.assignment.serverId}');
+    print('[EXIT] assignment.documentId=${widget.assignment.documentId}');
+    print('[EXIT] activeIcon=${widget.activeIcon}');
+    print('---------------------');
+
+    // 1) Servicio -> Formulario
+    if (widget.activeIcon == Icons.construction || currentTask == TaskType.service) {
+      Navigator.pop(context);
 
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => ServiceExitFormScreen(
-            event: widget.event,
-            eventKey: widget.eventKey,
+            event: widget.assignment,
+            eventKey: widget.keyGroup, // en tu screen esto realmente es keyGroup
           ),
         ),
       );
 
       if (result == true) {
-        widget.onSessionEnded(widget.eventKey);
+        widget.onactivityEnded(widget.eventKey);
         _showCustomSnackBar('Salida de Servicio registrada', isError: false);
       }
       return;
     }
 
-    // 2. SI ES OFICINA O TALLER -> Modal de Reporte de Salida
+    // 2) Oficina/Taller -> Modal reporte
     if (currentTask == TaskType.office || currentTask == TaskType.workshop) {
-      Navigator.pop(context); // Cierra este modal
+      Navigator.pop(context);
 
       final result = await showModalBottomSheet(
         context: context,
@@ -199,40 +219,46 @@ class _EventActionModalState extends State<EventActionModal> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
         builder: (_) => OfficeWorkshopExitModal(
-          event: widget.event,
+          event: widget.assignment,
           task: currentTask,
-          eventKey: widget.eventKey,
+          eventKey: widget.keyGroup, // en tu modal esto realmente es keyGroup
         ),
       );
 
       if (result == true) {
-        widget.onSessionEnded(widget.eventKey);
-        _showCustomSnackBar('Salida de ${currentTask.label} registrada',
-            isError: false);
+        widget.onactivityEnded(widget.eventKey);
+        _showCustomSnackBar('Salida de ${currentTask.label} registrada', isError: false);
       }
       return;
     }
 
-    // 3. RESTO (Transporte o genérico) -> Salida directa
+    // 3) Directo
     setState(() => _isLoading = true);
 
     try {
-      final sid = widget.event.serverId;
-      if (sid != null) {
-        await _eventsService.endAttendance(serverId: sid);
-        widget.onSessionEnded(widget.eventKey);
+      if (widget.keyGroup.trim().isEmpty) {
+        _showCustomSnackBar('KeyGroup vacío. Refresca la pantalla.', isError: true);
+        if (mounted) setState(() => _isLoading = false);
+        return;
       }
 
-      if (mounted) {
-        LogProvider.log(
-          'Salida directa registrada: ${widget.event.description}',
-          type: LogType.warning,
-          origin: 'EventActionModal',
-        );
-        Navigator.pop(context);
-        _showCustomSnackBar('Salida registrada', isError: false);
-      }
+      await _attendanceService.endAttendance(keyGroup: widget.keyGroup);
+
+      // ✅ Notificamos al screen por eventKey (UI), NO por keyGroup
+      widget.onactivityEnded(widget.eventKey);
+
+      if (!mounted) return;
+
+      LogProvider.log(
+        'Salida directa registrada: ${widget.assignment.description}',
+        type: LogType.warning,
+        origin: 'EventActionModal',
+      );
+
+      Navigator.pop(context);
+      _showCustomSnackBar('Salida registrada', isError: false);
     } catch (e) {
+      print('[MODAL] _onExitSelected Exception: $e');
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -256,20 +282,19 @@ class _EventActionModalState extends State<EventActionModal> {
                     children: [
                       CircularProgressIndicator(color: Color(0xFF4CAF50)),
                       SizedBox(height: 16),
-                      Text("Procesando...",
-                          style: TextStyle(color: Colors.white)),
+                      Text("Procesando...", style: TextStyle(color: Colors.white)),
                     ],
                   ),
                 ),
               )
-            : widget.isActiveSession
-                ? _buildExitSessionContent()
-                : _buildStartSessionContent(),
+            : widget.isActiveactivity
+                ? _buildExitactivityContent()
+                : _buildStartactivityContent(),
       ),
     );
   }
 
-  Widget _buildStartSessionContent() {
+  Widget _buildStartactivityContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -289,14 +314,7 @@ class _EventActionModalState extends State<EventActionModal> {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.grey, size: 28),
-              onPressed: () {
-                LogProvider.log(
-                  'Modal de Inicio: Cerrado con X',
-                  type: LogType.info,
-                  origin: 'EventActionModal',
-                );
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -332,7 +350,7 @@ class _EventActionModalState extends State<EventActionModal> {
     );
   }
 
-  Widget _buildExitSessionContent() {
+  Widget _buildExitactivityContent() {
     final activeIcon = widget.activeIcon;
 
     return Column(
@@ -354,14 +372,7 @@ class _EventActionModalState extends State<EventActionModal> {
             ),
             IconButton(
               icon: const Icon(Icons.close, color: Colors.grey, size: 28),
-              onPressed: () {
-                LogProvider.log(
-                  'Modal de Gestión: Cerrado con X',
-                  type: LogType.info,
-                  origin: 'EventActionModal',
-                );
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -402,8 +413,7 @@ class _EventActionModalState extends State<EventActionModal> {
             icon: Icons.local_shipping,
             title: 'Transporte',
             subtitle: 'Traslados',
-            onTap: () =>
-                _onActivitySelected('Transporte', Icons.local_shipping),
+            onTap: () => _onActivitySelected('Transporte', Icons.local_shipping),
           ),
         if (activeIcon != Icons.construction)
           ActionOption(

@@ -61,6 +61,7 @@ class ActivityRegistrar {
       print(
           '[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
     }
+    print("[ACTIVITY] Closing with keyGroup = '$keyGroup'");
 
     await CreateActivity.storeExit(
       keyGroup: keyGroup,

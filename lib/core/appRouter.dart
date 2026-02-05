@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
 import 'package:app_asistencias/ui/screens/login_screen.dart'; 
-import 'package:app_asistencias/ui/screens/home/events_screen.dart'; 
+import 'package:app_asistencias/ui/screens/home/attendance_screen.dart'; 
 import 'package:app_asistencias/ui/screens/history_screen.dart';
 
 // tu buildPage(...)
@@ -29,7 +29,7 @@ final router = GoRouter(
     GoRoute(
       path: '/home',
       name: 'home',
-      pageBuilder: (context, state) => buildPage(const EventsScreen(), state),
+      pageBuilder: (context, state) => buildPage(const AttendanceScreen(), state),
     ),
     GoRoute(
       path: '/history',

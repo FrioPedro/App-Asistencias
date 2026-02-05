@@ -1,3 +1,4 @@
+import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
@@ -33,7 +34,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   DateTime? _selectedDate;
 
   // Lista de modelos (Sesiones unificadas)
-  List<ActivityModel> _allActivities = [];
+  List<ActivitySession> _allActivities = [];
 
   @override
   void initState() {
@@ -117,9 +118,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
               final a = data[i];
               return ListTile(
                 dense: true,
-                title: Text('Token: ${a.token.substring(0, 8)}...'),
+                title: Text('Token: ${a.keyGroup}...'),
                 subtitle: Text(
-                    'ID:${a.serverId} Task:${a.task.name} Open:${a.isOpen}'),
+                    'ID:${a.assigmentId} Task:${a.task.name} Open:${a.motiveActivity}'),
               );
             },
           ),
@@ -129,7 +130,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   // --- LÓGICA DE FILTRADO ---
-  List<ActivityModel> _getFilteredSessions() {
+  List<ActivitySession> _getFilteredSessions() {
     // Las actividades ya vienen ordenadas por GetActivity (reciente primero)
     // Simplemente filtramos.
 
@@ -325,7 +326,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ? _formatTime(session.exitTimestamp!)
                                       : null,
 
-                                  hasPendingSync: !session.isSynced,
+                                  hasPendingSync: !session.hasPendingSync,
                                   assigmentType: session.activityType,
                                 );
                               },

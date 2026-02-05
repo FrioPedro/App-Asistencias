@@ -116,8 +116,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         // Intentamos matchear la zona que viene del usuario con nuestras etiquetas
         if (userLoaded != null) {
-          final zoneEnum = UserZoneX.fromString(userLoaded.zone);
-          _selectedZoneLabel = zoneEnum?.label;
+          final zoneEnum = userLoaded.zone.label;
+          _selectedZoneLabel = zoneEnum;
         }
       });
     }

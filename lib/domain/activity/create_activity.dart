@@ -62,15 +62,25 @@ class CreateActivity {
     }
 
     // 2) Actualizar el mismo registro (cerrar)
-    active.motiveActivity =
-        MotiveActivity.endWork;
+    /*
+    active.motiveActivity = MotiveActivity.endWork;
     active.timestamp = timestamp ?? DateTime.now();
     active.latitude = latitude;
     active.longitude = longitude;
     active.isSynced = false;
-
+    */
+    final salida = active.copyWith(
+      motiveActivity: MotiveActivity.endWork, // el que corresponda
+      timestamp: DateTime.now(),
+      latitude: latitude,
+      longitude: longitude,
+      isSynced: false,
+      keyGroup: active.keyGroup, // opcional: para que se regenere
+    );
+    print("[FLAG DE BORRADO]");
+    print(salida.id);
     await isar.writeTxn(() async {
-      await isar.activityModels.put(active);
+      await isar.activityModels.put(salida);
     });
 
     return active;

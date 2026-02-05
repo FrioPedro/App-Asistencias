@@ -62,7 +62,7 @@ class ActivitySyncService {
         payload['collaborator'] ??= user.nationalId ?? '';
         payload['zone'] ??= user.zone.label;
 
-        final res = await api.post('/api/attendance/v2', data: payload);
+        final res = await api.post('/api/attendance/v3', data: payload);
 
         final ok = res.statusCode == 200 || res.statusCode == 201;
         if (!ok) {

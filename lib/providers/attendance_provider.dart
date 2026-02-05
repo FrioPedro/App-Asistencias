@@ -11,15 +11,15 @@ import 'package:app_asistencias/models/user/user_model.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/models/user/user_zone.dart';
 
-class activityProvider {
+class AttendanceProvider {
   final ActiveSessionStorage _storage;
   final ActivitySyncService _sync = ActivitySyncService();
   final NoteSyncService _sync2 = NoteSyncService();
   
-  activityProvider({ActiveSessionStorage? storage})
+  AttendanceProvider({ActiveSessionStorage? storage})
       : _storage = storage ?? ActiveSessionStorage();
 
-  Future<List<AssigmentModel>> fetchactivity() async {
+  Future<List<AssigmentModel>> fetchAssignment() async {
     await _sync.syncIfPossible();
     await _sync2.syncIfPossible();
     return await GetAssigned.fetchAssignment();
@@ -32,7 +32,7 @@ class activityProvider {
   }
 
   /// Si hay uno activo, lo cierra y luego marca la nueva entrada
-  Future<void> startAttendance({
+  Future<String> startAttendance({
     required AssigmentModel assignment,
     required TaskType task,
   }) async {
@@ -89,6 +89,8 @@ class activityProvider {
 
     await _sync.syncIfPossible();
     await _sync2.syncIfPossible(); // Forzamos envío de notas pendientes
+
+    return eventKey;
   }
 
   Future<void> endAttendance({

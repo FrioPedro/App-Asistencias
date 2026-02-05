@@ -6,7 +6,7 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 import '../../../core/picker_localization.dart';
 import '../../../models/assigment_model.dart';
-import '../../../providers/activity_provider.dart';
+import '../../../providers/attendance_provider.dart';
 import '../../../providers/report_form_provider.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
@@ -33,7 +33,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final _recomendacionesController = TextEditingController();
   final _accionesController = TextEditingController();
 
-  final EventsProvider _eventsService = EventsProvider();
+  final AttendanceProvider _eventsService = AttendanceProvider();
 
   bool _isSubmitting = false;
   double _uploadProgress = 0.0;
@@ -198,9 +198,9 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
       setState(() => _uploadProgress = 0.7);
 
-      final sid = widget.event.serverId;
+      final sid = widget.eventKey;
       if (sid != null) {
-        await _eventsService.endAttendance(serverId: sid);
+        await _eventsService.endAttendance(keyGroup: sid);
       }
 
       setState(() => _uploadProgress = 1.0);

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../../models/assigment_model.dart';
 import '../../../models/activity/activity_model.dart';
-import '../../../providers/activity_provider.dart';
+import '../../../providers/attendance_provider.dart';
 import 'package:app_asistencias/providers/notes_provider.dart';
 import 'package:app_asistencias/providers/log_provider.dart';
 import 'package:app_asistencias/models/log_model.dart';
+import 'package:app_asistencias/models/taskType_model.dart';
 
 class OfficeWorkshopExitModal extends StatefulWidget {
   final AssigmentModel event;
@@ -27,7 +28,7 @@ class OfficeWorkshopExitModal extends StatefulWidget {
 class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
   final TextEditingController _descriptionController = TextEditingController();
   bool _isLoading = false;
-  final EventsProvider _eventsService = EventsProvider();
+  final AttendanceProvider _eventsService = AttendanceProvider();
   final NotesProvider _notesProvider = NotesProvider();
 
   @override
@@ -121,10 +122,10 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
     setState(() => _isLoading = true);
 
     try {
-      final sid = widget.event.serverId;
+      final sid = widget.eventKey;
       if (sid != null) {
         await _eventsService.endAttendance(
-          serverId: sid,
+          keyGroup: sid,
           //description: ,
         );
 
