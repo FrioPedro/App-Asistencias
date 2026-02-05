@@ -17,7 +17,7 @@ extension UserZoneX on UserZone {
   }
 
   /// Convierte un String (ej: "sur", "Sur") al Enum correspondiente
-  static UserZone? fromString(String? value) {
+  static UserZone fromString(String? value) {
     switch (value?.trim().toLowerCase()) {
       case 'sur':
         return UserZone.sur;
@@ -26,7 +26,7 @@ extension UserZoneX on UserZone {
       case 'norte':
         return UserZone.norte;
       default:
-        return null;
+        return UserZone.centro;
     }
   }
 

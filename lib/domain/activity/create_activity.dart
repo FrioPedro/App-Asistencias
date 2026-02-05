@@ -1,7 +1,9 @@
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/models/activity_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
-
+import 'package:app_asistencias/models/taskType_model.dart';
+import 'package:app_asistencias/models/user_zone.dart';
+import 'package:app_asistencias/models/motiveActivity_model.dart';
 import 'get_activity.dart';
 
 class CreateActivity {
@@ -10,6 +12,8 @@ class CreateActivity {
   static Future<ActivityModel> storeEntry({
     required AssigmentModel assignment,
     required TaskType task,
+    required String collaboratorDocumentId,
+    required UserZone userZone,
     double? latitude,
     double? longitude,
     DateTime? timestamp,
@@ -17,23 +21,20 @@ class CreateActivity {
     final isar = await Database.instance();
 
     final activity = ActivityModel(
-      // Entrada
-      entryTimestamp: timestamp ?? DateTime.now(),
-      entryLatitude: latitude,
-      entryLongitude: longitude,
-
-      // Metadatos
-      serverId: assignment.serverId,
+      assigmentId: assignment.serverId,
       documentId: assignment.documentId,
       client: assignment.client,
       description: assignment.description,
-      collaborator: null,
+      collaboratordocumentId: collaboratorDocumentId,
+      zone: userZone,
       task: task,
       activityType: assignment.assigmentType,
+      motiveActivity: MotiveActivity.startWork,
+      timestamp:timestamp,
+      latitude:latitude,
+      longitude:longitude,
       isSynced: false,
     );
-
-    // Salida es null por defecto -> Sesión Abierta
 
     await isar.writeTxn(() async {
       await isar.activityModels.put(activity);
@@ -43,7 +44,6 @@ class CreateActivity {
   }
 
   /// Cerrar una SESIÓN (Salida)
-  /// Busca la sesión abierta (Active) y actualiza sus campos de salida.
   static Future<ActivityModel?> storeExit({
     required int serverId,
     double? latitude,

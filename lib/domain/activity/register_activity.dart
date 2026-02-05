@@ -2,8 +2,8 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:app_asistencias/domain/activity/create_activity.dart';
 import 'package:app_asistencias/domain/activity/get_location.dart';
-import 'package:app_asistencias/models/activity_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
+import 'package:app_asistencias/models/taskType_model.dart';
 
 class ActivityRegistrar {
   /// Registra ENTRADA tomando GPS internamente (sin params lat/lng)

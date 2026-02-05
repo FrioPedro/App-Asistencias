@@ -21,7 +21,7 @@ class AssigmentModel {
   Id id = Isar.autoIncrement;
   
   @Index(unique: true)
-  int? serverId;
+  int serverId = 0;
 
   String? documentId;
   String? client;
@@ -35,7 +35,7 @@ class AssigmentModel {
   DateTime updatedAt = DateTime.now();
 
     AssigmentModel({
-      this.serverId,
+      this.serverId = 0,
       this.documentId,
       this.client,
       this.description,

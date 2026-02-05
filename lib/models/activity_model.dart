@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 import 'assigment_model.dart';
 import 'taskType_model.dart';
 import 'motiveActivity_model.dart';
-
+import 'user_zone.dart';
 part 'activity_model.g.dart';
 
 DateTime _parseServerTimestamp(dynamic v) {
@@ -45,7 +45,11 @@ class ActivityModel {
   String? client;
 
   String? description;
-  String? collaborator;
+  String? collaboratordocumentId;
+  
+  @enumerated
+  UserZone zone = UserZone.centro;
+
 
   @Index()
   TaskType task = TaskType.office;
@@ -72,7 +76,8 @@ class ActivityModel {
     this.documentId,
     this.client,
     this.description,
-    this.collaborator,
+    this.collaboratordocumentId,
+    this.zone = UserZone.centro,
     this.task = TaskType.office,
     this.activityType = AssigmentType.other,
     this.motiveActivity = MotiveActivity.startWork,
@@ -101,7 +106,8 @@ class ActivityModel {
       assigmentId: idAssigment,
       documentId: json['Document'] as String,
       description: json['Description'] as String?,
-      collaborator: json['Collaborator'] as String?,
+      collaboratordocumentId: json['Collaborator'] as String?,
+      zone: UserZoneX.fromString(json["Zone"] as String?),
       task: TaskTypeX.fromLabel(json['Task'] as String?),
       motiveActivity: MotiveactivityX.fromLabel(json['Motive'] as String?),
       activityType: AssigmentTypeX.fromCode(prefix),
@@ -112,14 +118,11 @@ class ActivityModel {
     );
   }
 
-  Map<String, dynamic> toServerPayload(
-    String collaborator,
-    String zone,
-  ) {
+  Map<String, dynamic> toServerPayload() {
     return {
       "project": assigmentId,
       "motive": motiveActivity.id, // int
-      "collaborator": collaborator,
+      "collaborator": collaboratordocumentId,
       "latitude": latitude,
       "longitude": longitude,
       "timestamp": _toServerDateTime(timestamp ?? DateTime.now()),
