@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
 import '../../models/assigment_model.dart';          // Tu nuevo modelo
-import '../../providers/event_detail_provider.dart'; // El provider
+import '../../providers/old__event_detail_provider.dart'; // El provider
 
 class EventDetailScreen extends StatefulWidget {
   // Ahora recibimos el nuevo modelo

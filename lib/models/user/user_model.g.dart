@@ -40,7 +40,8 @@ const UserModelSchema = CollectionSchema(
     r'zone': PropertySchema(
       id: 4,
       name: r'zone',
-      type: IsarType.string,
+      type: IsarType.byte,
+      enumMap: _UserModelzoneEnumValueMap,
     )
   },
   estimateSize: _userModelEstimateSize,
@@ -81,12 +82,6 @@ int _userModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  {
-    final value = object.zone;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
   return bytesCount;
 }
 
@@ -100,7 +95,7 @@ void _userModelSerialize(
   writer.writeString(offsets[1], object.lastNames);
   writer.writeString(offsets[2], object.names);
   writer.writeString(offsets[3], object.nationalId);
-  writer.writeString(offsets[4], object.zone);
+  writer.writeByte(offsets[4], object.zone.index);
 }
 
 UserModel _userModelDeserialize(
@@ -114,7 +109,8 @@ UserModel _userModelDeserialize(
     lastNames: reader.readStringOrNull(offsets[1]),
     names: reader.readStringOrNull(offsets[2]),
     nationalId: reader.readStringOrNull(offsets[3]),
-    zone: reader.readStringOrNull(offsets[4]),
+    zone: _UserModelzoneValueEnumMap[reader.readByteOrNull(offsets[4])] ??
+        UserZone.centro,
   );
   object.id = id;
   return object;
@@ -136,11 +132,23 @@ P _userModelDeserializeProp<P>(
     case 3:
       return (reader.readStringOrNull(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (_UserModelzoneValueEnumMap[reader.readByteOrNull(offset)] ??
+          UserZone.centro) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
+
+const _UserModelzoneEnumValueMap = {
+  'sur': 0,
+  'centro': 1,
+  'norte': 2,
+};
+const _UserModelzoneValueEnumMap = {
+  0: UserZone.sur,
+  1: UserZone.centro,
+  2: UserZone.norte,
+};
 
 Id _userModelGetId(UserModel object) {
   return object.id;
@@ -742,71 +750,47 @@ extension UserModelQueryFilter
     });
   }
 
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'zone',
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'zone',
-      ));
-    });
-  }
-
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
+      UserZone value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'zone',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneGreaterThan(
-    String? value, {
+    UserZone value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'zone',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneLessThan(
-    String? value, {
+    UserZone value, {
     bool include = false,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'zone',
         value: value,
-        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneBetween(
-    String? lower,
-    String? upper, {
+    UserZone lower,
+    UserZone upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -815,75 +799,6 @@ extension UserModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'zone',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'zone',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'zone',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'zone',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'zone',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<UserModel, UserModel, QAfterFilterCondition> zoneIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'zone',
-        value: '',
       ));
     });
   }
@@ -1061,10 +976,9 @@ extension UserModelQueryWhereDistinct
     });
   }
 
-  QueryBuilder<UserModel, UserModel, QDistinct> distinctByZone(
-      {bool caseSensitive = true}) {
+  QueryBuilder<UserModel, UserModel, QDistinct> distinctByZone() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'zone', caseSensitive: caseSensitive);
+      return query.addDistinctBy(r'zone');
     });
   }
 }
@@ -1101,7 +1015,7 @@ extension UserModelQueryProperty
     });
   }
 
-  QueryBuilder<UserModel, String?, QQueryOperations> zoneProperty() {
+  QueryBuilder<UserModel, UserZone, QQueryOperations> zoneProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'zone');
     });

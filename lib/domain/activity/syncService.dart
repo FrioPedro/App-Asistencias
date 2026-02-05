@@ -4,6 +4,7 @@ import 'package:app_asistencias/domain/connectivity/network_info.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/domain/activity/get_activity.dart';
+import 'package:app_asistencias/models/user/user_zone.dart';
 import 'package:isar/isar.dart';
 
 class ActivitySyncService {
@@ -56,14 +57,10 @@ class ActivitySyncService {
 
     for (final a in pending) {
       try {
-        // 2) Payload directo (1 request por actividad)
         final payload = a.toServerPayload();
 
-        // Si tu server requiere keys/token, agrégalo aquí:
-        // payload['keys'] = a.keyGroup;
-
-        // Si collaborator puede venir null, fuerza desde user
         payload['collaborator'] ??= user.nationalId ?? '';
+        payload['zone'] ??= user.zone.label;
 
         final res = await api.post('/api/attendance/v2', data: payload);
 

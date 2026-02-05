@@ -16,7 +16,7 @@ class UpdateUser {
     }
 
     await isar.writeTxn(() async {
-      user.zone = zone.label; // "Sur" | "Centro" | "Norte"
+      user.zone = zone; // "Sur" | "Centro" | "Norte"
       await isar.userModels.put(user);
     });
 
@@ -34,10 +34,4 @@ class UpdateUser {
     return updateZone(zone);
   }
 
-  /// Lectura rápida de zona actual (String)
-  static Future<String?> getZoneLabel() async {
-    final isar = await Database.instance();
-    final user = await isar.userModels.where().findFirst();
-    return user?.zone;
-  }
 }

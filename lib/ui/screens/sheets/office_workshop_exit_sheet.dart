@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../../models/assigment_model.dart';
 import '../../../models/activity/activity_model.dart';
-import '../../../providers/events_provider.dart';
+import '../../../providers/activity_provider.dart';
 import 'package:app_asistencias/providers/notes_provider.dart';
 import 'package:app_asistencias/providers/log_provider.dart';
 import 'package:app_asistencias/models/log_model.dart';

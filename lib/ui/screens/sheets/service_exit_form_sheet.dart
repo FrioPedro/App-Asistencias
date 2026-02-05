@@ -6,7 +6,7 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 import '../../../core/picker_localization.dart';
 import '../../../models/assigment_model.dart';
-import '../../../providers/events_provider.dart';
+import '../../../providers/activity_provider.dart';
 import '../../../providers/report_form_provider.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';

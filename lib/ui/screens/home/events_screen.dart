@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/assigment_model.dart';
-import '../../../providers/events_provider.dart';
+import '../../../providers/activity_provider.dart';
 import 'card.dart';
 import '../../widgets/event_card_skeleton.dart';
 import '../../widgets/custom_snackbar.dart';

@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'user_zone.dart';
 
 part 'user_model.g.dart';
 
@@ -8,7 +9,10 @@ class UserModel {
   String? nationalId;
   String? names;
   String? lastNames;
-  String? zone;
+
+  @enumerated
+  UserZone zone = UserZone.centro;
+  
   bool active = true;
 
 
@@ -16,7 +20,7 @@ class UserModel {
     this.nationalId,
     this.names,
     this.lastNames,
-    this.zone,
+    this.zone = UserZone.centro,
     this.active = true,
   });
 
@@ -31,7 +35,7 @@ class UserModel {
       nationalId: json['documento'] ?? json['Document'],
       names: json['nombres'] ?? name,
       lastNames: json['apellidos'] ?? lastNames,
-      zone: json['zone'],
+      zone: UserZoneX.fromString((json['zone'] ?? '') as String),
     );
   }
 

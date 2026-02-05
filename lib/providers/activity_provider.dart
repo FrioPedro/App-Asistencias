@@ -6,28 +6,29 @@ import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/domain/activity/syncService.dart';
 import 'package:app_asistencias/domain/note/sync_note.dart';
+import 'package:app_asistencias/models/taskType_model.dart';
 
-class EventsProvider {
+class activityProvider {
   final ActiveSessionStorage _storage;
   final ActivitySyncService _sync = ActivitySyncService();
   final NoteSyncService _sync2 = NoteSyncService();
 
-  EventsProvider({ActiveSessionStorage? storage})
+  activityProvider({ActiveSessionStorage? storage})
       : _storage = storage ?? ActiveSessionStorage();
 
-  Future<List<AssigmentModel>> fetchEvents() async {
+  Future<List<AssigmentModel>> fetchactivity() async {
     await _sync.syncIfPossible();
     await _sync2.syncIfPossible();
     return await GetAssigned.fetchAssignment();
   }
 
-  // ✅ CORREGIDO: Agregado DateTime timestamp al tipo de retorno
-  Future<({String eventKey, TaskType task, int serverId, DateTime timestamp})?>
+  // Agregado DateTime timestamp al tipo de retorno
+  Future<({String keyGroup, TaskType task, int serverId, DateTime timestamp})?>
       getActiveSession() {
     return _storage.read();
   }
 
-  /// ✅ Si hay uno activo, lo cierra y luego marca la nueva entrada
+  /// Si hay uno activo, lo cierra y luego marca la nueva entrada
   Future<void> startAttendance({
     required AssigmentModel assignment,
     required TaskType task,
