@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 
 import 'package:app_asistencias/core/appRouter.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
-
 import 'package:app_asistencias/core/sync_worker.dart';
+import 'package:app_asistencias/core/notification_service.dart';
 
 /// Punto de entrada principal de la aplicación
 Future<void> main() async {
@@ -29,14 +29,12 @@ Future<void> main() async {
     ),
   );
 
-  WidgetsFlutterBinding.ensureInitialized();
+  // ✅ Inicializar Notificaciones Locales (8AM entrada, 8PM salida)
+  await NotificationService().init();
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-
     systemNavigationBarColor: Color(0xFF121212),
-
     systemNavigationBarIconBrightness: Brightness.light,
-
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
   ));
