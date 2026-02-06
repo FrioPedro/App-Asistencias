@@ -3,23 +3,40 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core:1.13.1'
+            force 'androidx.core:core-ktx:1.13.1'
+        }
+    }
 }
 
 rootProject.buildDir = "../build"
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
-}
 
-subprojects {
-    plugins.withId('com.android.library') {
-        if (project.name == "isar_flutter_libs") {
-             android.namespace = "dev.isar.isar_flutter_libs"
+subprojects { project ->
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.evaluationDependsOn(":app")
+
+    project.plugins.withId("com.android.library") {
+        
+        project.android {
+            compileSdkVersion 35
+            // buildToolsVersion "35.0.0" // opcional
         }
-        // Add core-ktx to all library projects to fix toUri unresolved reference
-        dependencies {
+
+        // ✅ Namespace requerido por AGP 8+ (solo si falta)
+        if (project.android.namespace == null) {
+            project.android.namespace = project.group.toString()
+        }
+
+        // Fix específico para isar_flutter_libs
+        if (project.name == "isar_flutter_libs") {
+            project.android.namespace = "dev.isar.isar_flutter_libs"
+        }
+
+        // Dependencia extra que estabas metiendo
+        project.dependencies {
             implementation 'androidx.core:core-ktx:1.13.1'
         }
     }
