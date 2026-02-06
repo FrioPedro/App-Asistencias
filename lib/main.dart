@@ -16,7 +16,7 @@ Future<void> main() async {
   // ✅ Workmanager init
   await Workmanager().initialize(
     callbackDispatcher,
-    isInDebugMode: true, // pon false en release
+    isInDebugMode: false,
   );
 
   // ✅ sync cada 1 min (wifi o datos)

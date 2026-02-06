@@ -11,6 +11,7 @@ import '../sheets/event_action_sheet.dart';
 import 'widgets/home_header.dart';
 import '../../../models/activity/activity_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
+import '../../../../core/notification_service.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -237,7 +238,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
         ),
       ),
-      /*
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -271,22 +271,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             child: const Icon(Icons.add, color: Colors.white, size: 28),
           ),
         ],
-      ),
-      */
-      floatingActionButton: FloatingActionButton(
-        heroTag: "create_activity",
-        onPressed: () {
-          if (!_attendanceService.isCreationAllowed()) {
-            RestrictedAccessDialog.show(context);
-            return;
-          }
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
-          );
-        },
-        backgroundColor: const Color(0xFF2E60C4),
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }

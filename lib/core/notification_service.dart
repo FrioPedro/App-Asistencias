@@ -231,7 +231,6 @@ class NotificationService {
   // ─────────────────────────────────────────────────────────────────────────
 
   /// Muestra una notificación inmediata (útil para testing)
-  /*
   /// Muestra una notificación inmediata (útil para testing)
   Future<void> showInstantNotification({
     required String title,
@@ -254,7 +253,6 @@ class NotificationService {
 
     await _notificationsPlugin.show(id, title, body, platformDetails);
   }
-  */
 
   /// Cancela todas las notificaciones pendientes
   Future<void> cancelAllNotifications() async {
