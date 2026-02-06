@@ -1,5 +1,6 @@
 import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
 import '../../models/activity/activity_model.dart';
@@ -196,7 +197,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- BUSCADOR Y BOTÓN CALENDARIO ---
+            // --- BUSCADOR Y BOTONES ---
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
@@ -210,7 +211,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           setState(() => _searchQuery = val.toLowerCase()),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
+                  // Botón Estadísticas/Agrupadas
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2E60C4),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.analytics_outlined,
+                          color: Colors.white),
+                      tooltip: 'Ver agrupadas',
+                      onPressed: () {
+                        context.push('/grouped');
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   // Botón Calendario
                   Container(
                     decoration: BoxDecoration(
