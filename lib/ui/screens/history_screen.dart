@@ -326,7 +326,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ? _formatTime(session.exitTimestamp!)
                                       : null,
 
-                                  hasPendingSync: !session.hasPendingSync,
+                                  hasPendingSync: session.hasPendingSync,
                                   assigmentType: session.activityType,
                                 );
                               },

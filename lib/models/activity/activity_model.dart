@@ -128,7 +128,7 @@ class ActivityModel {
     }
 
     return ActivityModel(
-      keyGroup: (json['Keys'] as String?),
+      keyGroup: (json['Keys'] as String?) ?? '',
       assigmentId: idAssigment,
       documentId: json['Document'] as String,
       description: json['Description'] as String?,

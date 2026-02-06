@@ -39,25 +39,39 @@ class ActivitySession {
 }
 
 List<ActivitySession> groupByKeyGroup(List<ActivityModel> events) {
+  print('📦 groupByKeyGroup → eventos recibidos: ${events.length}');
   final Map<String, _Acc> map = {};
 
   for (final e in events) {
     final key = (e.keyGroup ?? '').trim();
-    if (key.isEmpty) continue;
+
+    if (key.isEmpty || key == "") continue;
+
+    print(
+      '➡️ Evento | keyGroup="$key" '
+      '| motive=${e.motiveActivity} '
+      '| ts=${e.assigmentId} '
+      '| synced=${e.isSynced}',
+    );
 
     final ts = e.timestamp ?? DateTime.fromMillisecondsSinceEpoch(0);
 
-    final acc = map.putIfAbsent(key, () => _Acc(
-      keyGroup: key,
-      assigmentId: e.assigmentId,
-      documentId: e.documentId,
-      client: e.client,
-      description: e.description,
-      task: e.task,
-      activityType: e.activityType,
-      zone: e.zone,
-    ));
-
+    final acc = map.putIfAbsent(
+      key,
+      () {
+        print('🆕 Nuevo _Acc para keyGroup="$key"');
+        return _Acc(
+          keyGroup: key,
+          assigmentId: e.assigmentId,
+          documentId: e.documentId,
+          client: e.client,
+          description: e.description,
+          task: e.task,
+          activityType: e.activityType,
+          zone: e.zone,
+        );
+      },
+    );
     // meta (por si vienen null en un evento y no en otro)
     acc.documentId ??= e.documentId;
     acc.client ??= e.client;
@@ -97,8 +111,7 @@ List<ActivitySession> groupByKeyGroup(List<ActivityModel> events) {
       .toList();
 
   // Orden: más reciente primero (por último evento en la sesión)
-  DateTime lastOf(ActivitySession s) =>
-      s.exitTimestamp ?? s.entryTimestamp;
+  DateTime lastOf(ActivitySession s) => s.exitTimestamp ?? s.entryTimestamp;
 
   sessions.sort((a, b) => lastOf(b).compareTo(lastOf(a)));
 
@@ -133,7 +146,6 @@ class _Acc {
     required this.zone,
   });
 }
-
 
 class HistoryProvider {
   final ActivitySyncService _sync = ActivitySyncService();
