@@ -237,7 +237,44 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
         ),
       ),
+      /*
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // BOTÓN TEMPORAL DE PRUEBA DE NOTIFICACIONES
+          FloatingActionButton.small(
+            heroTag: "test_notif",
+            onPressed: () {
+              NotificationService().showInstantNotification(
+                title: "🔔 Test de Notificación",
+                body: "Esta es una prueba inmediata del sistema.",
+              );
+            },
+            backgroundColor: Colors.amber,
+            child: const Icon(Icons.notifications_active, color: Colors.black),
+          ),
+          const SizedBox(height: 16),
+          // Botón original
+          FloatingActionButton(
+            heroTag: "create_activity",
+            onPressed: () {
+              if (!_attendanceService.isCreationAllowed()) {
+                RestrictedAccessDialog.show(context);
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
+              );
+            },
+            backgroundColor: const Color(0xFF2E60C4),
+            child: const Icon(Icons.add, color: Colors.white, size: 28),
+          ),
+        ],
+      ),
+      */
       floatingActionButton: FloatingActionButton(
+        heroTag: "create_activity",
         onPressed: () {
           if (!_attendanceService.isCreationAllowed()) {
             RestrictedAccessDialog.show(context);
