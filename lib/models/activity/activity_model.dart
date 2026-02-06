@@ -146,6 +146,8 @@ class ActivityModel {
 
   Map<String, dynamic> toServerPayload() {
     return {
+      "keys": keyGroup,
+      "category": 1,
       "project": assigmentId,
       "motive": motiveActivity.id, // int
       "collaborator": collaboratordocumentId,
