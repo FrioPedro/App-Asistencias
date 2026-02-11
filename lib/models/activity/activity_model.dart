@@ -132,6 +132,7 @@ class ActivityModel {
       assigmentId: idAssigment,
       documentId: json['Document'] as String,
       description: json['Description'] as String?,
+      client: json['Client'] as String?,
       collaboratordocumentId: json['collaboratordocumentId'] as String?,
       zone: UserZoneX.fromString(json["Zone"] as String?),
       task: TaskTypeX.fromLabel(json['Task'] as String?),
