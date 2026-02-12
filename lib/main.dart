@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'package:app_asistencias/core/appRouter.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
+import 'package:app_asistencias/core/notification_service.dart';
 
 import 'package:app_asistencias/core/sync_worker.dart';
 
@@ -12,6 +13,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await session.init(); // ✅ CLAVE: carga token antes del router
+
+  // ✅ Notificaciones full-screen intent (06:00 y 20:00)
+  await NotificationService.init(router);
+  await NotificationService.scheduleDailyNotifications();
 
   // ✅ Workmanager init
   await Workmanager().initialize(
@@ -32,11 +37,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-
     systemNavigationBarColor: Color(0xFF121212),
-
     systemNavigationBarIconBrightness: Brightness.light,
-
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
   ));
