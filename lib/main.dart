@@ -14,27 +14,35 @@ Future<void> main() async {
 
   await session.init(); // ✅ CLAVE: carga token antes del router
 
-  // ✅ Notificaciones full-screen intent (06:00 y 20:00)
+  // ✅ Inicializar servicio de notificaciones
   await NotificationService.init(router);
-  await NotificationService.scheduleDailyNotifications();
+
+  // ✅ Programar alarmas de trabajo (06:00 AM y 08:00 PM)
+  await NotificationService().scheduleDailyWorkReminders();
+
+  // ✅ Iniciar vigilante de alarmas (foreground — sin notificaciones)
+  NotificationService().startWatching();
 
   // ✅ Workmanager init
   await Workmanager().initialize(
     callbackDispatcher,
-    isInDebugMode: true, // pon false en release
+    isInDebugMode: false, // CLAVE: false para ocultar notificaciones
   );
 
-  // ✅ sync cada 1 min (wifi o datos)
+  // Cancelar tareas previas para limpiar configuraciones antiguas (debug)
+  await Workmanager().cancelAll();
+
+  // ✅ sync cada 15 min (mínimo de Android)
+  // Usamos un ID nuevo 'sync-task-v2' para asegurar una configuración limpia
   await Workmanager().registerPeriodicTask(
-    'sync-task-1',
+    'sync-task-v2',
     kSyncTask,
-    frequency: const Duration(minutes: 1),
+    frequency: const Duration(minutes: 15), // Android require mín 15 min
     constraints: Constraints(
       networkType: NetworkType.connected, // ✅ wifi o datos móviles
     ),
+    existingWorkPolicy: ExistingWorkPolicy.replace, // Reemplazar si existe
   );
-
-  WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: Color(0xFF121212),
@@ -46,9 +54,40 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-/// Widget raíz de la aplicación
-class MyApp extends StatelessWidget {
+/// Widget raíz con gestión de ciclo de vida para el AlarmWatcher.
+/// - resumed → startWatching (app en primer plano)
+/// - paused  → stopWatching (app en background)
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    NotificationService().stopWatching();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App vuelve a primer plano → activar vigilante
+      NotificationService().startWatching();
+    } else if (state == AppLifecycleState.paused) {
+      // App va a background → desactivar vigilante (zonedSchedule se encarga)
+      NotificationService().stopWatching();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
