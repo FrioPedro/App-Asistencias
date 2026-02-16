@@ -44,14 +44,14 @@ class NotificationService {
     {
       'id': 100,
       'hour': 8,
-      'minute': 30,
+      'minute': 0,
       'title': '¡Hora de trabajar!',
       'body': 'Recuerda marcar tu entrada para comenzar la jornada.',
     },
     {
       'id': 101,
       'hour': 20,
-      'minute': 53, // Hora de prueba actualizada
+      'minute': 0, // Hora de prueba actualizada
       'title': 'Fin de jornada',
       'body': 'No olvides marcar tu salida antes de irte.',
     },

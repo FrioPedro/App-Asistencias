@@ -1,16 +1,16 @@
 // ============================================================================
 // reminder_screen.dart
 // ----------------------------------------------------------------------------
-// Pantalla de recordatorio (full-screen intent)
-// - Diseño moderno (gradiente, glow, glass)
-// - CTA único: "Entendido" (completa tarea/asistencia + navega a Home)
-// - Botón X arriba: cierra y va a Home (sin acciones extra)
+// Pantalla de recordatorio (full-screen intent) - Rediseño Profesional
+// - Reloj grande centrado
+// - Fondo gradiente elegante
+// - Deslizar para confirmar (usando Dismissible nativo para evitar errores de build)
 // ============================================================================
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_asistencias/core/notification_service.dart';
+import 'package:intl/intl.dart';
 
 class ReminderScreen extends StatefulWidget {
   final String message;
@@ -36,14 +36,13 @@ class _ReminderScreenState extends State<ReminderScreen>
   void initState() {
     super.initState();
 
-    // Mejor que cancelar TODO: cancela solo el id si lo tienes
     if (widget.notificationId != null) {
       NotificationService().cancel(widget.notificationId!);
     }
 
     _ac = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1400),
+      duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
 
     _pulse = CurvedAnimation(parent: _ac, curve: Curves.easeInOut);
@@ -65,198 +64,180 @@ class _ReminderScreenState extends State<ReminderScreen>
     setState(() => _busy = true);
 
     try {
-      // ============================================================
-      // AQUÍ VA TU LÓGICA REAL para "cerrar la asistencia / tarea"
-      // Ejemplos (elige el que aplique en tu app):
-      //
-      // await ReminderRepository().markDone(widget.notificationId);
-      // await ActivityService().closeReminderTask(...);
-      // await NotificationService().ack(widget.notificationId);
-      //
-      // IMPORTANTE: este paso es el que hace que "sea válido".
-      // ============================================================
-
-      // Pequeño delay opcional para que se sienta responsivo (puedes quitarlo)
-      // await Future.delayed(const Duration(milliseconds: 150));
-
+      // Simula proceso de cierre/confirmación
+      await Future.delayed(const Duration(milliseconds: 300));
       await _goHome();
     } catch (_) {
-      // Si falla, igual puedes ir a home o mostrar mensaje. Yo lo dejo simple:
       await _goHome();
-    } finally {
-      if (mounted) setState(() => _busy = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Formato de hora AM/PM o 24h según prefieras. Aquí uso HH:mm
     final now = DateTime.now();
-    final timeStr =
-        "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+    final timeStr = DateFormat('HH:mm').format(now);
 
     return Scaffold(
+      backgroundColor: const Color(0xFF0F172A), // Fondo base
       body: Stack(
         children: [
+          // 1. Fondo con Gradiente Animado (simulado estático por performance)
           const _BackgroundGradient(),
+
+          // 2. Elementos decorativos (Blobs)
           Positioned(
-            top: -120,
-            right: -80,
+            top: -100,
+            left: -50,
             child: _GlowBlob(
-                color: const Color(0xFF2E60C4).withOpacity(0.35), size: 260),
+                color: const Color(0xFF3B82F6).withOpacity(0.2), size: 300),
           ),
           Positioned(
-            bottom: -140,
-            left: -60,
+            bottom: -80,
+            right: -20,
             child: _GlowBlob(
-                color: const Color(0xFF8B5CF6).withOpacity(0.22), size: 320),
+                color: const Color(0xFF8B5CF6).withOpacity(0.15), size: 250),
           ),
+
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Top bar: hora + X
-                  Row(
+            child: Column(
+              children: [
+                // Cabecera sutil vacía para balance
+                const SizedBox(height: 60),
+
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        child: Text(
-                          timeStr,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
+                      // Icono animado
+                      AnimatedBuilder(
+                        animation: _pulse,
+                        builder: (_, __) {
+                          return Transform.scale(
+                            scale: 1.0 + (_pulse.value * 0.05),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 40),
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.indigo.withOpacity(0.1),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.indigoAccent
+                                        .withOpacity(0.2 * _pulse.value),
+                                    blurRadius: 40,
+                                    spreadRadius: 10,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.access_alarm_rounded,
+                                color: Colors.white,
+                                size: 48,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      // HORA GRANDE
+                      Text(
+                        timeStr,
+                        style: const TextStyle(
+                          fontSize: 86,
+                          fontWeight: FontWeight.w200,
+                          color: Colors.white,
+                          letterSpacing: -2,
+                          height: 1,
                         ),
                       ),
-                      IconButton(
-                        onPressed: _busy ? null : _goHome, // X => home directo
-                        icon: const Icon(Icons.close_rounded),
-                        color: Colors.white70,
-                        tooltip: "Cerrar",
+
+                      const SizedBox(height: 10),
+
+                      // Mensaje principal
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Text(
+                          widget.message,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withOpacity(0.9),
+                            height: 1.5,
+                          ),
+                        ),
                       ),
                     ],
                   ),
+                ),
 
-                  const SizedBox(height: 18),
-
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                // SLIDER "DESLIZAR PARA CONFIRMAR" (Nativo con Dismissible)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(30, 0, 30, 50),
+                  child: Container(
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E293B),
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Stack(
                       children: [
-                        AnimatedBuilder(
-                          animation: _pulse,
-                          builder: (_, __) {
-                            final t = 0.65 + (_pulse.value * 0.35);
-                            return Container(
-                              width: 108,
-                              height: 108,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color:
-                                    const Color(0xFF2E60C4).withOpacity(0.18),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF2E60C4)
-                                        .withOpacity(0.45 * t),
-                                    blurRadius: 26 * t,
-                                    spreadRadius: 2 * t,
-                                  ),
-                                ],
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.10),
-                                  width: 1.2,
-                                ),
-                              ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.notifications_active_rounded,
-                                  size: 52,
-                                  color: Color(0xFFB9D2FF),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        const Text(
-                          'Recordatorio',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            height: 1.0,
+                        // Texto de fondo
+                        const Center(
+                          child: Text(
+                            'Desliza para confirmar  >>>',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 10),
 
-                        // Tarjeta moderna (sin label “Mensaje”)
-                        const _GlassCard(
-                          child: Text(
-                            'Debes confirmar tu salida para que\n'
-                            'tus horas se registren correctamente.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              height: 1.45,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                        // Slider real
+                        Dismissible(
+                          key: UniqueKey(),
+                          direction: DismissDirection.startToEnd,
+                          dismissThresholds: const {
+                            DismissDirection.startToEnd: 0.6
+                          },
+                          confirmDismiss: (direction) async {
+                            await _completeReminderAndGoHome();
+                            return false; // No eliminar del árbol widget
+                          },
+                          child: Container(
+                            alignment: Alignment.centerLeft,
+                            padding: const EdgeInsets.only(left: 4),
+                            child: Container(
+                              width: 56,
+                              height: 56,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                    offset: Offset(2, 0),
+                                  )
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.chevron_right_rounded,
+                                color: Color(0xFF0F172A),
+                                size: 32,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-
-                  // CTA único: completa + home
-                  SizedBox(
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _busy ? null : _completeReminderAndGoHome,
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: const Color(0xFF2E60C4),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14)),
-                      ).copyWith(
-                        overlayColor: WidgetStatePropertyAll(
-                            Colors.white.withOpacity(0.08)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (_busy) ...[
-                            const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
-                            ),
-                            const SizedBox(width: 12),
-                            const Text(
-                              'Procesando...',
-                              style: TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.w800),
-                            ),
-                          ] else ...[
-                            const Icon(Icons.check_circle_rounded, size: 22),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'Entendido',
-                              style: TextStyle(
-                                  fontSize: 17, fontWeight: FontWeight.w800),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -265,7 +246,7 @@ class _ReminderScreenState extends State<ReminderScreen>
   }
 }
 
-// ---------------------------- UI helpers ----------------------------
+// ---------------------------- UI Helper Widgets ----------------------------
 
 class _BackgroundGradient extends StatelessWidget {
   const _BackgroundGradient();
@@ -274,12 +255,12 @@ class _BackgroundGradient extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment(-0.25, -0.35),
-          radius: 1.15,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF151A2A),
-            Color(0xFF0B0E14),
+            Color(0xFF0F172A), // Slate 900
+            Color(0xFF1E293B), // Slate 800
           ],
         ),
       ),
@@ -302,38 +283,14 @@ class _GlowBlob extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: color,
+          // Reemplazo de ImageFilter.blur por BoxShadow equivalente
           boxShadow: [
             BoxShadow(
               color: color,
-              blurRadius: 70,
-              spreadRadius: 22,
+              blurRadius: 60,
+              spreadRadius: 20,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GlassCard extends StatelessWidget {
-  final Widget child;
-  const _GlassCard({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withOpacity(0.10)),
-          ),
-          child: child,
         ),
       ),
     );

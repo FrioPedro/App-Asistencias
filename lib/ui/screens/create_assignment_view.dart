@@ -119,8 +119,7 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
     // 🔹 Verifica conexión a internet
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult.contains(ConnectivityResult.none)) {
-      CustomSnackBar.show(context, '❌ No hay conexión a internet',
-          isError: true);
+      CustomSnackBar.show(context, 'No hay conexión a internet', isError: true);
       return;
     }
 
