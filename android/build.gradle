@@ -35,10 +35,7 @@ subprojects { project ->
             project.android.namespace = "dev.isar.isar_flutter_libs"
         }
 
-        // Dependencia extra que estabas metiendo
-        project.dependencies {
-            implementation 'androidx.core:core-ktx:1.13.1'
-        }
+
     }
 }
 
