@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:app_asistencias/core/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:vibration/vibration.dart';
 
 class ReminderScreen extends StatefulWidget {
   final String message;
@@ -48,6 +49,9 @@ class _ReminderScreenState extends State<ReminderScreen>
       volume: 1.0, // Volumen máximo
     );
 
+    // 📳 Iniciar vibración
+    _startVibration();
+
     _ac = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
@@ -56,9 +60,17 @@ class _ReminderScreenState extends State<ReminderScreen>
     _pulse = CurvedAnimation(parent: _ac, curve: Curves.easeInOut);
   }
 
+  Future<void> _startVibration() async {
+    if (await Vibration.hasVibrator() == true) {
+      // Patrón: esperar 500ms, vibrar 1000ms, repetir desde índice 0
+      Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
+    }
+  }
+
   @override
   void dispose() {
     FlutterRingtonePlayer().stop(); // Detener sonido al salir
+    Vibration.cancel(); // Detener vibración
     _ac.dispose();
     super.dispose();
   }

@@ -5,6 +5,7 @@ import '../../../providers/attendance_provider.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/action_option.dart';
 import 'service_exit_form_sheet.dart';
+import 'workshop_exit_form_sheet.dart';
 import 'office_workshop_exit_sheet.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
@@ -24,7 +25,8 @@ class AssigmentModal extends StatefulWidget {
   final String? activeTaskName;
 
   /// eventKey, keyGroup, icon, taskName
-  final void Function(String eventKey, String keyGroup, IconData icon, String taskName)
+  final void Function(
+          String eventKey, String keyGroup, IconData icon, String taskName)
       onactivityStarted;
 
   /// eventKey
@@ -50,7 +52,8 @@ class AssigmentModal extends StatefulWidget {
     required bool isActiveactivity,
     IconData? activeIcon,
     String? activeTaskName,
-    required void Function(String eventKey, String keyGroup, IconData icon, String taskName)
+    required void Function(
+            String eventKey, String keyGroup, IconData icon, String taskName)
         onactivityStarted,
     required void Function(String eventKey) onactivityEnded,
   }) {
@@ -90,7 +93,8 @@ class _EventActionModalState extends State<AssigmentModal> {
   }
 
   Future<void> _onActivitySelected(String title, IconData icon) async {
-    final hasPermission = await PermissionGuard.checkLocationPermission(context);
+    final hasPermission =
+        await PermissionGuard.checkLocationPermission(context);
     if (!hasPermission) return;
 
     // --- Intercepción de formularios si hay actividad activa ---
@@ -99,13 +103,15 @@ class _EventActionModalState extends State<AssigmentModal> {
       final currentTask = TaskTypeX.fromLabel(currentTaskName);
 
       // Caso 1: Servicio -> Formulario de servicio (usa keyGroup)
-      if (widget.activeIcon == Icons.construction || currentTask == TaskType.service) {
+      if (widget.activeIcon == Icons.construction ||
+          currentTask == TaskType.service) {
         final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => ServiceExitFormScreen(
               event: widget.assignment,
-              eventKey: widget.keyGroup, // aquí "eventKey" es keyGroup en tu screen
+              eventKey:
+                  widget.keyGroup, // aquí "eventKey" es keyGroup en tu screen
             ),
           ),
         );
@@ -113,8 +119,9 @@ class _EventActionModalState extends State<AssigmentModal> {
         if (result != true) return;
         await Future.delayed(const Duration(milliseconds: 1000));
       }
-      // Caso 2: Oficina/Taller -> Modal de reporte (usa keyGroup)
-      else if (currentTask == TaskType.office || currentTask == TaskType.workshop) {
+
+      // Caso 2: Oficina -> Modal de reporte (usa keyGroup)
+      else if (currentTask == TaskType.office) {
         final result = await showModalBottomSheet(
           context: context,
           backgroundColor: const Color(0xFF1E1E1E),
@@ -127,7 +134,22 @@ class _EventActionModalState extends State<AssigmentModal> {
           builder: (_) => OfficeWorkshopExitModal(
             event: widget.assignment,
             task: currentTask,
-            eventKey: widget.keyGroup, // aquí "eventKey" es keyGroup en tu modal/screen
+            eventKey: widget.keyGroup,
+          ),
+        );
+
+        if (result != true) return;
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
+      // Caso 3: Taller -> Formulario Completo (usa keyGroup)
+      else if (currentTask == TaskType.workshop) {
+        final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => WorkshopExitFormScreen(
+              event: widget.assignment,
+              eventKey: widget.keyGroup,
+            ),
           ),
         );
 
@@ -148,7 +170,8 @@ class _EventActionModalState extends State<AssigmentModal> {
         task: task,
       );
 
-      print('[MODAL] startAttendance -> eventKey="${widget.eventKey}" newKeyGroup="$newKeyGroup"');
+      print(
+          '[MODAL] startAttendance -> eventKey="${widget.eventKey}" newKeyGroup="$newKeyGroup"');
 
       if (!mounted) return;
 
@@ -178,14 +201,16 @@ class _EventActionModalState extends State<AssigmentModal> {
     print('[EXIT] eventKey(UI) = "${widget.eventKey}"');
     print('[EXIT] keyGroup(session) = "${widget.keyGroup}"');
     print('[EXIT] isActive = ${widget.isActiveactivity}');
-    print('[EXIT] activeTaskName="${widget.activeTaskName}" -> currentTask=${currentTask.label}');
+    print(
+        '[EXIT] activeTaskName="${widget.activeTaskName}" -> currentTask=${currentTask.label}');
     print('[EXIT] assignment.serverId=${widget.assignment.serverId}');
     print('[EXIT] assignment.documentId=${widget.assignment.documentId}');
     print('[EXIT] activeIcon=${widget.activeIcon}');
     print('---------------------');
 
     // 1) Servicio -> Formulario
-    if (widget.activeIcon == Icons.construction || currentTask == TaskType.service) {
+    if (widget.activeIcon == Icons.construction ||
+        currentTask == TaskType.service) {
       Navigator.pop(context);
 
       final result = await Navigator.push(
@@ -193,7 +218,8 @@ class _EventActionModalState extends State<AssigmentModal> {
         MaterialPageRoute(
           builder: (_) => ServiceExitFormScreen(
             event: widget.assignment,
-            eventKey: widget.keyGroup, // en tu screen esto realmente es keyGroup
+            eventKey:
+                widget.keyGroup, // en tu screen esto realmente es keyGroup
           ),
         ),
       );
@@ -205,8 +231,8 @@ class _EventActionModalState extends State<AssigmentModal> {
       return;
     }
 
-    // 2) Oficina/Taller -> Modal reporte
-    if (currentTask == TaskType.office || currentTask == TaskType.workshop) {
+    // 2) Oficina -> Modal reporte
+    if (currentTask == TaskType.office) {
       Navigator.pop(context);
 
       final result = await showModalBottomSheet(
@@ -221,13 +247,34 @@ class _EventActionModalState extends State<AssigmentModal> {
         builder: (_) => OfficeWorkshopExitModal(
           event: widget.assignment,
           task: currentTask,
-          eventKey: widget.keyGroup, // en tu modal esto realmente es keyGroup
+          eventKey: widget.keyGroup,
         ),
       );
 
       if (result == true) {
         widget.onactivityEnded(widget.eventKey);
-        _showCustomSnackBar('Salida de ${currentTask.label} registrada', isError: false);
+        _showCustomSnackBar('Salida de Oficina registrada', isError: false);
+      }
+      return;
+    }
+
+    // 3) Taller -> Formulario Completo
+    if (currentTask == TaskType.workshop) {
+      Navigator.pop(context);
+
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => WorkshopExitFormScreen(
+            event: widget.assignment,
+            eventKey: widget.keyGroup,
+          ),
+        ),
+      );
+
+      if (result == true) {
+        widget.onactivityEnded(widget.eventKey);
+        _showCustomSnackBar('Salida de Taller registrada', isError: false);
       }
       return;
     }
@@ -237,7 +284,8 @@ class _EventActionModalState extends State<AssigmentModal> {
 
     try {
       if (widget.keyGroup.trim().isEmpty) {
-        _showCustomSnackBar('KeyGroup vacío. Refresca la pantalla.', isError: true);
+        _showCustomSnackBar('KeyGroup vacío. Refresca la pantalla.',
+            isError: true);
         if (mounted) setState(() => _isLoading = false);
         return;
       }
@@ -282,7 +330,8 @@ class _EventActionModalState extends State<AssigmentModal> {
                     children: [
                       CircularProgressIndicator(color: Color(0xFF4CAF50)),
                       SizedBox(height: 16),
-                      Text("Procesando...", style: TextStyle(color: Colors.white)),
+                      Text("Procesando...",
+                          style: TextStyle(color: Colors.white)),
                     ],
                   ),
                 ),
@@ -413,7 +462,8 @@ class _EventActionModalState extends State<AssigmentModal> {
             icon: Icons.local_shipping,
             title: 'Transporte',
             subtitle: 'Traslados',
-            onTap: () => _onActivitySelected('Transporte', Icons.local_shipping),
+            onTap: () =>
+                _onActivitySelected('Transporte', Icons.local_shipping),
           ),
         if (activeIcon != Icons.construction)
           ActionOption(

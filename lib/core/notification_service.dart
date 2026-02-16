@@ -54,8 +54,8 @@ class NotificationService {
     },
     {
       'id': 101,
-      'hour': 20,
-      'minute': 0,
+      'hour': 12,
+      'minute': 54,
       'title': 'Fin de jornada',
       'body': 'No olvides marcar tu salida antes de irte.',
     },
