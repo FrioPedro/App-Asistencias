@@ -7,6 +7,7 @@
 // - Deslizar para confirmar (usando Dismissible nativo para evitar errores de build)
 // ============================================================================
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_asistencias/core/notification_service.dart';
@@ -33,6 +34,7 @@ class _ReminderScreenState extends State<ReminderScreen>
   late final AnimationController _ac;
   late final Animation<double> _pulse;
   bool _busy = false;
+  Timer? _vibrationTimer;
 
   @override
   void initState() {
@@ -61,16 +63,29 @@ class _ReminderScreenState extends State<ReminderScreen>
   }
 
   Future<void> _startVibration() async {
-    if (await Vibration.hasVibrator() == true) {
-      // Patrón: esperar 500ms, vibrar 1000ms, repetir desde índice 0
-      Vibration.vibrate(pattern: [500, 1000, 500, 1000], repeat: 0);
+    final hasVibrator = await Vibration.hasVibrator();
+    if (!hasVibrator) {
+      debugPrint('📳 Dispositivo sin vibrador');
+      return;
     }
+
+    debugPrint('📳 Iniciando vibración periódica');
+
+    // Vibración inmediata
+    Vibration.vibrate(duration: 800);
+
+    // Repetir cada 2 segundos con Timer (más fiable que repeat: 0)
+    _vibrationTimer = Timer.periodic(const Duration(milliseconds: 2000), (_) {
+      Vibration.vibrate(duration: 800);
+    });
   }
 
   @override
   void dispose() {
     FlutterRingtonePlayer().stop(); // Detener sonido al salir
-    Vibration.cancel(); // Detener vibración
+    _vibrationTimer?.cancel(); // Detener timer de vibración
+    _vibrationTimer = null;
+    Vibration.cancel(); // Detener vibración activa
     _ac.dispose();
     super.dispose();
   }
