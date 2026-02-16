@@ -221,14 +221,39 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
               const Text('Cliente:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              CustomDropdown<String>.search(
-                items: clients,
-                initialItem: _selectedClient ??
-                    (clients.isNotEmpty ? clients.first : null),
-                onChanged: (value) => setState(() => _selectedClient = value),
-                decoration: darkDropdownDecoration,
-                hintText: 'Seleccione cliente',
-                overlayHeight: 600,
+              FormField<String>(
+                validator: (value) =>
+                    _selectedClient == null ? 'Seleccione un cliente' : null,
+                builder: (field) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomDropdown<String>.search(
+                        items: clients,
+                        initialItem: _selectedClient ??
+                            (clients.isNotEmpty ? clients.first : null),
+                        onChanged: (value) {
+                          setState(() => _selectedClient = value);
+                          field.didChange(value);
+                        },
+                        decoration: darkDropdownDecoration,
+                        hintText: 'Seleccione cliente',
+                        overlayHeight: 340,
+                      ),
+                      if (field.hasError)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+                          child: Text(
+                            field.errorText!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 20),
               const Text('Descripción:',
@@ -253,13 +278,38 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
               const Text('Colaboradores:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              CustomDropdown<String>.multiSelectSearch(
-                hintText: 'Seleccionar colaboradores',
-                items: collaborators,
-                onListChanged: (values) =>
-                    setState(() => _selectedCollaborators = values),
-                decoration: darkDropdownDecoration,
-                overlayHeight: 400,
+              FormField<List<String>>(
+                validator: (values) => (_selectedCollaborators.isEmpty)
+                    ? 'Seleccione al menos un colaborador'
+                    : null,
+                builder: (field) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomDropdown<String>.multiSelectSearch(
+                        hintText: 'Seleccionar colaboradores',
+                        items: collaborators,
+                        onListChanged: (values) {
+                          setState(() => _selectedCollaborators = values);
+                          field.didChange(values);
+                        },
+                        decoration: darkDropdownDecoration,
+                        overlayHeight: 340,
+                      ),
+                      if (field.hasError)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+                          child: Text(
+                            field.errorText!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 20),
               const Text('Tipo de Asignación:',
@@ -286,20 +336,13 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
               const Text('Zona:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: selectedZone,
-                items: _fixedZones
-                    .map((z) => DropdownMenuItem(value: z, child: Text(z)))
-                    .toList(),
+              CustomDropdown<String>.search(
+                items: _fixedZones,
+                initialItem: selectedZone,
                 onChanged: (v) => setState(() => selectedZone = v),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: colorScheme.surface,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                decoration: darkDropdownDecoration,
+                hintText: 'Seleccione zona',
+                overlayHeight: 340,
               ),
               const SizedBox(height: 30),
               Center(
