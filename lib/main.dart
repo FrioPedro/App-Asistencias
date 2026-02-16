@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter/services.dart';
 
@@ -51,7 +52,7 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.light,
   ));
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 /// Widget raíz con gestión de ciclo de vida para el AlarmWatcher.

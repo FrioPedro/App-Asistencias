@@ -5,7 +5,7 @@ import 'card.dart';
 import '../../widgets/event_card_skeleton.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/custom_search_bar.dart';
-import '../create_activity_screen.dart';
+import '../create_assignment_view.dart';
 import 'widgets/restricted_access_dialog.dart';
 import '../sheets/event_action_sheet.dart';
 import 'widgets/home_header.dart';
@@ -245,7 +245,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           }
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const CreateActivityScreen()),
+            MaterialPageRoute(builder: (_) => const CreateAssignmentView()),
           );
         },
         backgroundColor: const Color(0xFF2E60C4),

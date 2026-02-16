@@ -1,23 +1,60 @@
-import '../models/activity/activity_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../domain/assignment/create_assignment.dart';
+import '../domain/client/get_clients.dart';
+import '../domain/client/sync_clients.dart';
+import '../domain/collaborator/get_collaborators.dart';
+import '../domain/collaborator/sync_collaborators.dart';
+import '../models/client_model.dart';
+import '../models/collaborator_model.dart';
 
-class CreateAssignmentProvider {
-  
-  /// Simula el envío de la nueva asignación al servidor
-  /// Retorna `true` si fue exitoso, `false` si falló.
-  Future<bool> createAssignment(ActivityModel assignment) async {
-    try {
-      // 1. Simular validación y espera de red (2 segundos)
-      await Future.delayed(const Duration(seconds: 2));
+/// 🔹 Provider clase principal
+class AssignmentCreatorProvider {
+  final Ref ref;
+  AssignmentCreatorProvider(this.ref);
 
-      // Aquí iría tu llamada HTTP:
-      // final response = await http.post(url, body: assignment.toJson());
-      
-      //print("Asignación creada: ${assignment.toJson()}");
+  /// 🔸 Obtiene todos los clientes locales (si está vacío, sincroniza)
+  Future<List<Client>> getClients({bool forceSync = false}) async {
+    var local = await GetClients.getAllActive();
 
-      return true; // Éxito
-    } catch (e) {
-      print("Error creando asignación: $e");
-      return false; // Fallo
+    if (local.isEmpty || forceSync) {
+      print('🌐 Sincronizando clientes desde API...');
+      local = await SyncClients().fetchAndSync();
     }
+
+    return local;
+  }
+
+  /// 🔸 Obtiene todos los colaboradores locales (si está vacío, sincroniza)
+  Future<List<Collaborator>> getCollaborators({bool forceSync = false}) async {
+    var local = await GetCollaborators.getAllActive();
+
+    if (local.isEmpty || forceSync) {
+      print('🌐 Sincronizando colaboradores desde API...');
+      local = await SyncCollaborators().fetchAndSync();
+    }
+
+    return local;
+  }
+
+  /// 🔸 Crea una asignación nueva (envío al servidor)
+  Future<bool> createAssignment({
+    required String type,
+    required String description,
+    required String document,
+    required String client,
+    required List<String> collaborators,
+    required String zone,
+  }) async {
+    print('📝 Enviando nueva asignación...');
+    return await CreateAssignment.send(
+      type: type,
+      description: description,
+      document: document,
+      client: client,
+      collaborators: collaborators,
+      zone: zone,
+    );
   }
 }
+
+final assignmentCreatorProvider = Provider<AssignmentCreatorProvider>((ref) => AssignmentCreatorProvider(ref));
