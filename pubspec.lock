@@ -17,6 +17,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.13.0"
+  android_alarm_manager_plus:
+    dependency: "direct main"
+    description:
+      name: android_alarm_manager_plus
+      sha256: eee0be254a30de0156fcda7b50c4d2c83d6dd187066df5c15ce23ccae0837e81
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.4"
+  android_intent_plus:
+    dependency: "direct main"
+    description:
+      name: android_intent_plus
+      sha256: f79fbb8ccb64b5584d19caa9c3d15613bf21cfbd829a6ca7f089fb5dfd43f8aa
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   animated_custom_dropdown:
     dependency: "direct main"
     description:
@@ -406,6 +422,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.22"
+  flutter_ringtone_player:
+    dependency: "direct main"
+    description:
+      name: flutter_ringtone_player
+      sha256: ae4a2caab2cfd14902f3ee5fe0307c454b396f0077fa34700238d6c4bd99cfec
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0+4"
   flutter_riverpod:
     dependency: "direct main"
     description:

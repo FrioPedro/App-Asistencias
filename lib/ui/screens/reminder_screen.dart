@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:app_asistencias/core/notification_service.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 class ReminderScreen extends StatefulWidget {
   final String message;
@@ -40,6 +41,13 @@ class _ReminderScreenState extends State<ReminderScreen>
       NotificationService().cancel(widget.notificationId!);
     }
 
+    // 🔊 Reproducir sonido de alarma en bucle y vibración
+    FlutterRingtonePlayer().playAlarm(
+      looping: true, // Bucle infinito hasta que se cierre
+      asAlarm: true, // Usar canal de alarma (respeta volumen)
+      volume: 1.0, // Volumen máximo
+    );
+
     _ac = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2000),
@@ -50,6 +58,7 @@ class _ReminderScreenState extends State<ReminderScreen>
 
   @override
   void dispose() {
+    FlutterRingtonePlayer().stop(); // Detener sonido al salir
     _ac.dispose();
     super.dispose();
   }

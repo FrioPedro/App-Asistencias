@@ -1,12 +1,15 @@
 // ============================================================================
 // notification_service.dart
 // ----------------------------------------------------------------------------
-// Sistema de alarma dual: Timer (foreground) + zonedSchedule (background).
+// Sistema de alarma dual:
 //
-// - Foreground: Timer.periodic detecta la hora → navega directo a /reminder
-//   SIN crear ninguna notificación.
-// - Background/Bloqueado: zonedSchedule + fullScreenIntent abre la Activity
-//   → auto-cancela la notificación inmediatamente.
+// 1. Foreground (app abierta):
+//    Timer.periodic detecta la hora → navega directo a /reminder
+//    SIN crear ninguna notificación.
+//
+// 2. Background (app cerrada/bloqueada):
+//    android_alarm_manager_plus ejecuta un callback exacto a nivel del OS
+//    → muestra notificación con fullScreenIntent → abre ReminderScreen.
 //
 // Resultado: comportamiento idéntico al Reloj de Android.
 // ============================================================================
@@ -21,6 +24,8 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'package:android_intent_plus/android_intent.dart';
 
 class NotificationService {
   NotificationService._();
@@ -32,26 +37,25 @@ class NotificationService {
 
   static GoRouter? _router;
 
-  // Canal RUIDOSO — para interrumpir apps activas (YouTube, etc.)
+  // Canal de alta prioridad para alarmas
   static const String _channelId = 'alarm_noisy_fsi_v3';
-  static const String _channelName = 'Alarmas de Trabajo (Prioridad Alta)';
+  static const String _channelName = 'Alarmas de Trabajo';
   static const String _channelDesc =
-      'Alarma ruidosa con pantalla completa para garantizar interrupción';
+      'Alarma con pantalla completa para marcar asistencia';
 
   // ── Configuración de alarmas ────────────────────────────────────────
-  // Lista de alarmas: {id, hour, minute, title, body}
   static final List<Map<String, dynamic>> _alarms = [
     {
       'id': 100,
-      'hour': 8,
-      'minute': 0,
+      'hour': 11,
+      'minute': 15,
       'title': '¡Hora de trabajar!',
       'body': 'Recuerda marcar tu entrada para comenzar la jornada.',
     },
     {
       'id': 101,
-      'hour': 20,
-      'minute': 0, // Hora de prueba actualizada
+      'hour': 11,
+      'minute': 17,
       'title': 'Fin de jornada',
       'body': 'No olvides marcar tu salida antes de irte.',
     },
@@ -59,7 +63,6 @@ class NotificationService {
 
   // ── AlarmWatcher (Timer para foreground) ────────────────────────────
   Timer? _watchTimer;
-  // Evitar que la alarma se dispare varias veces en el mismo minuto
   String? _lastTriggeredKey;
 
   // ════════════════════════════════════════════════════════════════════
@@ -74,7 +77,7 @@ class NotificationService {
     final String timeZoneName = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timeZoneName));
 
-    // Plugin
+    // Plugin de notificaciones (necesario para fullScreenIntent en background)
     const androidSettings =
         AndroidInitializationSettings('@mipmap/launcher_icon');
     const initSettings = InitializationSettings(android: androidSettings);
@@ -92,7 +95,6 @@ class NotificationService {
         await _instance._plugin.getNotificationAppLaunchDetails();
     if (launchDetails != null && launchDetails.didNotificationLaunchApp) {
       debugPrint('🚀 App lanzada por alarma FSI');
-      // Cancelar TODA notificación inmediatamente
       await _instance._plugin.cancelAll();
       if (launchDetails.notificationResponse != null) {
         Future.delayed(const Duration(milliseconds: 500), () {
@@ -101,12 +103,15 @@ class NotificationService {
       }
     }
 
+    // Inicializar AlarmManager
+    await AndroidAlarmManager.initialize();
+
     // Permisos
     await _requestAllPermissions();
   }
 
   // ════════════════════════════════════════════════════════════════════
-  //  CANAL (Ruidoso — para garantizar FSI)
+  //  CANAL
   // ════════════════════════════════════════════════════════════════════
 
   static Future<void> _createNotificationChannel() async {
@@ -114,16 +119,19 @@ class NotificationService {
       _channelId,
       _channelName,
       description: _channelDesc,
-      importance: Importance.max, // MÁXIMA IMPORTANCIA
-      playSound: true, // CON SONIDO
-      enableVibration: true, // CON VIBRACIÓN
-      audioAttributesUsage: AudioAttributesUsage.alarm, // ATRIBUTO DE ALARMA
+      importance: Importance.low, // Silencioso / Sin banner
+      playSound: false,
+      enableVibration: false,
       showBadge: true,
     );
 
     final androidPlugin = _instance._plugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
+
+    // Eliminar canal antiguo para asegurar que se actualice la importancia
+    await androidPlugin?.deleteNotificationChannel(_channelId);
+
     await androidPlugin?.createNotificationChannel(channel);
   }
 
@@ -161,27 +169,24 @@ class NotificationService {
   //  ALARM WATCHER — Timer para foreground (SIN notificaciones)
   // ════════════════════════════════════════════════════════════════════
 
-  /// Inicia el vigilante de alarmas. Cada 15 segundos compara la hora
-  /// actual con las alarmas programadas. Si coincide, navega directo
-  /// a /reminder SIN crear ninguna notificación.
   void startWatching() {
-    // Evitar múltiples timers
     stopWatching();
 
     debugPrint('👁️ AlarmWatcher: Iniciado (cada 15s)');
+
+    // Chequeo inmediato por si la app se acaba de abrir por la alarma
+    _checkAlarms();
+
     _watchTimer = Timer.periodic(const Duration(seconds: 15), (_) {
       _checkAlarms();
     });
   }
 
-  /// Detiene el vigilante de alarmas (cuando la app va a background).
   void stopWatching() {
     _watchTimer?.cancel();
     _watchTimer = null;
   }
 
-  /// Compara DateTime.now() con cada alarma. Si coincide hora y minuto,
-  /// navega directamente a /reminder.
   void _checkAlarms() {
     if (_router == null) return;
 
@@ -194,9 +199,8 @@ class NotificationService {
       final alarmMinute = alarm['minute'] as int;
 
       if (currentHour == alarmHour && currentMinute == alarmMinute) {
-        // Clave única para evitar disparar varias veces en el mismo minuto
         final key = '${alarm['id']}-$currentHour:$currentMinute';
-        if (_lastTriggeredKey == key) return; // Ya se disparó
+        if (_lastTriggeredKey == key) return;
         _lastTriggeredKey = key;
 
         final message = alarm['body'] as String;
@@ -205,10 +209,8 @@ class NotificationService {
         debugPrint(
             '⏰ AlarmWatcher: ¡ALARMA! ID:$id a las $currentHour:$currentMinute');
 
-        // Cancelar cualquier notificación que pudiera haber
         _plugin.cancelAll();
 
-        // Navegar directamente — CERO notificaciones
         final encodedMsg = Uri.encodeComponent(message);
         _router!.go('/reminder?message=$encodedMsg&id=$id');
         return;
@@ -217,94 +219,40 @@ class NotificationService {
   }
 
   // ════════════════════════════════════════════════════════════════════
-  //  PROGRAMACIÓN — zonedSchedule (para background/bloqueado)
+  //  PROGRAMACIÓN — AndroidAlarmManager (para background/cerrada)
   // ════════════════════════════════════════════════════════════════════
 
-  /// Programa las alarmas para cuando la app esté cerrada/en background.
-  /// Usa zonedSchedule con fullScreenIntent para despertar la pantalla.
+  /// Programa las alarmas diarias usando AndroidAlarmManager.
   Future<void> scheduleDailyWorkReminders() async {
-    await _plugin.cancelAll();
-
     for (final alarm in _alarms) {
-      await _scheduleBackgroundAlarm(
-        id: alarm['id'] as int,
-        hour: alarm['hour'] as int,
-        minute: alarm['minute'] as int,
-        title: alarm['title'] as String,
-        body: alarm['body'] as String,
+      final id = alarm['id'] as int;
+      final hour = alarm['hour'] as int;
+      final minute = alarm['minute'] as int;
+
+      final scheduledTime = _nextInstanceOfDateTime(hour, minute);
+
+      await AndroidAlarmManager.oneShotAt(
+        scheduledTime,
+        id,
+        _alarmCallback,
+        exact: true,
+        wakeup: true,
+        alarmClock: true,
+        rescheduleOnReboot: true,
       );
+
+      debugPrint('⏰ Alarma programada ID:$id → '
+          '${hour.toString().padLeft(2, "0")}:${minute.toString().padLeft(2, "0")} '
+          '(${scheduledTime.toIso8601String()})');
     }
 
-    debugPrint('📅 Alarmas background programadas');
+    debugPrint('📅 Todas las alarmas background programadas');
   }
 
-  Future<void> _scheduleBackgroundAlarm({
-    required int id,
-    required int hour,
-    required int minute,
-    required String title,
-    required String body,
-  }) async {
-    // Configuración: máxima prioridad + fullScreenIntent + SONIDO/VIBRACIÓN
-    // NECESARIO para que Android permita interrumpir apps activas (como YouTube).
-    final androidDetails = AndroidNotificationDetails(
-      _channelId,
-      _channelName,
-      channelDescription: _channelDesc,
-      importance: Importance.max,
-      priority: Priority.high,
-      fullScreenIntent: true,
-      category: AndroidNotificationCategory.alarm,
-      visibility: NotificationVisibility.public,
-      // Habilitar sonido y vibración para garantizar interrupción
-      playSound: true,
-      enableVibration: true,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      autoCancel: true,
-      ongoing: false,
-      showProgress: false,
-      silent: false, // NO silencioso
-      // Timeout: cancelar automáticamente si no se atiende en 60s
-      timeoutAfter: 60000,
-    );
-
-    final notificationDetails = NotificationDetails(android: androidDetails);
-
-    final payload = jsonEncode({
-      'type': 'reminder',
-      'message': body,
-      'id': id,
-    });
-
-    final scheduledDate = _nextInstanceOfTime(hour, minute);
-
-    await _plugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduledDate,
-      notificationDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-      payload: payload,
-    );
-
-    debugPrint('⏰ Alarma background ID:$id → '
-        '${hour.toString().padLeft(2, "0")}:${minute.toString().padLeft(2, "0")}');
-  }
-
-  static tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduled = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
+  /// Calcula la próxima ocurrencia de la hora/minuto indicados.
+  static DateTime _nextInstanceOfDateTime(int hour, int minute) {
+    final now = DateTime.now();
+    var scheduled = DateTime(now.year, now.month, now.day, hour, minute);
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
@@ -312,15 +260,128 @@ class NotificationService {
   }
 
   // ════════════════════════════════════════════════════════════════════
-  //  NAVEGACIÓN (solo para el caso background/FSI)
+  //  CALLBACK ESTÁTICO — Ejecutado por AlarmManager en background
+  // ════════════════════════════════════════════════════════════════════
+
+  /// TOP-LEVEL FUNCTION: ejecutada por AlarmManager incluso con app cerrada.
+  /// Muestra una notificación con fullScreenIntent que abre la app en /reminder.
+  @pragma('vm:entry-point')
+  static Future<void> _alarmCallback(int alarmId) async {
+    debugPrint('🔔 AlarmManager callback disparado: ID=$alarmId');
+
+    // Buscar los datos de esta alarma
+    final alarm = _alarms.firstWhere(
+      (a) => a['id'] == alarmId,
+      orElse: () => <String, dynamic>{
+        'id': alarmId,
+        'hour': 0,
+        'minute': 0,
+        'title': 'Recordatorio',
+        'body': 'Tienes un recordatorio pendiente.',
+      },
+    );
+
+    final title = alarm['title'] as String;
+    final body = alarm['body'] as String;
+
+    // 🚀 FUERZA BRUTA: Lanzar la app (Activity) directamente
+    // Esto es lo que interrumpe al usuario (como una llamada entrante)
+    try {
+      debugPrint('🚀 Intentando lanzar Activity...');
+      final intent = AndroidIntent(
+        package: 'com.friopacking.app_asistencias',
+        componentName: 'com.friopacking.app_asistencias.MainActivity',
+        action: 'android.intent.action.MAIN',
+        category: 'android.intent.category.LAUNCHER',
+        flags: [
+          268435456, // FLAG_ACTIVITY_NEW_TASK
+          131072, // FLAG_ACTIVITY_REORDER_TO_FRONT
+          67108864, // FLAG_ACTIVITY_CLEAR_TOP
+        ],
+        // Pasar datos extra para que el router sepa a dónde ir
+        arguments: <String, dynamic>{
+          'route': '/reminder',
+          'payload': body,
+          'id': alarmId,
+        },
+      );
+      await intent.launch();
+      debugPrint('🚀 Activity lanzada con éxito');
+    } catch (e) {
+      debugPrint('⚠️ Error lanzando Activity: $e');
+    }
+
+    // Siempre mostrar notificación con fullScreenIntent (para background/locked)
+    await _showFullScreenNotification(alarmId, title, body);
+
+    // Re-programar la misma alarma para mañana
+    final hour = alarm['hour'] as int;
+    final minute = alarm['minute'] as int;
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    final nextTime =
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, hour, minute);
+
+    await AndroidAlarmManager.oneShotAt(
+      nextTime,
+      alarmId,
+      _alarmCallback,
+      exact: true,
+      wakeup: true,
+      alarmClock: true,
+      rescheduleOnReboot: true,
+    );
+
+    debugPrint(
+        '🔄 Alarma ID:$alarmId reprogramada → ${nextTime.toIso8601String()}');
+  }
+
+  /// Muestra la notificación fullScreenIntent desde el callback de background.
+  static Future<void> _showFullScreenNotification(
+      int id, String title, String body) async {
+    final plugin = FlutterLocalNotificationsPlugin();
+
+    const androidSettings =
+        AndroidInitializationSettings('@mipmap/launcher_icon');
+    const initSettings = InitializationSettings(android: androidSettings);
+    await plugin.initialize(initSettings);
+
+    const androidDetails = AndroidNotificationDetails(
+      _channelId,
+      _channelName,
+      channelDescription: _channelDesc,
+      importance: Importance.low, // Bajar importancia para evitar banner
+      priority: Priority.low, // Bajar prioridad
+      fullScreenIntent: true,
+      category: AndroidNotificationCategory.alarm,
+      visibility: NotificationVisibility.public,
+      playSound: false, // El sonido lo maneja la UI ahora
+      enableVibration: false, // La vibración la maneja la UI
+      autoCancel: true,
+      ongoing: false,
+      timeoutAfter: 60000,
+    );
+
+    const notificationDetails = NotificationDetails(android: androidDetails);
+
+    final payload = jsonEncode({
+      'type': 'reminder',
+      'message': body,
+      'id': id,
+    });
+
+    await plugin.show(id, title, body, notificationDetails, payload: payload);
+    debugPrint('📢 Notificación fullScreenIntent mostrada: ID=$id');
+  }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  NAVEGACIÓN (cuando el usuario toca la notificación)
   // ════════════════════════════════════════════════════════════════════
 
   static void _onNotificationTapped(NotificationResponse response) {
-    debugPrint('🔔 Notificación activada — cancelando inmediatamente');
+    debugPrint('🔔 Notificación tocada — cancelando inmediatamente');
 
     if (_router == null) return;
 
-    // CANCELAR TODO inmediatamente — limpiar barra
     _instance._plugin.cancelAll();
 
     try {
@@ -352,10 +413,14 @@ class NotificationService {
 
   Future<void> cancelAll() async {
     await _plugin.cancelAll();
-    debugPrint('🗑️ Todo cancelado');
+    for (final alarm in _alarms) {
+      await AndroidAlarmManager.cancel(alarm['id'] as int);
+    }
+    debugPrint('🗑️ Todo cancelado (notificaciones + alarmas)');
   }
 
   Future<void> cancel(int id) async {
     await _plugin.cancel(id);
+    await AndroidAlarmManager.cancel(id);
   }
 }

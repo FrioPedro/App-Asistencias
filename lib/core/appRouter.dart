@@ -32,7 +32,7 @@ final router = GoRouter(
     GoRoute(
       path: '/home',
       //path: '/home2',
-      
+
       name: 'home',
       pageBuilder: (context, state) =>
           buildPage(const AttendanceScreen(), state),
@@ -80,7 +80,7 @@ final router = GoRouter(
     if (isReminder) return null;
 
     if (!loggedIn && !loggingIn) return '/login';
-    if (loggedIn && loggingIn) return '/reminder';
+    if (loggedIn && loggingIn) return '/home';
     return null;
   },
 );
