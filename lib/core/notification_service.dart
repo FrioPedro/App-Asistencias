@@ -43,8 +43,8 @@ class NotificationService {
   static final List<Map<String, dynamic>> _alarms = [
     {
       'id': 100,
-      'hour': 6,
-      'minute': 0,
+      'hour': 8,
+      'minute': 30,
       'title': '¡Hora de trabajar!',
       'body': 'Recuerda marcar tu entrada para comenzar la jornada.',
     },
