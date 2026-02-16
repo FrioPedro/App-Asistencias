@@ -196,7 +196,6 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
     final darkDropdownDecoration = CustomDropdownDecoration(
       closedFillColor: colorScheme.surface,
       expandedFillColor: colorScheme.surface,
-      closedBorder: Border.all(color: colorScheme.outline),
       closedBorderRadius: BorderRadius.circular(12),
       hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
       headerStyle: TextStyle(color: colorScheme.onSurface),

@@ -15,7 +15,7 @@ class AttendanceProvider {
   final ActiveSessionStorage _storage;
   final ActivitySyncService _sync = ActivitySyncService();
   final NoteSyncService _sync2 = NoteSyncService();
-  
+
   AttendanceProvider({ActiveSessionStorage? storage})
       : _storage = storage ?? ActiveSessionStorage();
 
@@ -65,7 +65,7 @@ class AttendanceProvider {
     }
 
     // 2) marca la nueva entrada (Hora base + 100ms)
-    final _activity =  await ActivityRegistrar.registerEntryWithGPS(
+    final _activity = await ActivityRegistrar.registerEntryWithGPS(
       collaboratorDocumentId: user.nationalId ?? '',
       userZone: user.zone,
       assignment: assignment,
@@ -110,6 +110,7 @@ class AttendanceProvider {
   // --- Logic Helpers ---
 
   bool isCreationAllowed() {
+    /*
     final now = DateTime.now();
     if (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday) {
       return true;
@@ -119,7 +120,7 @@ class AttendanceProvider {
     if (hour >= 6 && hour < 20) {
       return false;
     }
+    */
     return true;
   }
-
 }
