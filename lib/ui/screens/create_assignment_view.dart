@@ -44,20 +44,29 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
   Future<void> _showInternetRequirementPopup() async {
     await Future.delayed(
         const Duration(milliseconds: 400)); // da tiempo al build
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Conexión requerida'),
-        content: const Text(
-            'Para crear una asignación es necesario tener conexión a internet activa.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Entendido'),
-          ),
-        ],
-      ),
-    );
+
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          title: const Text('Sin conexión'),
+          content: const Text(
+              'Para crear una asignación es necesario tener conexión a internet activa.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Cierra diálogo
+                Navigator.pop(context); // Cierra pantalla
+              },
+              child: const Text('Volver'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Future<void> _loadInitialData() async {
