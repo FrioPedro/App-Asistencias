@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/create_assignment_provider.dart';
-import '../../models/branch_model.dart';
 import '../../models/client_model.dart';
 import '../../models/collaborator_model.dart';
 import '../../models/user/user_zone.dart';
@@ -28,7 +27,8 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
 
   late final List<Client> _clients;
   late final List<Collaborator> _collaborators;
-  late final List<BranchModel> _branches;
+  // late final List<BranchModel> _branches; // ⚠️ Reemplazado por lista estática
+  final List<String> _fixedZones = const ['Norte', 'Centro', 'Sur'];
 
   bool isLoading = true;
   bool isSubmitting = false; // 🔹 evita doble clic
@@ -66,26 +66,25 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
     final results = await Future.wait([
       creator.getClients(),
       creator.getCollaborators(),
-      UserNotifier.getListBranch(),
+      // UserNotifier.getListBranch(), // ⚠️ Ya no traemos branches de la API
     ]);
 
     _clients = results[0] as List<Client>;
     _collaborators = results[1] as List<Collaborator>;
-    _branches = results[2] as List<BranchModel>;
+    // _branches = results[2] as List<BranchModel>; // ⚠️ Deshabilitado
 
     _selectedClient = _clients.isNotEmpty ? _clients.first.description : null;
     _selectedType = 'VST';
 
-    if (user != null && _branches.isNotEmpty) {
-      // Intenta hacer match por la zona del usuario
+    if (user != null) {
+      // Intenta hacer match por la zona del usuario (p.ej. "norte" en "Zona Norte")
       final userZoneLabel = user.zone.label.toLowerCase();
-      final match = _branches.firstWhere(
-        (b) => b.name.toLowerCase().contains(userZoneLabel),
-        orElse: () => _branches.first,
+      selectedZone = _fixedZones.firstWhere(
+        (z) => z.toLowerCase().contains(userZoneLabel),
+        orElse: () => 'Centro', // Default a Centro si no match
       );
-      selectedZone = match.name;
     } else {
-      selectedZone = _branches.isNotEmpty ? _branches.first.name : null;
+      selectedZone = 'Centro';
     }
 
     setState(() => isLoading = false);
@@ -189,7 +188,7 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
         _clients.map((c) => c.description).whereType<String>().toList();
     final collaborators =
         _collaborators.map((c) => c.name).whereType<String>().toList();
-    final branchNames = _branches.map((b) => b.name).toList();
+    // final branchNames = _branches.map((b) => b.name).toList();
 
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -245,9 +244,13 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                 validator: (v) =>
                     (v == null || v.isEmpty) ? 'Ingrese una descripción' : null,
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: colorScheme.surface,
                   hintText: 'Ingrese una descripción...',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -270,8 +273,12 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                 value: _selectedType,
                 isExpanded: true,
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: colorScheme.surface,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
                 items: const [
                   DropdownMenuItem(value: 'VST', child: Text('VISITA TÉCNICA')),
@@ -285,13 +292,17 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: selectedZone,
-                items: branchNames
+                items: _fixedZones
                     .map((z) => DropdownMenuItem(value: z, child: Text(z)))
                     .toList(),
                 onChanged: (v) => setState(() => selectedZone = v),
                 decoration: InputDecoration(
+                  filled: true,
+                  fillColor: colorScheme.surface,
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
