@@ -184,65 +184,71 @@ class _ReminderScreenState extends State<ReminderScreen>
                 // SLIDER "DESLIZAR PARA CONFIRMAR" (Nativo con Dismissible)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 50),
-                  child: Container(
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Stack(
-                      children: [
-                        // Texto de fondo
-                        const Center(
-                          child: Text(
-                            'Desliza para confirmar  >>>',
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.5,
+                  child: Center(
+                    child: Container(
+                      width: 280, // 🔹 Ancho reducido
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(32),
+                        border: Border.all(
+                            color:
+                                Colors.white.withOpacity(0.1)), // Borde sutil
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        children: [
+                          // Texto de fondo
+                          const Center(
+                            child: Text(
+                              'Desliza para confirmar', // 🔹 Texto más simple
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
-                        ),
 
-                        // Slider real
-                        Dismissible(
-                          key: UniqueKey(),
-                          direction: DismissDirection.startToEnd,
-                          dismissThresholds: const {
-                            DismissDirection.startToEnd: 0.6
-                          },
-                          confirmDismiss: (direction) async {
-                            await _completeReminderAndGoHome();
-                            return false; // No eliminar del árbol widget
-                          },
-                          child: Container(
-                            alignment: Alignment.centerLeft,
-                            padding: const EdgeInsets.only(left: 4),
+                          // Slider real
+                          Dismissible(
+                            key: UniqueKey(),
+                            direction: DismissDirection.startToEnd,
+                            dismissThresholds: const {
+                              DismissDirection.startToEnd: 0.6
+                            },
+                            confirmDismiss: (direction) async {
+                              await _completeReminderAndGoHome();
+                              return false; // No eliminar del árbol widget
+                            },
                             child: Container(
-                              width: 56,
-                              height: 56,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 4,
-                                    offset: Offset(2, 0),
-                                  )
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.chevron_right_rounded,
-                                color: Color(0xFF0F172A),
-                                size: 32,
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.only(left: 4),
+                              child: Container(
+                                width: 56,
+                                height: 56,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4,
+                                      offset: Offset(2, 0),
+                                    )
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: Color(0xFF0F172A),
+                                  size: 32,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
