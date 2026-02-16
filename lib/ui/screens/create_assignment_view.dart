@@ -7,6 +7,7 @@ import '../../models/user/user_zone.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 import '../../providers/user_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart'; // 🔹 para detectar internet
+import '../widgets/custom_snackbar.dart';
 
 class CreateAssignmentView extends ConsumerStatefulWidget {
   const CreateAssignmentView({super.key});
@@ -118,9 +119,8 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
     // 🔹 Verifica conexión a internet
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult.contains(ConnectivityResult.none)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('❌ No hay conexión a internet')),
-      );
+      CustomSnackBar.show(context, '❌ No hay conexión a internet',
+          isError: true);
       return;
     }
 
@@ -136,9 +136,8 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
       );
 
       if (client.document == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cliente no válido o no encontrado')),
-        );
+        CustomSnackBar.show(context, 'Cliente no válido o no encontrado',
+            isError: true);
         return;
       }
 
@@ -159,14 +158,12 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? '✅ Asignación creada correctamente'
-                : '❌ Error al crear asignación',
-          ),
-        ),
+      CustomSnackBar.show(
+        context,
+        success
+            ? 'Asignación creada correctamente'
+            : 'Error al crear asignación',
+        isError: !success,
       );
 
       if (success) Navigator.pop(context);
