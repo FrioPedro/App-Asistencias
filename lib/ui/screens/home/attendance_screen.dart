@@ -205,7 +205,18 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredAssignments = _filterAssignments();
+    final filteredAssignments = _filterAssignments()
+      ..sort((a, b) {
+        final aKey = a.serverId.toString();
+        final bKey = b.serverId.toString();
+
+        final aActive = _participatingAttendance.containsKey(aKey);
+        final bActive = _participatingAttendance.containsKey(bKey);
+
+        // true primero
+        if (aActive == bActive) return 0;
+        return aActive ? -1 : 1;
+      });
 
     return Scaffold(
       appBar: AppBar(
