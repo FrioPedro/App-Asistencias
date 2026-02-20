@@ -182,7 +182,7 @@ class EventCard extends StatelessWidget {
                       ),
                     ),
 
-                    if (startTime != null) ...[
+                    if (startTime != null && startTime!= "") ...[
                       const SizedBox(height: 6),
                       Text(
                         'Inicio: $startTime',

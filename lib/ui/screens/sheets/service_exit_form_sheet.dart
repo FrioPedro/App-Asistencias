@@ -300,7 +300,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   onPressed: () => Navigator.pop(context, 'settings'),
                   icon: const Icon(Icons.settings, color: Colors.blueAccent),
                   label: const Text(
-                    'Gestionar Acceso a Fotos (Limitado)',
+                    'Gestionar acceso a fotos (Limitado)',
                     style: TextStyle(
                         color: Colors.blueAccent,
                         fontSize: 16,
@@ -471,7 +471,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
         ),
         title: const Text(
-          'Finalizar Servicio',
+          'Finalizar servicio',
           style: TextStyle(
               color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),

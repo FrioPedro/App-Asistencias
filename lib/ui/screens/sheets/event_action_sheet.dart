@@ -353,7 +353,7 @@ class _EventActionModalState extends State<AssigmentModal> {
           children: [
             const Expanded(
               child: Text(
-                'Iniciar Turno',
+                'Iniciar turno',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 22,
@@ -411,7 +411,7 @@ class _EventActionModalState extends State<AssigmentModal> {
           children: [
             const Expanded(
               child: Text(
-                'Gestionar Turno',
+                'Gestionar turno',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 22,
