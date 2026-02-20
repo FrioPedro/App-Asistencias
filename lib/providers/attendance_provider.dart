@@ -110,7 +110,6 @@ class AttendanceProvider {
   // --- Logic Helpers ---
 
   bool isCreationAllowed() {
-    /*
     final now = DateTime.now();
     if (now.weekday == DateTime.saturday || now.weekday == DateTime.sunday) {
       return true;
@@ -120,7 +119,6 @@ class AttendanceProvider {
     if (hour >= 6 && hour < 20) {
       return false;
     }
-    */
     return true;
   }
 }
