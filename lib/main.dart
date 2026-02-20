@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:app_asistencias/core/appRouter.dart';
 import 'package:app_asistencias/domain/auth/session.dart';
 import 'package:app_asistencias/core/notification_service.dart';
+import 'package:app_asistencias/core/permission_guard.dart';
 
 import 'package:app_asistencias/core/sync_worker.dart';
 
@@ -69,6 +70,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    PermissionGuard.requestCorePermissions();
     WidgetsBinding.instance.addObserver(this);
   }
 

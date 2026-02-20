@@ -205,4 +205,34 @@ class PermissionGuard {
       ),
     );
   }
+
+  static Future<bool> requestCorePermissions() async {
+    // 1️⃣ Verificar si GPS está activado
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return false;
+    }
+
+    // 2️⃣ Permiso ubicación
+    var locationPermission = await Geolocator.checkPermission();
+
+    if (locationPermission == LocationPermission.denied) {
+      locationPermission = await Geolocator.requestPermission();
+    }
+
+    final bool locationGranted =
+        locationPermission == LocationPermission.always ||
+            locationPermission == LocationPermission.whileInUse;
+
+    // 3️⃣ Permiso cámara
+    var cameraStatus = await Permission.camera.status;
+
+    if (!cameraStatus.isGranted) {
+      cameraStatus = await Permission.camera.request();
+    }
+
+    final bool cameraGranted = cameraStatus.isGranted;
+
+    return locationGranted && cameraGranted;
+  }
 }
