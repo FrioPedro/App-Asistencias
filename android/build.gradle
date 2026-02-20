@@ -3,7 +3,8 @@ allprojects {
         google()
         mavenCentral()
     }
-
+    
+    // Obliga a TODAS las librerías (incluyendo photo_manager) a usar esta versión
     configurations.all {
         resolutionStrategy {
             force 'androidx.core:core:1.13.1'
@@ -14,28 +15,28 @@ allprojects {
 
 rootProject.buildDir = "../build"
 
-subprojects { project ->
+subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-    project.evaluationDependsOn(":app")
+}
 
-    project.plugins.withId("com.android.library") {
-        
-        project.android {
-            compileSdkVersion 35
-            // buildToolsVersion "35.0.0" // opcional
+// Mantenemos la estructura de evaluación obligatoria de Flutter
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+// Mantenemos tu fix de isar intacto
+subprojects { project ->
+    if (project.name == "isar_flutter_libs") {
+        project.afterEvaluate {
+            if (project.hasProperty('android')) {
+                project.android {
+                    compileSdkVersion 35
+                    if (namespace == null) {
+                        namespace "dev.isar.isar_flutter_libs"
+                    }
+                }
+            }
         }
-
-        // ✅ Namespace requerido por AGP 8+ (solo si falta)
-        if (project.android.namespace == null) {
-            project.android.namespace = project.group.toString()
-        }
-
-        // Fix específico para isar_flutter_libs
-        if (project.name == "isar_flutter_libs") {
-            project.android.namespace = "dev.isar.isar_flutter_libs"
-        }
-
-
     }
 }
 
