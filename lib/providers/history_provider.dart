@@ -151,9 +151,15 @@ class HistoryProvider {
   final ActivitySyncService _sync = ActivitySyncService();
 
   Future<List<ActivitySession>> fetchHistory() async {
+    // 1) Subir pendientes al servidor (local → server)
     await _sync.syncIfPossible();
 
-    final events = await GetActivity.getOnlineAndLocalPending(); // eventos
-    return groupByKeyGroup(events); // sesiones
+    // 2) Bajar historial del servidor y persistir en Isar (server → local)
+    //    Esto permite ver registros anteriores a la instalación de la app.
+    await GetActivity.syncOnlineToLocal();
+
+    // 3) Leer todo desde la BD local (incluye histórico descargado + registros offline)
+    final events = await GetActivity.getLocalData();
+    return groupByKeyGroup(events);
   }
 }
