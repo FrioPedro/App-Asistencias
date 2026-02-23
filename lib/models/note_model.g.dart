@@ -63,8 +63,14 @@ const NoteModelSchema = CollectionSchema(
       type: IsarType.byte,
       enumMap: _NoteModelsyncStatusEnumValueMap,
     ),
-    r'timestamp': PropertySchema(
+    r'taskType': PropertySchema(
       id: 9,
+      name: r'taskType',
+      type: IsarType.byte,
+      enumMap: _NoteModeltaskTypeEnumValueMap,
+    ),
+    r'timestamp': PropertySchema(
+      id: 10,
       name: r'timestamp',
       type: IsarType.dateTime,
     )
@@ -174,7 +180,8 @@ void _noteModelSerialize(
   writer.writeString(offsets[6], object.imageUrl);
   writer.writeLong(offsets[7], object.serverId);
   writer.writeByte(offsets[8], object.syncStatus.index);
-  writer.writeDateTime(offsets[9], object.timestamp);
+  writer.writeByte(offsets[9], object.taskType.index);
+  writer.writeDateTime(offsets[10], object.timestamp);
 }
 
 NoteModel _noteModelDeserialize(
@@ -194,7 +201,10 @@ NoteModel _noteModelDeserialize(
     syncStatus:
         _NoteModelsyncStatusValueEnumMap[reader.readByteOrNull(offsets[8])] ??
             SyncStatus.pending,
-    timestamp: reader.readDateTime(offsets[9]),
+    taskType:
+        _NoteModeltaskTypeValueEnumMap[reader.readByteOrNull(offsets[9])] ??
+            TaskType.office,
+    timestamp: reader.readDateTime(offsets[10]),
   );
   object.dedupKey = reader.readString(offsets[2]);
   object.id = id;
@@ -228,6 +238,9 @@ P _noteModelDeserializeProp<P>(
       return (_NoteModelsyncStatusValueEnumMap[reader.readByteOrNull(offset)] ??
           SyncStatus.pending) as P;
     case 9:
+      return (_NoteModeltaskTypeValueEnumMap[reader.readByteOrNull(offset)] ??
+          TaskType.office) as P;
+    case 10:
       return (reader.readDateTime(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -245,6 +258,18 @@ const _NoteModelsyncStatusValueEnumMap = {
   1: SyncStatus.uploading,
   2: SyncStatus.synced,
   3: SyncStatus.failed,
+};
+const _NoteModeltaskTypeEnumValueMap = {
+  'office': 0,
+  'workshop': 1,
+  'service': 2,
+  'transport': 3,
+};
+const _NoteModeltaskTypeValueEnumMap = {
+  0: TaskType.office,
+  1: TaskType.workshop,
+  2: TaskType.service,
+  3: TaskType.transport,
 };
 
 Id _noteModelGetId(NoteModel object) {
@@ -1752,6 +1777,59 @@ extension NoteModelQueryFilter
     });
   }
 
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> taskTypeEqualTo(
+      TaskType value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'taskType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> taskTypeGreaterThan(
+    TaskType value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'taskType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> taskTypeLessThan(
+    TaskType value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'taskType',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> taskTypeBetween(
+    TaskType lower,
+    TaskType upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'taskType',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> timestampEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1922,6 +2000,18 @@ extension NoteModelQuerySortBy on QueryBuilder<NoteModel, NoteModel, QSortBy> {
     });
   }
 
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> sortByTaskType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> sortByTaskTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskType', Sort.desc);
+    });
+  }
+
   QueryBuilder<NoteModel, NoteModel, QAfterSortBy> sortByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -2057,6 +2147,18 @@ extension NoteModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> thenByTaskType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> thenByTaskTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskType', Sort.desc);
+    });
+  }
+
   QueryBuilder<NoteModel, NoteModel, QAfterSortBy> thenByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -2133,6 +2235,12 @@ extension NoteModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<NoteModel, NoteModel, QDistinct> distinctByTaskType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'taskType');
+    });
+  }
+
   QueryBuilder<NoteModel, NoteModel, QDistinct> distinctByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'timestamp');
@@ -2199,6 +2307,12 @@ extension NoteModelQueryProperty
   QueryBuilder<NoteModel, SyncStatus, QQueryOperations> syncStatusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'syncStatus');
+    });
+  }
+
+  QueryBuilder<NoteModel, TaskType, QQueryOperations> taskTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'taskType');
     });
   }
 

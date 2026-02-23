@@ -1,3 +1,4 @@
+import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:isar/isar.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
@@ -24,6 +25,9 @@ class NoteModel {
 
   late DateTime timestamp;
 
+  @enumerated
+  TaskType taskType = TaskType.office;
+
   @Index()
   @enumerated
   SyncStatus syncStatus = SyncStatus.pending;
@@ -35,6 +39,7 @@ class NoteModel {
     this.serverId,
     required this.document,
     required this.description,
+    required this.taskType,
     this.imagePath,
     this.imageUrl,
     this.activity,
@@ -47,6 +52,7 @@ class NoteModel {
       description: description, 
       timestamp: timestamp,
     );
+    taskType = taskType;
   }
 
 

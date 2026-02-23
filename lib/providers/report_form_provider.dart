@@ -28,6 +28,7 @@ class ServiceExitAsNotes {
           document: doc,
           description: '[Incidencia Servicio]: ${incidencias.trim()}',
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -36,6 +37,7 @@ class ServiceExitAsNotes {
           document: doc,
           description: '[Acciones Servicio]: ${acciones.trim()}',
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -44,6 +46,7 @@ class ServiceExitAsNotes {
           document: doc,
           description: '[Conclusiones Servicio]: ${conclusiones.trim()}',
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -52,6 +55,7 @@ class ServiceExitAsNotes {
           document: doc,
           description: '[Recomendaciones Servicio]: ${recomendaciones.trim()}',
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -65,6 +69,7 @@ class ServiceExitAsNotes {
           description: '[Foto Antes #${i + 1}]',
           imagePath: file.path,
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -78,6 +83,7 @@ class ServiceExitAsNotes {
           description: '[Foto Después #${i + 1}]',
           imagePath: file.path,
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -109,6 +115,7 @@ class WorkshopExitAsNotes {
           document: doc,
           description: '[Reporte Taller]: ${notes.trim()}',
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -122,6 +129,7 @@ class WorkshopExitAsNotes {
           description: '[Foto Taller Antes #${i + 1}]',
           imagePath: file.path,
           activity: activityKey,
+          taskType: taskType
         );
       }
 
@@ -135,6 +143,7 @@ class WorkshopExitAsNotes {
           description: '[Foto Taller Después #${i + 1}]',
           imagePath: file.path,
           activity: activityKey,
+          taskType: taskType
         );
       }
 

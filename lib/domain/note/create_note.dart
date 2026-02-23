@@ -1,14 +1,20 @@
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/models/note_model.dart';
+import 'package:app_asistencias/models/taskType_model.dart';
+
 
 class CreateNote {
 
   static Future<NoteModel> createAndStore({
     required String document,
     required String description,
+    required TaskType taskType,
     String? imagePath,
     String? activity,
   }) async {
+    final activityKey =
+        taskType.name;
+        
     final ts = DateTime.now();
 
     final note = NoteModel(
@@ -18,6 +24,7 @@ class CreateNote {
       activity: activity,
       timestamp: ts,
       syncStatus: SyncStatus.pending,
+      taskType: taskType,
     );
 
     print('[NOTE] dedupKey=${note.dedupKey} doc=${note.document} desc=${note.description}');

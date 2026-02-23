@@ -130,6 +130,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         );
 
         await _notesProvider.createNote(
+            taskType: widget.task,
             document: sid.toString(),
             description:
                 "[Reporte ${widget.task.label}]: ${_descriptionController.text.trim()}");

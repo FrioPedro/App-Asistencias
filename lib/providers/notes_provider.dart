@@ -1,6 +1,7 @@
 import 'package:app_asistencias/domain/note/sync_note.dart';
 import 'package:app_asistencias/models/note_model.dart';
 import 'package:app_asistencias/domain/note/create_note.dart'; // tu CreateNote
+import 'package:app_asistencias/models/taskType_model.dart';
 
 
 class NotesProvider {
@@ -12,6 +13,7 @@ class NotesProvider {
     required String description,
     String? imagePath,
     String? activity,
+    required TaskType taskType,
   }) async {
 
     // 1) crear nota local (pending)
@@ -21,6 +23,7 @@ class NotesProvider {
       description: description,
       imagePath: imagePath,
       activity: activity,
+      taskType: taskType
     );
 
 

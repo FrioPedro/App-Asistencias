@@ -183,7 +183,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       // Llamada al provider refactorizado
       final uploadSuccess = await ServiceExitAsNotes.saveAll(
         sid: widget.event.serverId ?? 0,
-        taskType: widget.task,
+        taskType: TaskType.service,
         incidencias: _incidenciasController.text,
         conclusiones: _conclusionesController.text,
         recomendaciones: _recomendacionesController.text,
