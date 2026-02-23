@@ -88,7 +88,7 @@ class NoteSyncService {
         }
 
         final res = await api.postFormData(
-          '/api/create',
+          '/api/create/v2',
           formData: formData,
         );
 
@@ -159,9 +159,11 @@ class NoteSyncService {
       'project': n.document,
       'description': n.description,
       if (n.activity != null) 'activity': n.activity,
-      'task': n.taskType.label, // Modificar para enviar categorizacion de notas
-      'category': n.type.id.toString(),
+      'task': n.taskType.id,
+      'type': n.type.id,
     };
+
+    print("[Notes]: ${map}");
 
     if (n.imagePath != null && n.imagePath!.trim().isNotEmpty) {
       final file = File(n.imagePath!);
