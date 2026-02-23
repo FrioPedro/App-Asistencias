@@ -191,6 +191,8 @@ class NotificationService {
     if (_router == null) return;
 
     final now = DateTime.now();
+    if (now.weekday > 5) return; // Solo lunes a viernes
+
     final currentHour = now.hour;
     final currentMinute = now.minute;
 
@@ -256,6 +258,10 @@ class NotificationService {
     if (scheduled.isBefore(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
+    // Saltar fines de semana (sábado = 6, domingo = 7)
+    while (scheduled.weekday > 5) {
+      scheduled = scheduled.add(const Duration(days: 1));
+    }
     return scheduled;
   }
 
@@ -314,12 +320,16 @@ class NotificationService {
     // Siempre mostrar notificación con fullScreenIntent (para background/locked)
     await _showFullScreenNotification(alarmId, title, body);
 
-    // Re-programar la misma alarma para mañana
+    // Re-programar para el próximo día hábil
     final hour = alarm['hour'] as int;
     final minute = alarm['minute'] as int;
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final nextTime =
+    var nextTime =
         DateTime(tomorrow.year, tomorrow.month, tomorrow.day, hour, minute);
+
+    while (nextTime.weekday > 5) {
+      nextTime = nextTime.add(const Duration(days: 1));
+    }
 
     await AndroidAlarmManager.oneShotAt(
       nextTime,
