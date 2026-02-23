@@ -1,4 +1,5 @@
 import 'package:app_asistencias/models/taskType_model.dart';
+import 'package:app_asistencias/models/activity/list_form_model.dart';
 import 'package:isar/isar.dart';
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
@@ -11,7 +12,7 @@ class NoteModel {
   Id id = Isar.autoIncrement;
 
   //@Index(unique: true, replace: true)
-  int? serverId; 
+  int? serverId;
   @Index()
   late String document;
 
@@ -20,7 +21,7 @@ class NoteModel {
   String? imagePath;
   String? imageUrl;
 
-  String? activity; 
+  String? activity;
   String? collaborator;
 
   late DateTime timestamp;
@@ -31,6 +32,9 @@ class NoteModel {
   @Index()
   @enumerated
   SyncStatus syncStatus = SyncStatus.pending;
+
+  @enumerated
+  ListForm type = ListForm.foto_antes;
 
   @Index(unique: true, replace: true)
   late String dedupKey;
@@ -46,15 +50,15 @@ class NoteModel {
     this.collaborator,
     required this.timestamp,
     this.syncStatus = SyncStatus.pending,
+    this.type = ListForm.foto_antes,
   }) {
     dedupKey = buildDedupKey(
       document: document,
-      description: description, 
+      description: description,
       timestamp: timestamp,
     );
     taskType = taskType;
   }
-
 
   NoteModel.fromServer(Map<String, dynamic> json) {
     serverId = (json['Identifier'] as num?)?.toInt();
@@ -68,32 +72,28 @@ class NoteModel {
     syncStatus = SyncStatus.synced;
 
     dedupKey = buildDedupKey(
-      document: document,
-      description: description,
-      timestamp: timestamp
-    );
+        document: document, description: description, timestamp: timestamp);
   }
 
   // ---------------- helpers ----------------
 
   String _norm(String s) => s.trim().toLowerCase();
 
-String buildDedupKey({
-  required String document,
-  required String description,
-  required DateTime timestamp,
-  String? imagePath,
-}) {
-  final base = [
-    _norm(document),
-    _norm(description),
-    timestamp.toIso8601String(), // o recortado a minuto si quieres
-    if (imagePath != null) _norm(imagePath),
-  ].join('|');
+  String buildDedupKey({
+    required String document,
+    required String description,
+    required DateTime timestamp,
+    String? imagePath,
+  }) {
+    final base = [
+      _norm(document),
+      _norm(description),
+      timestamp.toIso8601String(), // o recortado a minuto si quieres
+      if (imagePath != null) _norm(imagePath),
+    ].join('|');
 
-  return sha1.convert(utf8.encode(base)).toString().substring(0, 20);
-}
-
+    return sha1.convert(utf8.encode(base)).toString().substring(0, 20);
+  }
 
   DateTime _parseServerTimestamp(dynamic v) {
     // 👇 fecha antigua por defecto

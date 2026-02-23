@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:app_asistencias/domain/note/sync_note.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
-
+import 'package:app_asistencias/models/activity/list_form_model.dart';
 import 'package:app_asistencias/domain/note/create_note.dart';
 
 class ServiceExitAsNotes {
@@ -25,38 +25,38 @@ class ServiceExitAsNotes {
       // 1) Textos (si no están vacíos)
       if (incidencias.trim().isNotEmpty) {
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Incidencia Servicio]: ${incidencias.trim()}',
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: incidencias.trim(),
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.incidencias);
       }
 
       if (acciones.trim().isNotEmpty) {
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Acciones Servicio]: ${acciones.trim()}',
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: acciones.trim(),
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.acciones);
       }
 
       if (conclusiones.trim().isNotEmpty) {
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Conclusiones Servicio]: ${conclusiones.trim()}',
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: conclusiones.trim(),
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.conclusiones);
       }
 
       if (recomendaciones.trim().isNotEmpty) {
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Recomendaciones Servicio]: ${recomendaciones.trim()}',
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: recomendaciones.trim(),
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.recomendaciones);
       }
 
       // 2) Fotos ANTES
@@ -65,12 +65,12 @@ class ServiceExitAsNotes {
         if (file == null) continue;
 
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Foto Antes #${i + 1}]',
-          imagePath: file.path,
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: 'Foto Antes',
+            imagePath: file.path,
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.foto_antes);
       }
 
       // 3) Fotos DESPUÉS
@@ -79,12 +79,12 @@ class ServiceExitAsNotes {
         if (file == null) continue;
 
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Foto Después #${i + 1}]',
-          imagePath: file.path,
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: 'Foto Después',
+            imagePath: file.path,
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.foto_despues);
       }
 
       await _sync.syncIfPossible();
@@ -112,11 +112,11 @@ class WorkshopExitAsNotes {
       // 1) Notas (Obligatorio validado en UI, pero guardamos si no es vacío)
       if (notes.trim().isNotEmpty) {
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Reporte Taller]: ${notes.trim()}',
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: notes.trim(),
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.acciones);
       }
 
       // 2) Fotos ANTES
@@ -125,12 +125,12 @@ class WorkshopExitAsNotes {
         if (file == null) continue;
 
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Foto Taller Antes #${i + 1}]',
-          imagePath: file.path,
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: 'Foto Antes',
+            imagePath: file.path,
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.foto_antes);
       }
 
       // 3) Fotos DESPUÉS
@@ -139,12 +139,12 @@ class WorkshopExitAsNotes {
         if (file == null) continue;
 
         await CreateNote.createAndStore(
-          document: doc,
-          description: '[Foto Taller Después #${i + 1}]',
-          imagePath: file.path,
-          activity: activityKey,
-          taskType: taskType
-        );
+            document: doc,
+            description: 'Foto Después',
+            imagePath: file.path,
+            activity: activityKey,
+            taskType: taskType,
+            type: ListForm.foto_despues);
       }
 
       await _sync.syncIfPossible();

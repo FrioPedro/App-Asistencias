@@ -8,6 +8,7 @@ import 'package:app_asistencias/models/note_model.dart';
 import 'package:isar/isar.dart';
 import 'package:app_asistencias/providers/log_provider.dart';
 import 'package:app_asistencias/models/log_model.dart';
+import 'package:app_asistencias/models/activity/list_form_model.dart';
 
 class NoteSyncService {
   final NetworkInfo _net;
@@ -159,7 +160,7 @@ class NoteSyncService {
       'description': n.description,
       if (n.activity != null) 'activity': n.activity,
       'task': n.taskType.label, // Modificar para enviar categorizacion de notas
-      'catergoy': '',
+      'category': n.type.id.toString(),
     };
 
     if (n.imagePath != null && n.imagePath!.trim().isNotEmpty) {

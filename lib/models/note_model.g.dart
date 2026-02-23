@@ -73,6 +73,12 @@ const NoteModelSchema = CollectionSchema(
       id: 10,
       name: r'timestamp',
       type: IsarType.dateTime,
+    ),
+    r'type': PropertySchema(
+      id: 11,
+      name: r'type',
+      type: IsarType.byte,
+      enumMap: _NoteModeltypeEnumValueMap,
     )
   },
   estimateSize: _noteModelEstimateSize,
@@ -182,6 +188,7 @@ void _noteModelSerialize(
   writer.writeByte(offsets[8], object.syncStatus.index);
   writer.writeByte(offsets[9], object.taskType.index);
   writer.writeDateTime(offsets[10], object.timestamp);
+  writer.writeByte(offsets[11], object.type.index);
 }
 
 NoteModel _noteModelDeserialize(
@@ -205,6 +212,8 @@ NoteModel _noteModelDeserialize(
         _NoteModeltaskTypeValueEnumMap[reader.readByteOrNull(offsets[9])] ??
             TaskType.office,
     timestamp: reader.readDateTime(offsets[10]),
+    type: _NoteModeltypeValueEnumMap[reader.readByteOrNull(offsets[11])] ??
+        ListForm.foto_antes,
   );
   object.dedupKey = reader.readString(offsets[2]);
   object.id = id;
@@ -242,6 +251,9 @@ P _noteModelDeserializeProp<P>(
           TaskType.office) as P;
     case 10:
       return (reader.readDateTime(offset)) as P;
+    case 11:
+      return (_NoteModeltypeValueEnumMap[reader.readByteOrNull(offset)] ??
+          ListForm.foto_antes) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -270,6 +282,22 @@ const _NoteModeltaskTypeValueEnumMap = {
   1: TaskType.workshop,
   2: TaskType.service,
   3: TaskType.transport,
+};
+const _NoteModeltypeEnumValueMap = {
+  'foto_antes': 0,
+  'foto_despues': 1,
+  'acciones': 2,
+  'incidencias': 3,
+  'conclusiones': 4,
+  'recomendaciones': 5,
+};
+const _NoteModeltypeValueEnumMap = {
+  0: ListForm.foto_antes,
+  1: ListForm.foto_despues,
+  2: ListForm.acciones,
+  3: ListForm.incidencias,
+  4: ListForm.conclusiones,
+  5: ListForm.recomendaciones,
 };
 
 Id _noteModelGetId(NoteModel object) {
@@ -1883,6 +1911,59 @@ extension NoteModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> typeEqualTo(
+      ListForm value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'type',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> typeGreaterThan(
+    ListForm value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'type',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> typeLessThan(
+    ListForm value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'type',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterFilterCondition> typeBetween(
+    ListForm lower,
+    ListForm upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'type',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension NoteModelQueryObject
@@ -2021,6 +2102,18 @@ extension NoteModelQuerySortBy on QueryBuilder<NoteModel, NoteModel, QSortBy> {
   QueryBuilder<NoteModel, NoteModel, QAfterSortBy> sortByTimestampDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> sortByType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> sortByTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.desc);
     });
   }
 }
@@ -2170,6 +2263,18 @@ extension NoteModelQuerySortThenBy
       return query.addSortBy(r'timestamp', Sort.desc);
     });
   }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> thenByType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.asc);
+    });
+  }
+
+  QueryBuilder<NoteModel, NoteModel, QAfterSortBy> thenByTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'type', Sort.desc);
+    });
+  }
 }
 
 extension NoteModelQueryWhereDistinct
@@ -2246,6 +2351,12 @@ extension NoteModelQueryWhereDistinct
       return query.addDistinctBy(r'timestamp');
     });
   }
+
+  QueryBuilder<NoteModel, NoteModel, QDistinct> distinctByType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'type');
+    });
+  }
 }
 
 extension NoteModelQueryProperty
@@ -2319,6 +2430,12 @@ extension NoteModelQueryProperty
   QueryBuilder<NoteModel, DateTime, QQueryOperations> timestampProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'timestamp');
+    });
+  }
+
+  QueryBuilder<NoteModel, ListForm, QQueryOperations> typeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'type');
     });
   }
 }
