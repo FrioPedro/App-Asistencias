@@ -1,12 +1,14 @@
 import 'dart:io';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:app_asistencias/domain/note/sync_note.dart';
+import 'package:app_asistencias/models/taskType_model.dart';
 
 import 'package:app_asistencias/domain/note/create_note.dart';
 
 class ServiceExitAsNotes {
   static Future<bool> saveAll({
     required int sid,
+    required TaskType taskType,
     required String incidencias,
     required String conclusiones,
     required String recomendaciones,
@@ -14,6 +16,8 @@ class ServiceExitAsNotes {
     required List<AssetEntity> photosAntes,
     required List<AssetEntity> photosDespues,
   }) async {
+    final activityKey =
+        taskType.name; // 'office' | 'workshop' | 'service' | 'transport'
     try {
       final doc = sid.toString();
       final NoteSyncService _sync = NoteSyncService();
@@ -23,7 +27,7 @@ class ServiceExitAsNotes {
         await CreateNote.createAndStore(
           document: doc,
           description: '[Incidencia Servicio]: ${incidencias.trim()}',
-          //activity: 'SERVICE_EXIT',
+          activity: activityKey,
         );
       }
 
@@ -31,7 +35,7 @@ class ServiceExitAsNotes {
         await CreateNote.createAndStore(
           document: doc,
           description: '[Acciones Servicio]: ${acciones.trim()}',
-          //activity: 'SERVICE_EXIT',
+          activity: activityKey,
         );
       }
 
@@ -39,7 +43,7 @@ class ServiceExitAsNotes {
         await CreateNote.createAndStore(
           document: doc,
           description: '[Conclusiones Servicio]: ${conclusiones.trim()}',
-          //activity: 'SERVICE_EXIT',
+          activity: activityKey,
         );
       }
 
@@ -47,7 +51,7 @@ class ServiceExitAsNotes {
         await CreateNote.createAndStore(
           document: doc,
           description: '[Recomendaciones Servicio]: ${recomendaciones.trim()}',
-          //activity: 'SERVICE_EXIT',
+          activity: activityKey,
         );
       }
 
@@ -60,7 +64,7 @@ class ServiceExitAsNotes {
           document: doc,
           description: '[Foto Antes #${i + 1}]',
           imagePath: file.path,
-          //activity: 'SERVICE_EXIT_PHOTO_BEFORE',
+          activity: activityKey,
         );
       }
 
@@ -73,7 +77,7 @@ class ServiceExitAsNotes {
           document: doc,
           description: '[Foto Después #${i + 1}]',
           imagePath: file.path,
-          activity: 'SERVICE_EXIT_PHOTO_AFTER',
+          activity: activityKey,
         );
       }
 
@@ -88,10 +92,13 @@ class ServiceExitAsNotes {
 class WorkshopExitAsNotes {
   static Future<bool> saveAll({
     required int sid,
+    required TaskType taskType,
     required String notes,
     required List<AssetEntity> photosAntes,
     required List<AssetEntity> photosDespues,
   }) async {
+    final activityKey =
+        taskType.name; // 'office' | 'workshop' | 'service' | 'transport'
     try {
       final doc = sid.toString();
       final NoteSyncService _sync = NoteSyncService();
@@ -101,6 +108,7 @@ class WorkshopExitAsNotes {
         await CreateNote.createAndStore(
           document: doc,
           description: '[Reporte Taller]: ${notes.trim()}',
+          activity: activityKey,
         );
       }
 
@@ -113,6 +121,7 @@ class WorkshopExitAsNotes {
           document: doc,
           description: '[Foto Taller Antes #${i + 1}]',
           imagePath: file.path,
+          activity: activityKey,
         );
       }
 
@@ -125,6 +134,7 @@ class WorkshopExitAsNotes {
           document: doc,
           description: '[Foto Taller Después #${i + 1}]',
           imagePath: file.path,
+          activity: activityKey,
         );
       }
 

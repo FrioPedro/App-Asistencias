@@ -110,8 +110,8 @@ class _EventActionModalState extends State<AssigmentModal> {
           MaterialPageRoute(
             builder: (_) => ServiceExitFormScreen(
               event: widget.assignment,
-              eventKey:
-                  widget.keyGroup, // aquí "eventKey" es keyGroup en tu screen
+              eventKey: widget.keyGroup,
+              task: currentTask,
             ),
           ),
         );
@@ -149,6 +149,7 @@ class _EventActionModalState extends State<AssigmentModal> {
             builder: (_) => WorkshopExitFormScreen(
               event: widget.assignment,
               eventKey: widget.keyGroup,
+              task: currentTask,
             ),
           ),
         );
@@ -218,8 +219,8 @@ class _EventActionModalState extends State<AssigmentModal> {
         MaterialPageRoute(
           builder: (_) => ServiceExitFormScreen(
             event: widget.assignment,
-            eventKey:
-                widget.keyGroup, // en tu screen esto realmente es keyGroup
+            eventKey: widget.keyGroup,
+            task: currentTask,
           ),
         ),
       );
@@ -268,6 +269,7 @@ class _EventActionModalState extends State<AssigmentModal> {
           builder: (_) => WorkshopExitFormScreen(
             event: widget.assignment,
             eventKey: widget.keyGroup,
+            task: currentTask,
           ),
         ),
       );

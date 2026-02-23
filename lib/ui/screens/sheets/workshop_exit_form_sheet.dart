@@ -6,6 +6,7 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
 import '../../../core/picker_localization.dart';
 import '../../../models/assigment_model.dart';
+import '../../../models/taskType_model.dart';
 import '../../../providers/attendance_provider.dart';
 import '../../../providers/report_form_provider.dart';
 import '../../../providers/log_provider.dart';
@@ -15,11 +16,13 @@ import '../../widgets/custom_snackbar.dart';
 class WorkshopExitFormScreen extends StatefulWidget {
   final AssigmentModel event;
   final String eventKey;
+  final TaskType task;
 
   const WorkshopExitFormScreen({
     super.key,
     required this.event,
     required this.eventKey,
+    required this.task,
   });
 
   @override
@@ -170,6 +173,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
       // Llamada al provider refactorizado
       final uploadSuccess = await WorkshopExitAsNotes.saveAll(
         sid: widget.event.serverId,
+        taskType: widget.task,
         notes: _notesController.text,
         photosAntes: _photosAntes,
         photosDespues: _photosDespues,
