@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:dio/dio.dart';
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/core/enpoinService.dart';
@@ -157,6 +158,8 @@ class NoteSyncService {
       'project': n.document,
       'description': n.description,
       if (n.activity != null) 'activity': n.activity,
+      'task': n.taskType.label, // Modificar para enviar categorizacion de notas
+      'catergoy': '',
     };
 
     if (n.imagePath != null && n.imagePath!.trim().isNotEmpty) {
