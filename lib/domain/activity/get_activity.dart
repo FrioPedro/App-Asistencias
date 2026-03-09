@@ -130,7 +130,7 @@ class GetActivity {
     return isar.activityModels
         .filter()
         .isSyncedEqualTo(false)
-        .sortByTimestampDesc()
+        .sortByTimestamp()
         .limit(limit)
         .findAll();
   }

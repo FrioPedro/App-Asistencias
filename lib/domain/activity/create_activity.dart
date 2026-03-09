@@ -71,7 +71,7 @@ class CreateActivity {
     */
     final salida = active.copyWith(
       motiveActivity: MotiveActivity.endWork, // el que corresponda
-      timestamp: DateTime.now(),
+      timestamp: timestamp ?? DateTime.now(),
       latitude: latitude,
       longitude: longitude,
       isSynced: false,
