@@ -19,6 +19,6 @@ extension MotiveactivityX on MotiveActivity{
     if (s == "fin de labores") return MotiveActivity.endWork;
     if (s == "inicio de labores") return MotiveActivity.startWork;
 
-    return MotiveActivity.endWork;
+    return MotiveActivity.startWork;
   }
 }

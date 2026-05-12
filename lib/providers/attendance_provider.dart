@@ -50,9 +50,9 @@ class AttendanceProvider {
 
     // Capturamos el tiempo BASE
     final now = DateTime.now();
-    // Agregamos un pequeño delta a la entrada nueva para asegurar que, al ordenar por fecha,
-    // la Entrada de B quede técnicamente "después" de la Salida de A en la BD.
-    final entryTime = now.add(const Duration(milliseconds: 100));
+    // Delta de 1 s para garantizar que entry B quede después de exit A
+    // incluso con timestamps de precisión segundos en el servidor.
+    final entryTime = now.add(const Duration(seconds: 1));
 
     // 1) si hay activo, ciérralo (Hora base)
     final active = await _storage.read();
