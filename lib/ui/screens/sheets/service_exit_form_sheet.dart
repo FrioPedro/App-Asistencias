@@ -35,10 +35,13 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final _conclusionesController = TextEditingController();
   final _recomendacionesController = TextEditingController();
   final _accionesController = TextEditingController();
+  final _antesCaptionController = TextEditingController();
+  final _despuesCaptionController = TextEditingController();
 
   final AttendanceProvider _eventsService = AttendanceProvider();
 
   bool _isSubmitting = false;
+  bool _submitAttempted = false;
   double _uploadProgress = 0.0;
 
   // Listas separadas para fotos ANTES y DESPUÉS
@@ -160,7 +163,13 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
   Future<void> _onSubmit() async {
     if (_isSubmitting) return;
-    if (!_formKey.currentState!.validate()) {
+
+    setState(() => _submitAttempted = true);
+
+    final formValid = _formKey.currentState!.validate();
+    final photosValid = _photosAntes.isNotEmpty && _photosDespues.isNotEmpty;
+
+    if (!formValid || !photosValid) {
       LogProvider.log(
         'Intento de envío de formulario de servicio fallido: Campos obligatorios incompletos',
         type: LogType.warning,
@@ -168,9 +177,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       );
       return;
     }
-
-    // Fotos ya no son obligatorias por solicitud
-    // if (_photosAntes.isEmpty) { ... }
 
     setState(() {
       _isSubmitting = true;
@@ -188,8 +194,10 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         conclusiones: _conclusionesController.text,
         recomendaciones: _recomendacionesController.text,
         acciones: _accionesController.text,
+        descripcionAntes: _antesCaptionController.text,
         photosAntes: _photosAntes,
         photosDespues: _photosDespues,
+        descripcionDespues: _despuesCaptionController.text,
       );
 
       if (!uploadSuccess && mounted) {
@@ -493,20 +501,43 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                   label: 'FOTOS ANTES',
                   photos: _photosAntes,
                   isAntes: true,
+                  isRequired: true,
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 30),
+                  child: _buildFormField(
+                    label: 'Descripción',
+                    controller: _antesCaptionController,
+                    hint: 'Describa las fotos antes del servicio...',
+                    maxLines: 1,
+                    isRequired: true,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildPhotoSection(
                   label: 'FOTOS DESPUÉS',
                   photos: _photosDespues,
                   isAntes: false,
+                  isRequired: true,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 30),
+                  child: _buildFormField(
+                    label: 'Descripción',
+                    controller: _despuesCaptionController,
+                    hint: 'Describa las fotos después del servicio...',
+                    maxLines: 1,
+                  ),
+                ),
                 const SizedBox(height: 20),
                 _buildFormField(
                   label: 'ACCIONES (OBLIGATORIO)',
                   controller: _accionesController,
                   hint: 'Describa las acciones realizadas...',
                   isRequired: true,
+                  minChars: 50,
                 ),
                 const SizedBox(height: 16),
                 _buildFormField(
@@ -606,7 +637,9 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     required String label,
     required List<AssetEntity> photos,
     required bool isAntes,
+    bool isRequired = false,
   }) {
+    final showMissingError = isRequired && photos.isEmpty && _submitAttempted;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -614,7 +647,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              label,
+              isRequired ? '$label (OBLIGATORIO)' : label,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -744,7 +777,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                       color: _primaryBlue.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.add_a_photo_rounded,
+                    child: const Icon(Icons.add_a_photo_rounded,
                         color: _primaryBlue, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -759,6 +792,18 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               ),
             ),
           ),
+        if (showMissingError && photos.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 8, bottom: 8),
+            child: Text(
+              '* Este campo es obligatorio',
+              style: TextStyle(
+                color: _exitRed,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -768,6 +813,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     required TextEditingController controller,
     required String hint,
     bool isRequired = true,
+    int maxLines = 3,
+    int minChars = 0,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -789,19 +836,30 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
           ),
           child: TextFormField(
             controller: controller,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             style: const TextStyle(color: Colors.white, fontSize: 15),
-            maxLines: 3,
+            maxLines: maxLines,
             enabled: !_isSubmitting,
             validator: (v) {
               if (!isRequired) return null;
-              return (v == null || v.trim().isEmpty)
-                  ? 'Este campo es obligatorio'
-                  : null;
+              if (v == null || v.trim().isEmpty) {
+                return '* Este campo es obligatorio';
+              } else if (v.length < minChars) {
+                return '* Debes introducir $minChars caracteres como mínimo';
+              } else {
+                return null;
+              }
             },
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
               border: InputBorder.none,
+              errorStyle: const TextStyle(
+                color: _exitRed,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                height: 2.2,
+              ),
               contentPadding: const EdgeInsets.all(16.0),
             ),
           ),

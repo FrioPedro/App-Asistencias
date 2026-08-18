@@ -32,10 +32,13 @@ class WorkshopExitFormScreen extends StatefulWidget {
 class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
+  final _antesCaptionController = TextEditingController();
+  final _despuesCaptionController = TextEditingController();
 
   final AttendanceProvider _eventsService = AttendanceProvider();
 
   bool _isSubmitting = false;
+  bool _submitAttempted = false;
   double _uploadProgress = 0.0;
 
   // Listas separadas para fotos ANTES y DESPUÉS
@@ -153,7 +156,13 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
 
   Future<void> _onSubmit() async {
     if (_isSubmitting) return;
-    if (!_formKey.currentState!.validate()) {
+
+    setState(() => _submitAttempted = true);
+
+    final formValid = _formKey.currentState!.validate();
+    final photosValid = _photosAntes.isNotEmpty && _photosDespues.isNotEmpty;
+
+    if (!formValid || !photosValid) {
       LogProvider.log(
         'Intento de envío de formulario de taller fallido: Campos obligatorios incompletos',
         type: LogType.warning,
@@ -175,8 +184,10 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
         sid: widget.event.serverId,
         taskType: widget.task,
         notes: _notesController.text,
+        descripcionAntes: _antesCaptionController.text,
         photosAntes: _photosAntes,
         photosDespues: _photosDespues,
+        descripcionDespues: _despuesCaptionController.text,
       );
 
       if (!uploadSuccess && mounted) {
@@ -469,12 +480,35 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                   label: 'FOTOS ANTES',
                   photos: _photosAntes,
                   isAntes: true,
+                  isRequired: true,
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 30),
+                  child: _buildFormField(
+                    label: 'Descripción',
+                    controller: _antesCaptionController,
+                    hint: 'Describa las fotos antes del taller...',
+                    maxLines: 1,
+                    isRequired: true,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildPhotoSection(
                   label: 'FOTOS DESPUÉS',
                   photos: _photosDespues,
                   isAntes: false,
+                  isRequired: true,
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(left: 30),
+                  child: _buildFormField(
+                    label: 'Descripción',
+                    controller: _despuesCaptionController,
+                    hint: 'Describa las fotos después del taller...',
+                    maxLines: 1,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildFormField(
@@ -482,6 +516,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                   controller: _notesController,
                   hint: 'Describa las actividades realizadas...',
                   isRequired: true,
+                  minChars: 50,
                 ),
                 const SizedBox(height: 24),
                 if (_isSubmitting)
@@ -560,7 +595,10 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
     required String label,
     required List<AssetEntity> photos,
     required bool isAntes,
+    bool isRequired = false,
   }) {
+    final showMissingError =
+        isRequired && photos.isEmpty && _submitAttempted;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -568,7 +606,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              label,
+              isRequired ? '$label (OBLIGATORIO)' : label,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -713,6 +751,18 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
               ),
             ),
           ),
+        if (showMissingError)
+          const Padding(
+            padding: EdgeInsets.only(top: 8, bottom: 20),
+            child: Text(
+              '* Este campo es obligatorio',
+              style: TextStyle(
+                color: _exitRed,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -722,6 +772,8 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
     required TextEditingController controller,
     required String hint,
     bool isRequired = true,
+    int maxLines = 5,
+    int minChars = 0,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -743,19 +795,30 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
           ),
           child: TextFormField(
             controller: controller,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             style: const TextStyle(color: Colors.white, fontSize: 15),
-            maxLines: 5,
+            maxLines: maxLines,
             enabled: !_isSubmitting,
             validator: (v) {
               if (!isRequired) return null;
-              return (v == null || v.trim().isEmpty)
-                  ? 'Este campo es obligatorio'
-                  : null;
+              if (v == null || v.trim().isEmpty) {
+                return '* Este campo es obligatorio';
+              } else if (v.length < minChars) {
+                return '* Debes introducir $minChars caracteres como mínimo';
+              } else {
+                return null;
+              }
             },
             decoration: InputDecoration(
               hintText: hint,
               hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
               border: InputBorder.none,
+              errorStyle: const TextStyle(
+                color: _exitRed,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                height: 2.2,
+              ),
               contentPadding: const EdgeInsets.all(16),
             ),
           ),

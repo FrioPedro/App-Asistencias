@@ -87,12 +87,18 @@ class NoteSyncService {
           print('  ${f.key} = ${f.value.filename}');
         }
 
+        print(
+            '[NOTE_SYNC][POST /api/create/v2] Enviando: '
+            '${{for (final f in formData.fields) f.key: f.value}}'
+            '${formData.files.isNotEmpty ? " + files: ${formData.files.map((f) => f.value.filename).toList()}" : ""}');
+
         final res = await api.postFormData(
           '/api/create/v2',
           formData: formData,
         );
 
-        print('[NOTE_SYNC] Response status: ${res.statusCode}');
+        print(
+            '[NOTE_SYNC][POST /api/create/v2] Respuesta: status=${res.statusCode}, data=${res.data}');
 
         if (res.statusCode == 200 || res.statusCode == 201) {
           await isar.writeTxn(() async {

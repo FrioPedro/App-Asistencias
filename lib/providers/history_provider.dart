@@ -2,7 +2,6 @@
 import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/domain/activity/get_activity.dart';
 import 'package:app_asistencias/domain/activity/syncService.dart';
-import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/user/user_zone.dart';
