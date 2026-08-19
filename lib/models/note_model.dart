@@ -56,6 +56,7 @@ class NoteModel {
       document: document,
       description: description,
       timestamp: timestamp,
+      imagePath: imagePath,
     );
     taskType = taskType;
   }

@@ -13,6 +13,9 @@ import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/form_text_field.dart';
+import '../../../models/activity/photo_item.dart';
+import '../photo_caption_screen.dart';
+import '../../widgets/photo_strip.dart';
 
 class ServiceExitFormScreen extends StatefulWidget {
   final AssigmentModel event;
@@ -36,8 +39,6 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   final _conclusionesController = TextEditingController();
   final _recomendacionesController = TextEditingController();
   final _accionesController = TextEditingController();
-  final _antesCaptionController = TextEditingController();
-  final _despuesCaptionController = TextEditingController();
 
   final AttendanceProvider _eventsService = AttendanceProvider();
 
@@ -45,9 +46,15 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   bool _submitAttempted = false;
   double _uploadProgress = 0.0;
 
-  // Listas separadas para fotos ANTES y DESPUÉS
-  List<AssetEntity> _photosAntes = [];
-  List<AssetEntity> _photosDespues = [];
+  /// Un servicio de mantenimiento exige fotos ANTES y DESPUÉS, y habilita
+  /// conclusiones y recomendaciones. Cualquier otro servicio lleva un solo
+  /// grupo de fotos.
+  bool _esMantenimiento = false;
+
+  /// Cuando no es mantenimiento solo se usa [_photosAntes], que es el grupo
+  /// único (se envía como `ListForm.foto_antes`).
+  List<PhotoItem> _photosAntes = [];
+  List<PhotoItem> _photosDespues = [];
 
   static const int _maxPhotosPerSection = 20;
 
@@ -56,6 +63,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   static const Color _cardColor = Color(0xFF2C2C2C);
   static const Color _primaryBlue = Color(0xFF2E60C4);
   static const Color _exitRed = Color(0xFFEF5350);
+  static const Color _pendingAmber = Color(0xFFFFB300);
+  static const Color _okGreen = Color(0xFF4CAF50);
 
   @override
   void dispose() {
@@ -63,6 +72,9 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     _conclusionesController.dispose();
     _recomendacionesController.dispose();
     _accionesController.dispose();
+    for (final item in [..._photosAntes, ..._photosDespues]) {
+      item.dispose();
+    }
     super.dispose();
   }
 
@@ -168,9 +180,11 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     setState(() => _submitAttempted = true);
 
     final formValid = _formKey.currentState!.validate();
-    final photosValid = _photosAntes.isNotEmpty && _photosDespues.isNotEmpty;
+    final photosValid = _photosAntes.isNotEmpty &&
+        (!_esMantenimiento || _photosDespues.isNotEmpty);
+    final captionsValid = _pendingCaptions == 0;
 
-    if (!formValid || !photosValid) {
+    if (!formValid || !photosValid || !captionsValid) {
       LogProvider.log(
         'Intento de envío de formulario de servicio fallido: Campos obligatorios incompletos',
         type: LogType.warning,
@@ -191,14 +205,16 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       final uploadSuccess = await ServiceExitAsNotes.saveAll(
         sid: widget.event.serverId ?? 0,
         taskType: TaskType.service,
-        incidencias: _incidenciasController.text,
-        conclusiones: _conclusionesController.text,
-        recomendaciones: _recomendacionesController.text,
+        incidencias: _esMantenimiento ? _incidenciasController.text : '',
+        conclusiones: _esMantenimiento ? _conclusionesController.text : '',
+        recomendaciones:
+            _esMantenimiento ? _recomendacionesController.text : '',
         acciones: _accionesController.text,
-        descripcionAntes: _antesCaptionController.text,
-        photosAntes: _photosAntes,
-        photosDespues: _photosDespues,
-        descripcionDespues: _despuesCaptionController.text,
+        photosAntes: _photosAntes.map((p) => p.asset).toList(),
+        descripcionesAntes: _photosAntes.map((p) => p.caption.text).toList(),
+        photosDespues: _esMantenimiento ? (_photosDespues.map((p) => p.asset).toList()) : [],
+        descripcionesDespues:
+            _esMantenimiento ? (_photosDespues.map((p) => p.caption.text).toList()) : [],
       );
 
       if (!uploadSuccess && mounted) {
@@ -207,6 +223,12 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
             isError: true);
         setState(() => _isSubmitting = false);
         return;
+      }
+
+      // Las fotos DESPUÉS no se envían cuando no es mantenimiento: se
+      // descartan aquí para no dejar basura en la galería del operario.
+      if (!_esMantenimiento) {
+        await _descartarFotosDespues();
       }
 
       setState(() => _uploadProgress = 0.7);
@@ -240,6 +262,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   /// Muestra opciones para agregar fotos (galería o cámara)
   Future<void> _showPhotoOptions({required bool isAntes}) async {
     final currentPhotos = isAntes ? _photosAntes : _photosDespues;
+    FocusScope.of(context).unfocus();
+
     final remaining = _maxPhotosPerSection - currentPhotos.length;
 
     if (remaining <= 0) {
@@ -408,14 +432,14 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
           origin: 'ServiceExitFormScreen',
         );
         setState(() {
+          final destino = isAntes ? _photosAntes : _photosDespues;
+          final espacio = _maxPhotosPerSection - destino.length;
+          final nuevos = result.take(espacio).map(PhotoItem.new);
+
           if (isAntes) {
-            _photosAntes = [..._photosAntes, ...result]
-                .take(_maxPhotosPerSection)
-                .toList();
+            _photosAntes = [..._photosAntes, ...nuevos];
           } else {
-            _photosDespues = [..._photosDespues, ...result]
-                .take(_maxPhotosPerSection)
-                .toList();
+            _photosDespues = [..._photosDespues, ...nuevos];
           }
         });
       }
@@ -445,11 +469,17 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         setState(() {
           if (isAntes) {
             if (_photosAntes.length < _maxPhotosPerSection) {
-              _photosAntes = [..._photosAntes, result];
+              _photosAntes = [
+                ..._photosAntes,
+                PhotoItem(result, fromCamera: true)
+              ];
             }
           } else {
             if (_photosDespues.length < _maxPhotosPerSection) {
-              _photosDespues = [..._photosDespues, result];
+              _photosDespues = [
+                ..._photosDespues,
+                PhotoItem(result, fromCamera: true)
+              ];
             }
           }
         });
@@ -462,14 +492,108 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     }
   }
 
-  void _removePhoto(AssetEntity asset, {required bool isAntes}) {
+  /// Descarta el grupo DESPUÉS cuando el servicio no es mantenimiento y por lo
+  /// tanto esas fotos no se subieron.
+  ///
+  /// Solo se borran del dispositivo las tomadas con la cámara de la app: las
+  /// elegidas de la galería ya eran del operario y no se tocan. También se
+  /// excluye cualquier asset que además esté en ANTES, porque ese sí se subió.
+  ///
+  /// Nunca interrumpe la finalización: si el borrado falla (el sistema puede
+  /// pedir confirmación y el operario puede rechazarla) solo queda registrado
+  /// en el log, porque el formulario ya se envió correctamente.
+  Future<void> _descartarFotosDespues() async {
+    if (_photosDespues.isEmpty) return;
+
+    final descartados = _photosDespues;
+    final idsAntes = _photosAntes.map((p) => p.asset.id).toSet();
+    final idsABorrar = descartados
+        .where((p) => p.fromCamera && !idsAntes.contains(p.asset.id))
+        .map((p) => p.asset.id)
+        .toList();
+
+    // Primero se sueltan las referencias en memoria, para que la UI no vuelva
+    // a pintar miniaturas de assets que están por desaparecer.
+    if (mounted) {
+      setState(() => _photosDespues = []);
+    } else {
+      _photosDespues = [];
+    }
+    for (final item in descartados) {
+      item.dispose();
+    }
+
+    if (idsABorrar.isEmpty) return;
+
+    try {
+      final borrados = await PhotoManager.editor.deleteWithIds(idsABorrar);
+      LogProvider.log(
+        'Fotos DESPUÉS descartadas de la galería: '
+        '${borrados.length} de ${idsABorrar.length}',
+        type: borrados.length == idsABorrar.length
+            ? LogType.info
+            : LogType.warning,
+        origin: 'ServiceExitFormScreen',
+      );
+    } catch (e) {
+      LogProvider.log(
+        'No se pudieron borrar las fotos DESPUÉS descartadas: $e',
+        type: LogType.error,
+        origin: 'ServiceExitFormScreen',
+      );
+    }
+  }
+
+  void _removePhoto(PhotoItem item, {required bool isAntes}) {
     setState(() {
       if (isAntes) {
-        _photosAntes.remove(asset);
+        _photosAntes.remove(item);
       } else {
-        _photosDespues.remove(asset);
+        _photosDespues.remove(item);
       }
     });
+    // El controller vive en el PhotoItem, así que lo liberamos aquí.
+    item.dispose();
+  }
+
+  List<PhotoItem> get _allPhotos =>
+      _esMantenimiento ? [..._photosAntes, ..._photosDespues] : _photosAntes;
+
+  /// Cuántas fotos siguen sin descripción válida.
+  int get _pendingCaptions => _allPhotos.where((p) => !p.isDescribed).length;
+
+  /// Etiqueta de la sección tal como la ve el operario.
+  String _sectionLabel({required bool isAntes}) {
+    if (!_esMantenimiento) return 'FOTOS';
+    return isAntes ? 'ANTES' : 'DESPUÉS';
+  }
+
+  /// Abre la vista de descripción. [startAt] permite entrar directo a una foto
+  /// concreta al tocar su miniatura; si es nulo arranca en la primera pendiente.
+  Future<void> _openCaptions({required bool isAntes, int? startAt}) async {
+    final photos = isAntes ? _photosAntes : _photosDespues;
+    if (photos.isEmpty) return;
+
+    final firstPending = photos.indexWhere((p) => !p.isDescribed);
+    FocusScope.of(context).unfocus();
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PhotoCaptionScreen(
+          photos: photos,
+          sectionLabel: _sectionLabel(isAntes: isAntes),
+          initialIndex: startAt ?? (firstPending == -1 ? 0 : firstPending),
+          onRemove: (item) => _removePhoto(item, isAntes: isAntes),
+        ),
+      ),
+    );
+
+    // Al volver refrescamos los indicadores ✓ / pendiente.
+    if (mounted) {
+      FocusScope.of(context).unfocus();
+      setState(() {});
+    }
   }
 
   @override
@@ -491,148 +615,167 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildPhotoSection(
-                  label: 'FOTOS ANTES',
-                  photos: _photosAntes,
-                  isAntes: true,
-                  isRequired: true,
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 30),
-                  child: FormTextField(
-                    label: 'Descripción',
-                    controller: _antesCaptionController,
-                    hint: 'Describa las fotos antes del servicio...',
-                    maxLines: 1,
+        // Tocar fuera de un campo cierra el teclado. Con HitTestBehavior.opaque
+        // el gesto cubre todo el área, pero los botones y campos hijos ganan la
+        // arena de gestos, así que sus toques siguen funcionando igual.
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: SingleChildScrollView(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            // Arrastrar la pantalla también cierra el teclado.
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FormTextField(
+                    label: '¿QUÉ HICISTE EN EL SERVICIO? (OBLIGATORIO)',
+                    controller: _accionesController,
+                    hint: 'Describa las acciones realizadas...',
                     isRequired: true,
+                    minChars: 50,
                     enabled: !_isSubmitting,
                   ),
-                ),
-                const SizedBox(height: 20),
-                _buildPhotoSection(
-                  label: 'FOTOS DESPUÉS',
-                  photos: _photosDespues,
-                  isAntes: false,
-                  isRequired: true,
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 30),
-                  child: FormTextField(
-                    label: 'Descripción',
-                    controller: _despuesCaptionController,
-                    hint: 'Describa las fotos después del servicio...',
-                    maxLines: 1,
-                    enabled: !_isSubmitting,
+                  const SizedBox(height: 16),
+                  _buildMantenimientoToggle(),
+                  const SizedBox(height: 20),
+                  _buildPhotoSection(
+                    label: _esMantenimiento ? 'FOTOS ANTES' : 'FOTOS',
+                    photos: _photosAntes,
+                    isAntes: true,
+                    isRequired: true,
                   ),
-                ),
-                const SizedBox(height: 20),
-                FormTextField(
-                  label: 'ACCIONES (OBLIGATORIO)',
-                  controller: _accionesController,
-                  hint: 'Describa las acciones realizadas...',
-                  isRequired: true,
-                  minChars: 50,
-                  enabled: !_isSubmitting,
-                ),
-                const SizedBox(height: 16),
-                FormTextField(
-                  label: 'INCIDENCIAS',
-                  controller: _incidenciasController,
-                  hint: 'Describa las incidencias encontradas...',
-                  isRequired: false,
-                  enabled: !_isSubmitting,
-                ),
-                const SizedBox(height: 16),
-                FormTextField(
-                  label: 'CONCLUSIONES',
-                  controller: _conclusionesController,
-                  hint: 'Conclusiones del servicio...',
-                  isRequired: false,
-                  enabled: !_isSubmitting,
-                ),
-                const SizedBox(height: 16),
-                FormTextField(
-                  label: 'RECOMENDACIONES',
-                  controller: _recomendacionesController,
-                  hint: 'Recomendaciones para el cliente...',
-                  isRequired: false,
-                  enabled: !_isSubmitting,
-                ),
-                const SizedBox(height: 24),
-                if (_isSubmitting)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: _uploadProgress,
-                            backgroundColor: Colors.grey[800],
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF4CAF50)),
-                            minHeight: 8,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Subiendo ${_photosAntes.length + _photosDespues.length} fotos... ${(_uploadProgress * 100).toInt()}%',
-                          style:
-                              TextStyle(color: Colors.grey[400], fontSize: 13),
-                        ),
-                      ],
+                  if (_esMantenimiento) ...[
+                    const SizedBox(height: 20),
+                    _buildPhotoSection(
+                      label: 'FOTOS DESPUÉS',
+                      photos: _photosDespues,
+                      isAntes: false,
+                      isRequired: true,
                     ),
-                  ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _onSubmit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _exitRed,
-                      disabledBackgroundColor: Colors.grey[700],
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                  ],
+                  if (_esMantenimiento) ...[
+                    const SizedBox(height: 20),
+                    FormTextField(
+                      label: 'INCIDENCIAS',
+                      controller: _incidenciasController,
+                      hint: 'Describa las incidencias encontradas...',
+                      isRequired: false,
+                      enabled: !_isSubmitting,
+                    ),
+                    const SizedBox(height: 16),
+                    FormTextField(
+                      label: 'CONCLUSIONES',
+                      controller: _conclusionesController,
+                      hint: 'Conclusiones del servicio...',
+                      isRequired: false,
+                      enabled: !_isSubmitting,
+                    ),
+                    const SizedBox(height: 16),
+                    FormTextField(
+                      label: 'RECOMENDACIONES',
+                      controller: _recomendacionesController,
+                      hint: 'Recomendaciones para el cliente...',
+                      isRequired: false,
+                      enabled: !_isSubmitting,
+                    ),
+                  ],
+                  const SizedBox(height: 24),
+                  if (_isSubmitting)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: _uploadProgress,
+                              backgroundColor: Colors.grey[800],
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF4CAF50)),
+                              minHeight: 8,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Subiendo ${_allPhotos.length} fotos... ${(_uploadProgress * 100).toInt()}%',
+                            style: TextStyle(
+                                color: Colors.grey[400], fontSize: 13),
+                          ),
+                        ],
                       ),
                     ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.check_circle_outline,
-                                  color: Colors.white, size: 22),
-                              const SizedBox(width: 10),
-                              Text(
-                                'FINALIZAR (${_photosAntes.length + _photosDespues.length} fotos)',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold),
+                  if (_pendingCaptions > 0 && !_isSubmitting)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded,
+                              color: _pendingAmber, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _pendingCaptions == 1
+                                  ? 'Falta la descripción de 1 foto'
+                                  : 'Faltan las descripciones de '
+                                      '$_pendingCaptions fotos',
+                              style: const TextStyle(
+                                color: _pendingAmber,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
+                            ),
                           ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: (_isSubmitting || _pendingCaptions > 0)
+                          ? null
+                          : _onSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _exitRed,
+                        disabledBackgroundColor: Colors.grey[700],
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.check_circle_outline,
+                                    color: Colors.white, size: 22),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'FINALIZAR (${_allPhotos.length} fotos)',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),
@@ -640,13 +783,52 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     );
   }
 
+  /// Toggle que define la forma del formulario: mantenimiento = fotos ANTES y
+  /// DESPUÉS + conclusiones y recomendaciones; cualquier otro servicio = un
+  /// solo grupo de fotos.
+  Widget _buildMantenimientoToggle() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: _cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: SwitchListTile(
+        value: _esMantenimiento,
+        onChanged: _isSubmitting
+            ? null
+            : (value) => setState(() => _esMantenimiento = value),
+        contentPadding: EdgeInsets.zero,
+        activeColor: Colors.white,
+        activeTrackColor: _primaryBlue,
+        title: const Text(
+          '¿ES MANTENIMIENTO?',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        subtitle: Text(
+          _esMantenimiento
+              ? 'Pide fotos de antes y después del trabajo'
+              : 'Pide un solo grupo de fotos',
+          style: TextStyle(color: Colors.grey[400], fontSize: 13),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPhotoSection({
     required String label,
-    required List<AssetEntity> photos,
+    required List<PhotoItem> photos,
     required bool isAntes,
     bool isRequired = false,
   }) {
     final showMissingError = isRequired && photos.isEmpty && _submitAttempted;
+    final pending = photos.where((p) => !p.isDescribed).length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -667,13 +849,13 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               decoration: BoxDecoration(
                 color: photos.isEmpty
                     ? Colors.grey[800]
-                    : Colors.green.withOpacity(0.2),
+                    : _okGreen.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
                 '${photos.length}/$_maxPhotosPerSection',
                 style: TextStyle(
-                  color: photos.isEmpty ? Colors.grey[500] : Colors.green[400],
+                  color: photos.isEmpty ? Colors.grey[500] : _okGreen,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -683,86 +865,13 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         ),
         const SizedBox(height: 12),
         if (photos.isNotEmpty)
-          Container(
-            height: 120,
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              scrollDirection: Axis.horizontal,
-              itemCount: photos.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final asset = photos[index];
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: AssetEntityImage(
-                          asset,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          isOriginal: false,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 6,
-                      left: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    if (!_isSubmitting)
-                      Positioned(
-                        top: -5,
-                        right: -5,
-                        child: GestureDetector(
-                          onTap: () => _removePhoto(asset, isAntes: isAntes),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: _exitRed,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2))
-                              ],
-                            ),
-                            child: const Icon(Icons.close,
-                                color: Colors.white, size: 14),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: PhotoStrip(
+              photos: photos,
+              onTapPhoto: _isSubmitting
+                  ? null
+                  : (index) => _openCaptions(isAntes: isAntes, startAt: index),
             ),
           ),
         if (photos.length < _maxPhotosPerSection && !_isSubmitting)
@@ -799,6 +908,35 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               ),
             ),
           ),
+        if (photos.isNotEmpty && !_isSubmitting) ...[
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: OutlinedButton.icon(
+              onPressed: () => _openCaptions(isAntes: isAntes),
+              icon: Icon(
+                pending > 0 ? Icons.edit_note_rounded : Icons.check_circle,
+                size: 20,
+              ),
+              label: Text(
+                pending > 0
+                    ? 'DESCRIBIR FOTOS  ·  faltan $pending'
+                    : 'DESCRIPCIONES LISTAS (${photos.length})',
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: pending > 0 ? _pendingAmber : _okGreen,
+                side: BorderSide(
+                    color: pending > 0 ? _pendingAmber : _okGreen, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        ],
         if (showMissingError && photos.isEmpty)
           const Padding(
             padding: EdgeInsets.only(top: 8, bottom: 8),
@@ -814,5 +952,4 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       ],
     );
   }
-
 }

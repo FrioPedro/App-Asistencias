@@ -13,6 +13,9 @@ import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/form_text_field.dart';
+import '../../../models/activity/photo_item.dart';
+import '../photo_caption_screen.dart';
+import '../../widgets/photo_strip.dart';
 
 class WorkshopExitFormScreen extends StatefulWidget {
   final AssigmentModel event;
@@ -33,8 +36,6 @@ class WorkshopExitFormScreen extends StatefulWidget {
 class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _notesController = TextEditingController();
-  final _antesCaptionController = TextEditingController();
-  final _despuesCaptionController = TextEditingController();
 
   final AttendanceProvider _eventsService = AttendanceProvider();
 
@@ -42,21 +43,24 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   bool _submitAttempted = false;
   double _uploadProgress = 0.0;
 
-  // Listas separadas para fotos ANTES y DESPUÉS
-  List<AssetEntity> _photosAntes = [];
-  List<AssetEntity> _photosDespues = [];
+  List<PhotoItem> _photos = [];
 
-  static const int _maxPhotosPerSection = 20;
+  static const int _maxPhotos = 20;
 
   // Colores de la app
   static const Color _bgColor = Color(0xFF121212);
   static const Color _cardColor = Color(0xFF2C2C2C);
   static const Color _primaryBlue = Color(0xFF2E60C4);
   static const Color _exitRed = Color(0xFFEF5350);
+  static const Color _pendingAmber = Color(0xFFFFB300);
+  static const Color _okGreen = Color(0xFF4CAF50);
 
   @override
   void dispose() {
     _notesController.dispose();
+    for (final item in _photos) {
+      item.dispose();
+    }
     super.dispose();
   }
 
@@ -161,9 +165,10 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
     setState(() => _submitAttempted = true);
 
     final formValid = _formKey.currentState!.validate();
-    final photosValid = _photosAntes.isNotEmpty && _photosDespues.isNotEmpty;
+    final photosValid = _photos.isNotEmpty;
+    final captionsValid = _pendingCaptions == 0;
 
-    if (!formValid || !photosValid) {
+    if (!formValid || !photosValid || !captionsValid) {
       LogProvider.log(
         'Intento de envío de formulario de taller fallido: Campos obligatorios incompletos',
         type: LogType.warning,
@@ -185,10 +190,8 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
         sid: widget.event.serverId,
         taskType: widget.task,
         notes: _notesController.text,
-        descripcionAntes: _antesCaptionController.text,
-        photosAntes: _photosAntes,
-        photosDespues: _photosDespues,
-        descripcionDespues: _despuesCaptionController.text,
+        photos: _photos.map((p) => p.asset).toList(),
+        descripciones: _photos.map((p) => p.caption.text).toList(),
       );
 
       if (!uploadSuccess && mounted) {
@@ -226,13 +229,14 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   }
 
   /// Muestra opciones para agregar fotos (galería o cámara)
-  Future<void> _showPhotoOptions({required bool isAntes}) async {
-    final currentPhotos = isAntes ? _photosAntes : _photosDespues;
-    final remaining = _maxPhotosPerSection - currentPhotos.length;
+  Future<void> _showPhotoOptions() async {
+    final currentPhotos = _photos;
+    FocusScope.of(context).unfocus();
+
+    final remaining = _maxPhotos - currentPhotos.length;
 
     if (remaining <= 0) {
-      CustomSnackBar.show(
-          context, 'Máximo $_maxPhotosPerSection fotos permitidas',
+      CustomSnackBar.show(context, 'Máximo $_maxPhotos fotos permitidas',
           isError: true);
       return;
     }
@@ -265,9 +269,9 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Text(
-                isAntes ? 'Agregar fotos ANTES' : 'Agregar fotos DESPUÉS',
-                style: const TextStyle(
+              const Text(
+                'Agregar fotos',
+                style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -320,14 +324,14 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
       final hasGalleryAccess = await _requestPermission();
       if (hasGalleryAccess) {
         await Future.delayed(const Duration(milliseconds: 200));
-        await _pickFromGallery(isAntes: isAntes, maxAssets: remaining);
+        await _pickFromGallery(maxAssets: remaining);
       }
     } else if (action == 'camera') {
       final hasCameraAccess =
           await PermissionGuard.checkCameraPermission(context);
       if (hasCameraAccess) {
         await Future.delayed(const Duration(milliseconds: 200));
-        await _pickFromCamera(isAntes: isAntes);
+        await _pickFromCamera();
       }
     } else if (action == 'settings') {
       await PhotoManager.openSetting();
@@ -374,8 +378,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   }
 
   /// Seleccionar fotos de la galería
-  Future<void> _pickFromGallery(
-      {required bool isAntes, required int maxAssets}) async {
+  Future<void> _pickFromGallery({required int maxAssets}) async {
     try {
       final List<AssetEntity>? result = await AssetPicker.pickAssets(
         context,
@@ -384,20 +387,15 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
 
       if (result != null && result.isNotEmpty) {
         LogProvider.log(
-          '${result.length} foto(s) añadidas desde Galería (${isAntes ? "Antes" : "Después"})',
+          '${result.length} foto(s) añadidas desde Galería',
           type: LogType.info,
           origin: 'WorkshopExitFormScreen',
         );
         setState(() {
-          if (isAntes) {
-            _photosAntes = [..._photosAntes, ...result]
-                .take(_maxPhotosPerSection)
-                .toList();
-          } else {
-            _photosDespues = [..._photosDespues, ...result]
-                .take(_maxPhotosPerSection)
-                .toList();
-          }
+          // Se recorta ANTES de construir los PhotoItem: si se descartaran
+          // después, sus TextEditingController quedarían sin liberar.
+          final espacio = _maxPhotos - _photos.length;
+          _photos = [..._photos, ...result.take(espacio).map(PhotoItem.new)];
         });
       }
     } catch (e) {
@@ -409,7 +407,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   }
 
   /// Tomar foto con la cámara
-  Future<void> _pickFromCamera({required bool isAntes}) async {
+  Future<void> _pickFromCamera() async {
     try {
       final AssetEntity? result = await CameraPicker.pickFromCamera(
         context,
@@ -418,19 +416,13 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
 
       if (result != null) {
         LogProvider.log(
-          'Foto añadida desde Cámara (${isAntes ? "Antes" : "Después"})',
+          'Foto añadida desde Cámara',
           type: LogType.info,
           origin: 'WorkshopExitFormScreen',
         );
         setState(() {
-          if (isAntes) {
-            if (_photosAntes.length < _maxPhotosPerSection) {
-              _photosAntes = [..._photosAntes, result];
-            }
-          } else {
-            if (_photosDespues.length < _maxPhotosPerSection) {
-              _photosDespues = [..._photosDespues, result];
-            }
+          if (_photos.length < _maxPhotos) {
+            _photos = [..._photos, PhotoItem(result)];
           }
         });
       }
@@ -441,14 +433,42 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
     }
   }
 
-  void _removePhoto(AssetEntity asset, {required bool isAntes}) {
+  void _removePhoto(PhotoItem item) {
     setState(() {
-      if (isAntes) {
-        _photosAntes.remove(asset);
-      } else {
-        _photosDespues.remove(asset);
-      }
+      _photos.remove(item);
     });
+    // El controller vive en el PhotoItem, así que lo liberamos aquí.
+    item.dispose();
+  }
+
+  /// Cuántas fotos siguen sin descripción válida.
+  int get _pendingCaptions => _photos.where((p) => !p.isDescribed).length;
+
+  /// Abre la vista de descripción. [startAt] permite entrar directo a una foto
+  /// concreta al tocar su miniatura; si es nulo arranca en la primera pendiente.
+  Future<void> _openCaptions({int? startAt}) async {
+    if (_photos.isEmpty) return;
+
+    final firstPending = _photos.indexWhere((p) => !p.isDescribed);
+    FocusScope.of(context).unfocus();
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PhotoCaptionScreen(
+          photos: _photos,
+          sectionLabel: 'FOTOS',
+          initialIndex: startAt ?? (firstPending == -1 ? 0 : firstPending),
+          onRemove: _removePhoto,
+        ),
+      ),
+    );
+
+    // Al volver refrescamos los indicadores ✓ / pendiente.
+    if (mounted) {
+      FocusScope.of(context).unfocus();
+      setState(() {});
+    }
   }
 
   @override
@@ -470,125 +490,130 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildPhotoSection(
-                  label: 'FOTOS ANTES',
-                  photos: _photosAntes,
-                  isAntes: true,
-                  isRequired: true,
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 30),
-                  child: FormTextField(
-                    label: 'Descripción',
-                    controller: _antesCaptionController,
-                    hint: 'Describa las fotos antes del taller...',
-                    maxLines: 1,
+        // Tocar fuera de un campo cierra el teclado. Con HitTestBehavior.opaque
+        // el gesto cubre todo el área, pero los botones y campos hijos ganan la
+        // arena de gestos, así que sus toques siguen funcionando igual.
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.opaque,
+          child: SingleChildScrollView(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            // Arrastrar la pantalla también cierra el teclado.
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FormTextField(
+                    label: '¿QUÉ HICISTE EN EL TALLER? (OBLIGATORIO)',
+                    controller: _notesController,
+                    hint: 'Describa las actividades realizadas...',
                     isRequired: true,
+                    minChars: 50,
+                    maxLines: 5,
                     enabled: !_isSubmitting,
                   ),
-                ),
-                const SizedBox(height: 20),
-                _buildPhotoSection(
-                  label: 'FOTOS DESPUÉS',
-                  photos: _photosDespues,
-                  isAntes: false,
-                  isRequired: true,
-                ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(left: 30),
-                  child: FormTextField(
-                    label: 'Descripción',
-                    controller: _despuesCaptionController,
-                    hint: 'Describa las fotos después del taller...',
-                    maxLines: 1,
-                    enabled: !_isSubmitting,
+                  const SizedBox(height: 20),
+                  _buildPhotoSection(
+                    label: 'FOTOS',
+                    photos: _photos,
+                    isRequired: true,
                   ),
-                ),
-                const SizedBox(height: 20),
-                FormTextField(
-                  label: 'NOTAS (OBLIGATORIO)',
-                  controller: _notesController,
-                  hint: 'Describa las actividades realizadas...',
-                  isRequired: true,
-                  minChars: 50,
-                  maxLines: 5,
-                  enabled: !_isSubmitting,
-                ),
-                const SizedBox(height: 24),
-                if (_isSubmitting)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: LinearProgressIndicator(
-                            value: _uploadProgress,
-                            backgroundColor: Colors.grey[800],
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                                Color(0xFF4CAF50)),
-                            minHeight: 8,
+                  const SizedBox(height: 24),
+                  if (_isSubmitting)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: _uploadProgress,
+                              backgroundColor: Colors.grey[800],
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF4CAF50)),
+                              minHeight: 8,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Subiendo ${_photosAntes.length + _photosDespues.length} fotos... ${(_uploadProgress * 100).toInt()}%',
-                          style:
-                              TextStyle(color: Colors.grey[400], fontSize: 13),
-                        ),
-                      ],
-                    ),
-                  ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 54,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _onSubmit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _exitRed,
-                      disabledBackgroundColor: Colors.grey[700],
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Subiendo ${_photos.length} fotos... ${(_uploadProgress * 100).toInt()}%',
+                            style: TextStyle(
+                                color: Colors.grey[400], fontSize: 13),
+                          ),
+                        ],
                       ),
                     ),
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.check_circle_outline,
-                                  color: Colors.white, size: 22),
-                              const SizedBox(width: 10),
-                              Text(
-                                'FINALIZAR (${_photosAntes.length + _photosDespues.length} fotos)',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold),
+                  if (_pendingCaptions > 0 && !_isSubmitting)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber_rounded,
+                              color: _pendingAmber, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _pendingCaptions == 1
+                                  ? 'Falta la descripción de 1 foto'
+                                  : 'Faltan las descripciones de '
+                                      '$_pendingCaptions fotos',
+                              style: const TextStyle(
+                                color: _pendingAmber,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
+                            ),
                           ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: (_isSubmitting || _pendingCaptions > 0)
+                          ? null
+                          : _onSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _exitRed,
+                        disabledBackgroundColor: Colors.grey[700],
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.check_circle_outline,
+                                    color: Colors.white, size: 22),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'FINALIZAR (${_photos.length} fotos)',
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-              ],
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),
@@ -598,12 +623,12 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
 
   Widget _buildPhotoSection({
     required String label,
-    required List<AssetEntity> photos,
-    required bool isAntes,
+    required List<PhotoItem> photos,
     bool isRequired = false,
   }) {
-    final showMissingError =
-        isRequired && photos.isEmpty && _submitAttempted;
+    final showMissingError = isRequired && photos.isEmpty && _submitAttempted;
+    final pending = photos.where((p) => !p.isDescribed).length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -624,13 +649,13 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
               decoration: BoxDecoration(
                 color: photos.isEmpty
                     ? Colors.grey[800]
-                    : Colors.green.withOpacity(0.2),
+                    : _okGreen.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                '${photos.length}/$_maxPhotosPerSection',
+                '${photos.length}/$_maxPhotos',
                 style: TextStyle(
-                  color: photos.isEmpty ? Colors.grey[500] : Colors.green[400],
+                  color: photos.isEmpty ? Colors.grey[500] : _okGreen,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -640,91 +665,18 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
         ),
         const SizedBox(height: 12),
         if (photos.isNotEmpty)
-          Container(
-            height: 120,
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              scrollDirection: Axis.horizontal,
-              itemCount: photos.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final asset = photos[index];
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: AssetEntityImage(
-                          asset,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          isOriginal: false,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 6,
-                      left: 6,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '${index + 1}',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    if (!_isSubmitting)
-                      Positioned(
-                        top: -5,
-                        right: -5,
-                        child: GestureDetector(
-                          onTap: () => _removePhoto(asset, isAntes: isAntes),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: _exitRed,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2))
-                              ],
-                            ),
-                            child: const Icon(Icons.close,
-                                color: Colors.white, size: 14),
-                          ),
-                        ),
-                      ),
-                  ],
-                );
-              },
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: PhotoStrip(
+              photos: photos,
+              onTapPhoto: _isSubmitting
+                  ? null
+                  : (index) => _openCaptions(startAt: index),
             ),
           ),
-        if (photos.length < _maxPhotosPerSection && !_isSubmitting)
+        if (photos.length < _maxPhotos && !_isSubmitting)
           GestureDetector(
-            onTap: () => _showPhotoOptions(isAntes: isAntes),
+            onTap: () => _showPhotoOptions(),
             child: Container(
               width: double.infinity,
               height: 56,
@@ -741,7 +693,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                       color: _primaryBlue.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.add_a_photo_rounded,
+                    child: const Icon(Icons.add_a_photo_rounded,
                         color: _primaryBlue, size: 20),
                   ),
                   const SizedBox(width: 12),
@@ -756,9 +708,38 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
               ),
             ),
           ),
-        if (showMissingError)
+        if (photos.isNotEmpty && !_isSubmitting) ...[
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: OutlinedButton.icon(
+              onPressed: () => _openCaptions(),
+              icon: Icon(
+                pending > 0 ? Icons.edit_note_rounded : Icons.check_circle,
+                size: 20,
+              ),
+              label: Text(
+                pending > 0
+                    ? 'DESCRIBIR FOTOS  ·  faltan $pending'
+                    : 'DESCRIPCIONES LISTAS (${photos.length})',
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: pending > 0 ? _pendingAmber : _okGreen,
+                side: BorderSide(
+                    color: pending > 0 ? _pendingAmber : _okGreen, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        ],
+        if (showMissingError && photos.isEmpty)
           const Padding(
-            padding: EdgeInsets.only(top: 8, bottom: 20),
+            padding: EdgeInsets.only(top: 8, bottom: 8),
             child: Text(
               '* Este campo es obligatorio',
               style: TextStyle(
@@ -771,5 +752,4 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
       ],
     );
   }
-
 }
