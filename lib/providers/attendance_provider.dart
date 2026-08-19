@@ -3,13 +3,13 @@ import 'package:app_asistencias/domain/activity/register_activity.dart';
 
 import 'package:app_asistencias/domain/session/active_session_storage.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
-import 'package:app_asistencias/models/activity/activity_model.dart';
+// import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/domain/activity/syncService.dart';
 import 'package:app_asistencias/domain/note/sync_note.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
-import 'package:app_asistencias/models/user/user_model.dart';
+// import 'package:app_asistencias/models/user/user_model.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
-import 'package:app_asistencias/models/user/user_zone.dart';
+// import 'package:app_asistencias/models/user/user_zone.dart';
 
 class AttendanceProvider {
   final ActiveSessionStorage _storage;

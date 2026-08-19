@@ -5,7 +5,7 @@ import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/domain/activity/get_activity.dart';
 import 'package:app_asistencias/models/user/user_zone.dart';
-import 'package:isar/isar.dart';
+// import 'package:isar/isar.dart';
 
 class ActivitySyncService {
   final NetworkInfo _net;

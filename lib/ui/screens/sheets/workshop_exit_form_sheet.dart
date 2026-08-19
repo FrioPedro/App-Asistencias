@@ -12,6 +12,7 @@ import '../../../providers/report_form_provider.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
 import '../../widgets/custom_snackbar.dart';
+import '../../widgets/form_text_field.dart';
 
 class WorkshopExitFormScreen extends StatefulWidget {
   final AssigmentModel event;
@@ -485,12 +486,13 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.only(left: 30),
-                  child: _buildFormField(
+                  child: FormTextField(
                     label: 'Descripción',
                     controller: _antesCaptionController,
                     hint: 'Describa las fotos antes del taller...',
                     maxLines: 1,
                     isRequired: true,
+                    enabled: !_isSubmitting,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -503,20 +505,23 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                 const SizedBox(height: 10),
                 Padding(
                   padding: const EdgeInsets.only(left: 30),
-                  child: _buildFormField(
+                  child: FormTextField(
                     label: 'Descripción',
                     controller: _despuesCaptionController,
                     hint: 'Describa las fotos después del taller...',
                     maxLines: 1,
+                    enabled: !_isSubmitting,
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildFormField(
+                FormTextField(
                   label: 'NOTAS (OBLIGATORIO)',
                   controller: _notesController,
                   hint: 'Describa las actividades realizadas...',
                   isRequired: true,
                   minChars: 50,
+                  maxLines: 5,
+                  enabled: !_isSubmitting,
                 ),
                 const SizedBox(height: 24),
                 if (_isSubmitting)
@@ -767,63 +772,4 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
     );
   }
 
-  Widget _buildFormField({
-    required String label,
-    required TextEditingController controller,
-    required String hint,
-    bool isRequired = true,
-    int maxLines = 5,
-    int minChars = 0,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            color: _cardColor,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: TextFormField(
-            controller: controller,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            style: const TextStyle(color: Colors.white, fontSize: 15),
-            maxLines: maxLines,
-            enabled: !_isSubmitting,
-            validator: (v) {
-              if (!isRequired) return null;
-              if (v == null || v.trim().isEmpty) {
-                return '* Este campo es obligatorio';
-              } else if (v.length < minChars) {
-                return '* Debes introducir $minChars caracteres como mínimo';
-              } else {
-                return null;
-              }
-            },
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
-              border: InputBorder.none,
-              errorStyle: const TextStyle(
-                color: _exitRed,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                height: 2.2,
-              ),
-              contentPadding: const EdgeInsets.all(16),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
 }

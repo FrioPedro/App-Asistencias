@@ -1,5 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:app_asistencias/models/activity/activity_model.dart';
+// import 'package:app_asistencias/models/activity/activity_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
 
 class ActiveSessionStorage {

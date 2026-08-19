@@ -9,7 +9,7 @@ import '../create_assignment_view.dart';
 import 'widgets/restricted_access_dialog.dart';
 import '../sheets/event_action_sheet.dart';
 import 'widgets/home_header.dart';
-import '../../../models/activity/activity_model.dart';
+// import '../../../models/activity/activity_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
 
 class AttendanceScreen extends StatefulWidget {

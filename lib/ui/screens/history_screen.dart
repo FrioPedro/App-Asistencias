@@ -2,8 +2,8 @@ import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
-import '../../models/activity/activity_model.dart';
-import '../../models/assigment_model.dart';
+// import '../../models/activity/activity_model.dart';
+// import '../../models/assigment_model.dart';
 import '../../providers/history_provider.dart';
 import '../widgets/event_card_history.dart';
 import '../widgets/event_card_skeleton.dart';
