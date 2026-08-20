@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/attendance_provider.dart';
 import 'card.dart';
@@ -210,14 +212,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         toolbarHeight: 20,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -249,7 +249,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             MaterialPageRoute(builder: (_) => const CreateAssignmentView()),
           );
         },
-        backgroundColor: const Color(0xFF2E60C4),
+        backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
@@ -279,7 +279,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 _searchQuery.isEmpty
                     ? 'No hay asignaciones disponibles'
                     : 'No se encontraron resultados',
-                style: TextStyle(color: Colors.grey[500]),
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
             ),
           ),
@@ -342,8 +342,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadData,
-      color: const Color(0xFF2E60C4),
-      backgroundColor: const Color(0xFF2C2C2C),
+      color: AppColors.primary,
+      backgroundColor: AppColors.surface,
       child: listContent,
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
 import '../../models/assigment_model.dart'; // Import para AssigmentType
 
@@ -47,8 +49,8 @@ class EventCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       clipBehavior: Clip.antiAlias, // Para recortar la imagen de fondo
       decoration: BoxDecoration(
-        color: const Color(0xFF1F1F1F), // Gris oscuro
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surfaceAlt, // Gris oscuro
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Stack(
         children: [
@@ -95,16 +97,16 @@ class EventCard extends StatelessWidget {
                           Text(
                             assigmentType.label.toUpperCase(),
                             style: const TextStyle(
-                              color: Color(0xFF9E9E9E), // Gris Apagado
+                              color: AppColors.textSecondary, // Gris Apagado
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 0.5,
                             ),
                           ),
-                          Text(
+                          const Text(
                             ' - ',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
                             ),
@@ -153,8 +155,8 @@ class EventCard extends StatelessWidget {
                   companyName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.grey[400],
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
                     fontSize: 13,
                   ),
                 ),
@@ -162,8 +164,8 @@ class EventCard extends StatelessWidget {
                 // 4. DOCUMENTO
                 Text(
                   eventCode,
-                  style: TextStyle(
-                    color: Colors.grey[500],
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -180,7 +182,7 @@ class EventCard extends StatelessWidget {
                         Container(
                             width: 1,
                             height: 12,
-                            color: Colors.grey[700]), // Separador
+                            color: AppColors.textSecondary), // Separador
                         const SizedBox(width: 12),
                         _buildTimeChip('Salida:', exitTime),
                       ]
@@ -209,7 +211,7 @@ class EventCard extends StatelessWidget {
         children: [
           TextSpan(
             text: '$label ',
-            style: TextStyle(color: Colors.grey[500]),
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
           TextSpan(
             text: time,
@@ -263,11 +265,11 @@ class EventCard extends StatelessWidget {
 
   Color _getTaskColor(String taskName) {
     final name = taskName.toLowerCase();
-    if (name.contains('oficina')) return Colors.grey;
-    if (name.contains('taller')) return const Color(0xFF4CAF50); // Verde
+    if (name.contains('oficina')) return AppColors.textSecondary;
+    if (name.contains('taller')) return AppColors.success; // Verde
     if (name.contains('transporte')) return const Color(0xFFFF9800); // Naranja
-    if (name.contains('servicio')) return const Color(0xFF2E60C4); // Azul
-    return const Color(0xFF2E60C4); // Default Azul
+    if (name.contains('servicio')) return AppColors.primary; // Azul
+    return AppColors.primary; // Default Azul
   }
 
   String? _getTaskImageAsset(String taskName) {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 class ActionOption extends StatelessWidget {
   final IconData icon;
@@ -22,8 +24,8 @@ class ActionOption extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C), // Gris un poco más claro que el fondo
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.surface, // Gris un poco más claro que el fondo
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Row(
           children: [
@@ -44,8 +46,8 @@ class ActionOption extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      color: Colors.grey[400],
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
                       fontSize: 12,
                     ),
                   ),

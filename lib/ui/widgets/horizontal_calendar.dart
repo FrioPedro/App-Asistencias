@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart'; // Importante para inicializar locales
 
@@ -110,9 +112,9 @@ class _HorizontalCalendarState extends State<HorizontalCalendar> {
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF2E60C4)
-                        : const Color(0xFF2C2C2C),
-                    borderRadius: BorderRadius.circular(12),
+                        ? AppColors.primary
+                        : AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     border: isSelected
                         ? Border.all(color: Colors.blueAccent, width: 1.5)
                         : null,
@@ -125,7 +127,7 @@ class _HorizontalCalendarState extends State<HorizontalCalendar> {
                             .format(date)
                             .toUpperCase(), // LUN/MAR
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey,
+                          color: isSelected ? Colors.white : AppColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),

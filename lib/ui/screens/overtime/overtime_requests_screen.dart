@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 import 'package:app_asistencias/models/overtime_request_model.dart';
 import 'package:app_asistencias/providers/overtime_provider.dart';
@@ -14,7 +16,6 @@ class OvertimeRequestsScreen extends StatefulWidget {
 }
 
 class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
-  static const Color _bgColor = Color(0xFF18191D);
 
   final OvertimeProvider _overtime = OvertimeProvider();
 
@@ -68,29 +69,19 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Mis solicitudes',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+        title: const Text('Mis solicitudes'),
       ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _refresh,
           color: Colors.white,
-          backgroundColor: const Color(0xFF2C2C2C),
+          backgroundColor: AppColors.surface,
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _visibleRequests.isEmpty
@@ -115,16 +106,16 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.hourglass_empty,
-                      size: 64, color: Colors.grey[700]),
-                  const SizedBox(height: 24),
-                  const Text(
+                      size: 64, color: AppColors.iconMuted),
+                  SizedBox(height: 24),
+                  Text(
                     'Todavía no ha solicitado\nhoras extra',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -134,12 +125,12 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
                   Text(
                     'Pide horas extra desde la asignación.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: AppColors.textSecondary,
                       fontSize: 14,
                       height: 1.5,
                     ),
@@ -160,19 +151,14 @@ class _OvertimeRequestCard extends StatelessWidget {
 
   const _OvertimeRequestCard({required this.request});
 
-  static const Color _cardColor = Color(0xFF2C2C2C);
-  static const Color _amber = Color(0xFFFFB300);
-  static const Color _green = Color(0xFF4CAF50);
-  static const Color _red = Color(0xFFEF5350);
-
   Color get _statusColor {
     switch (request.status) {
       case OvertimeStatus.approved:
-        return _green;
+        return AppColors.success;
       case OvertimeStatus.rejected:
-        return _red;
+        return AppColors.danger;
       case OvertimeStatus.pending:
-        return _amber;
+        return AppColors.warning;
     }
   }
 
@@ -211,8 +197,8 @@ class _OvertimeRequestCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _cardColor,
-        borderRadius: BorderRadius.circular(14),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: _statusColor.withOpacity(0.35)),
       ),
       child: Column(
@@ -236,7 +222,7 @@ class _OvertimeRequestCard extends StatelessWidget {
               if (submittedAgo.isNotEmpty)
                 Text(
                   submittedAgo,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
                 ),
             ],
           ),
@@ -253,14 +239,14 @@ class _OvertimeRequestCard extends StatelessWidget {
           Text(
             '${OvertimeFormat.timeRange(request)}  ·  '
             '${OvertimeFormat.duration(request.duration)}',
-            style: TextStyle(color: Colors.grey[300], fontSize: 14),
+            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           ),
           if (_footer.isNotEmpty) ...[
             const SizedBox(height: 14),
             Text(
               _footer,
-              style: TextStyle(
-                color: Colors.grey[400],
+              style: const TextStyle(
+                color: AppColors.textSecondary,
                 fontSize: 13,
                 height: 1.4,
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import '../../history_screen.dart';
 import '../../profile_screen.dart';
 import '../../../../providers/profile_provider.dart';
@@ -92,7 +93,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                 width: 40,
                 height: 40,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF2C2C2C),
+                  color: AppColors.surface,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
@@ -120,7 +121,7 @@ class _HomeHeaderState extends State<HomeHeader> {
       width: 40, // Asegurar tamaño consistente
       height: 40,
       decoration: const BoxDecoration(
-        color: Color(0xFF2C2C2C),
+        color: AppColors.surface,
         shape: BoxShape.circle,
       ),
       child: IconButton(

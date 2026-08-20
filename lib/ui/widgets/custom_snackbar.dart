@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 class CustomSnackBar {
   static void show(BuildContext context, String message, {bool isError = false}) {
@@ -6,11 +8,7 @@ class CustomSnackBar {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF252525),
-        behavior: SnackBarBehavior.floating,
-        elevation: 6,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        margin: const EdgeInsets.all(AppSpacing.lg),
         content: Row(
           children: [
             Container(
@@ -18,26 +16,17 @@ class CustomSnackBar {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isError
-                    ? const Color(0xFFFF5252).withOpacity(0.2)
-                    : const Color(0xFF4CAF50).withOpacity(0.2),
+                    ? AppColors.danger.withOpacity(0.2)
+                    : AppColors.success.withOpacity(0.2),
               ),
               child: Icon(
                 isError ? Icons.close : Icons.check,
-                color: isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
+                color: isError ? AppColors.danger : AppColors.success,
                 size: 20,
               ),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(child: Text(message)),
           ],
         ),
       ),

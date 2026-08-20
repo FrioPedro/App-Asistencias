@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
@@ -44,7 +46,7 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
             if (result != null) navigator.pop([result]);
           },
           child: Container(
-            color: Colors.grey[900],
+            color: AppColors.surfaceAlt,
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -101,7 +103,7 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
                   clipBehavior: Clip.none,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                       child: AssetEntityImage(
                         asset,
                         width: 100,
@@ -118,7 +120,7 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEF5350),
+                            color: AppColors.danger,
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 2),
                             boxShadow: [
@@ -144,21 +146,21 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
               width: double.infinity,
               height: 50,
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2C),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[700]!),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.border),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add_a_photo, color: Colors.grey[400]),
+                  const Icon(Icons.add_a_photo, color: AppColors.textSecondary),
                   const SizedBox(width: 8),
                   Text(
                     _selectedAssets.isEmpty
                         ? "Subir Fotos (Máx ${widget.maxPhotos})"
                         : "Agregar más (${_selectedAssets.length}/${widget.maxPhotos})",
-                    style: TextStyle(
-                        color: Colors.grey[400], fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:animated_custom_dropdown/custom_dropdown.dart';
 
 import '../../models/user/user_model.dart';
@@ -47,12 +50,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: const Color(0xFF252525), // Fondo Dark
+        backgroundColor: AppColors.surface, // Fondo Dark
         behavior: SnackBarBehavior.floating,
         elevation: 6,
         margin: const EdgeInsets.all(16),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5)), // Borde 5px
+            borderRadius: BorderRadius.circular(AppRadius.xs)), // Borde 5px
         content: Row(
           children: [
             // Esfera del ícono
@@ -61,13 +64,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isError
-                    ? const Color(0xFFFF5252).withOpacity(0.2)
-                    : const Color(0xFF4CAF50).withOpacity(0.2),
+                    ? AppColors.danger.withOpacity(0.2)
+                    : AppColors.success.withOpacity(0.2),
               ),
               child: Icon(
                 isError ? Icons.close : Icons.check,
                 color:
-                    isError ? const Color(0xFFFF5252) : const Color(0xFF4CAF50),
+                    isError ? AppColors.danger : AppColors.success,
                 size: 20,
               ),
             ),
@@ -171,10 +174,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -195,12 +196,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final document = _user?.nationalId ?? '-';
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(AppSpacing.gutter),
       child: Column(
         children: [
           const CircleAvatar(
             radius: 50,
-            backgroundColor: Colors.grey,
+            backgroundColor: AppColors.surfaceRaised,
             child: Icon(Icons.person, size: 50, color: Colors.white),
           ),
           const SizedBox(height: 40),
@@ -218,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: AppSpacing.ctaHeight,
             child: ElevatedButton(
               onPressed: () async {
                 LogProvider.log(
@@ -229,9 +230,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 await _profileService.logout();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFF6B6B),
+                backgroundColor: AppColors.danger,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
               ),
               child: const Text(
@@ -247,11 +248,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           GestureDetector(
             onTap: _handleSecretTap,
             behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
+            child: const Padding(
+              padding: EdgeInsets.all(12.0),
               child: Text(
                 "Versión 1.0.3",
-                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
               ),
             ),
           ),
@@ -266,15 +267,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Text(
           label,
-          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
         const SizedBox(height: 8),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFF2C2C2C),
-            borderRadius: BorderRadius.circular(12),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Text(
             value,
@@ -286,13 +287,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildZoneSelector() {
-    const cardColor = Color(0xFF2C2C2C);
+    const cardColor = AppColors.surface;
 
     final darkDropdownDecoration = CustomDropdownDecoration(
       closedFillColor: cardColor,
       expandedFillColor: cardColor,
-      closedBorderRadius: BorderRadius.circular(12),
-      hintStyle: TextStyle(color: Colors.grey[600]),
+      closedBorderRadius: BorderRadius.circular(AppRadius.md),
+      hintStyle: const TextStyle(color: AppColors.textSecondary),
       headerStyle: const TextStyle(color: Colors.white, fontSize: 16),
       listItemStyle: const TextStyle(color: Colors.white),
       listItemDecoration: const ListItemDecoration(
@@ -305,9 +306,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Zona',
-          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
         const SizedBox(height: 8),
         CustomDropdown<String>(

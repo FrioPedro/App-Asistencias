@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import '../../models/activity/photo_item.dart';
@@ -32,12 +35,6 @@ class PhotoCaptionScreen extends StatefulWidget {
 }
 
 class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
-  static const Color _bgColor = Color(0xFF121212);
-  static const Color _cardColor = Color(0xFF2C2C2C);
-  static const Color _primaryBlue = Color(0xFF2E60C4);
-  static const Color _exitRed = Color(0xFFEF5350);
-  static const Color _pendingAmber = Color(0xFFFFB300);
-  static const Color _okGreen = Color(0xFF4CAF50);
 
   static const int _thumbsPerRow = 8;
 
@@ -80,9 +77,9 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: _cardColor,
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         title: const Text(
           '¿Borrar esta foto?',
@@ -90,23 +87,18 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
         ),
         content: const Text(
           'Se borrará la foto y su descripción. No se puede recuperar.',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: Colors.grey),
+            style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: _exitRed,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+                backgroundColor: AppColors.danger),
             child: const Text('Sí, borrar'),
           ),
         ],
@@ -134,56 +126,43 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
         keyboardOpen ? 120.0 : MediaQuery.of(context).size.height * 0.32;
 
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: AppColors.bg,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        automaticallyImplyLeading: false,
-        titleSpacing: 16,
-        title: Row(
-          children: [
-            Expanded(
-              child: TextButton.icon(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                label: const Text(
-                  'Guardar y volver',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: TextButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  padding: EdgeInsets.zero,
-                ),
-              ),
-            ),
-            Text(
-              '$_describedCount de ${widget.photos.length} ✓',
-              style: TextStyle(
-                color: _describedCount == widget.photos.length
-                    ? _okGreen
-                    : _pendingAmber,
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Guardar y volver',
+          onPressed: () => Navigator.pop(context),
         ),
+        title: const Text('Guardar y volver'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.lg),
+            child: Center(
+              child: Text(
+                '$_describedCount de ${widget.photos.length} ✓',
+                style: TextStyle(
+                  color: _describedCount == widget.photos.length
+                      ? AppColors.success
+                      : AppColors.warning,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Foto ${_index + 1} de ${widget.photos.length}  ·  ${widget.sectionLabel}',
-                style: TextStyle(
-                  color: Colors.grey[400],
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -191,7 +170,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
               const SizedBox(height: 12),
               Center(
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                   child: AssetEntityImage(
                     _current.asset,
                     key: ValueKey(_current.asset.id),
@@ -233,14 +212,14 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                             const TextStyle(color: Colors.white, fontSize: 16),
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: _cardColor,
+                          fillColor: AppColors.surface,
                           hintText:
                               'Ej: Serpentín con hielo antes de la limpieza.',
                           hintStyle:
-                              TextStyle(color: Colors.grey[600], fontSize: 15),
+                              const TextStyle(color: AppColors.textSecondary, fontSize: 15),
                           contentPadding: const EdgeInsets.all(16),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(AppRadius.md),
                             borderSide: BorderSide.none,
                           ),
                         ),
@@ -276,14 +255,14 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
             children: [
               Icon(
                 ok ? Icons.check_circle : Icons.edit_outlined,
-                color: ok ? _okGreen : _pendingAmber,
+                color: ok ? AppColors.success : AppColors.warning,
                 size: 15,
               ),
               const SizedBox(width: 6),
               Text(
                 ok ? 'Guardado' : 'Escribe un poco más',
                 style: TextStyle(
-                  color: ok ? _okGreen : _pendingAmber,
+                  color: ok ? AppColors.success : AppColors.warning,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -291,14 +270,14 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
             ],
           )
         else
-          Text(
+          const Text(
             'Escribe al menos ${PhotoItem.minCaptionChars} letras',
-            style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
         Text(
           '$length/${PhotoItem.minCaptionChars}',
           style: TextStyle(
-            color: ok ? _okGreen : Colors.grey[500],
+            color: ok ? AppColors.success : AppColors.textSecondary,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
@@ -352,16 +331,16 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
               height: 44,
               width: double.infinity,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
                 border: Border.all(
                   color: isCurrent
                       ? Colors.white
-                      : (item.isDescribed ? _okGreen : _pendingAmber),
+                      : (item.isDescribed ? AppColors.success : AppColors.warning),
                   width: isCurrent ? 2.5 : 1.5,
                 ),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(7),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
                 child: SizedBox.expand(
                   child: AssetEntityImage(
                     item.asset,
@@ -377,13 +356,13 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
               child: Container(
                 padding: const EdgeInsets.all(1.5),
                 decoration: BoxDecoration(
-                  color: item.isDescribed ? _okGreen : _pendingAmber,
+                  color: item.isDescribed ? AppColors.success : AppColors.warning,
                   shape: BoxShape.circle,
-                  border: Border.all(color: _bgColor, width: 1.5),
+                  border: Border.all(color: AppColors.bg, width: 1.5),
                 ),
                 child: Icon(
                   item.isDescribed ? Icons.check : Icons.priority_high,
-                  color: Colors.white,
+                  color: AppColors.onAccent,
                   size: 8,
                 ),
               ),
@@ -398,7 +377,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
     return Row(
       children: [
         SizedBox(
-          height: 56,
+          height: AppSpacing.ctaHeight,
           child: OutlinedButton.icon(
             onPressed: _confirmRemove,
             icon: const Icon(Icons.delete_outline, size: 18),
@@ -407,10 +386,10 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: _exitRed,
-              side: const BorderSide(color: _exitRed),
+              foregroundColor: AppColors.danger,
+              side: const BorderSide(color: AppColors.danger),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
             ),
           ),
@@ -418,14 +397,14 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: SizedBox(
-            height: 56,
+            height: AppSpacing.ctaHeight,
             child: ElevatedButton(
               onPressed: _onNext,
               style: ElevatedButton.styleFrom(
-                backgroundColor: _primaryBlue,
+                backgroundColor: AppColors.primary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
               ),
               child: Row(

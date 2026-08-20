@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 class CustomSearchBar extends StatefulWidget {
   final TextEditingController controller;
@@ -41,20 +43,15 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       style: const TextStyle(color: Colors.white),
       onChanged: widget.onChanged,
       decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.04),
         hintText: widget.hintText,
-        hintStyle: TextStyle(color: Colors.grey[600]),
-        prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+        prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.md,
+          horizontal: AppSpacing.lg,
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         suffixIcon: widget.controller.text.isNotEmpty
             ? IconButton(
-                icon: const Icon(Icons.clear, color: Colors.grey),
+                icon: const Icon(Icons.clear, color: AppColors.textSecondary),
                 onPressed: () {
                   widget.controller.clear();
                   widget.onChanged('');

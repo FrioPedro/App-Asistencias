@@ -1,4 +1,7 @@
 import 'package:app_asistencias/models/taskType_model.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
@@ -175,21 +178,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final isDateFilterActive = _selectedDate != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         title: GestureDetector(
           onLongPress: _showDebugInfo,
-          child: const Text(
-            'Histórico',
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          child: const Text('Histórico'),
         ),
       ),
       body: SafeArea(
@@ -199,7 +196,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             // --- BUSCADOR Y BOTÓN CALENDARIO ---
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
               child: Row(
                 children: [
                   Expanded(
@@ -215,9 +212,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: isDateFilterActive
-                          ? const Color(0xFF4CAF50)
-                          : const Color(0xFF2C2C2C),
-                      borderRadius: BorderRadius.circular(12),
+                          ? AppColors.success
+                          : AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
                     child: IconButton(
                       icon:
@@ -232,7 +229,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             // --- CHIP FILTRO ---
             if (isDateFilterActive)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: Align(
@@ -241,10 +238,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
+                        color: AppColors.success.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(AppRadius.sheet),
                         border: Border.all(
-                            color: const Color(0xFF4CAF50).withOpacity(0.5)),
+                            color: AppColors.success.withOpacity(0.5)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -252,7 +249,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           Text(
                             'Filtrando: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                             style: const TextStyle(
-                                color: Color(0xFF4CAF50),
+                                color: AppColors.success,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -260,7 +257,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           GestureDetector(
                             onTap: _clearDateFilter,
                             child: const Icon(Icons.close,
-                                color: Color(0xFF4CAF50), size: 18),
+                                color: AppColors.success, size: 18),
                           )
                         ],
                       ),
@@ -275,8 +272,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ? _buildSkeletons()
                   : RefreshIndicator(
                       onRefresh: _loadData,
-                      color: const Color(0xFF2E60C4),
-                      backgroundColor: const Color(0xFF2C2C2C),
+                      color: AppColors.primary,
+                      backgroundColor: AppColors.surface,
                       child: filteredSessions.isEmpty
                           ? ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
@@ -289,15 +286,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Icon(Icons.event_busy,
-                                            size: 60, color: Colors.grey[800]),
+                                        const Icon(Icons.event_busy,
+                                            size: 60, color: AppColors.iconMuted),
                                         const SizedBox(height: 16),
                                         Text(
                                             isDateFilterActive
                                                 ? 'No hay actividades para esta fecha'
                                                 : 'No se encontraron actividades',
-                                            style: TextStyle(
-                                                color: Colors.grey[600])),
+                                            style: const TextStyle(
+                                                color: AppColors.textSecondary)),
                                       ],
                                     ),
                                   ),
@@ -307,7 +304,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           : ListView.builder(
                               physics: const AlwaysScrollableScrollPhysics(),
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 24),
+                                  const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
                               itemCount: filteredSessions.length,
                               itemBuilder: (context, index) {
                                 final session = filteredSessions[index];

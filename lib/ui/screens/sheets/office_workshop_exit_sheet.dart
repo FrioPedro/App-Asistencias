@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'dart:async';
 import '../../../models/assigment_model.dart';
 // import '../../../models/activity/activity_model.dart';
@@ -54,10 +57,10 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
             decoration: BoxDecoration(
-              color: const Color(0xFF252525),
-              borderRadius: BorderRadius.circular(5),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.xs),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.3),
@@ -73,14 +76,14 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isError
-                        ? const Color(0xFFFF5252).withOpacity(0.2)
-                        : const Color(0xFF4CAF50).withOpacity(0.2),
+                        ? AppColors.danger.withOpacity(0.2)
+                        : AppColors.success.withOpacity(0.2),
                   ),
                   child: Icon(
                     isError ? Icons.close : Icons.check,
                     color: isError
-                        ? const Color(0xFFFF5252)
-                        : const Color(0xFF4CAF50),
+                        ? AppColors.danger
+                        : AppColors.success,
                     size: 20,
                   ),
                 ),
@@ -196,7 +199,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
                 right: -12,
                 top: -8,
                 child: IconButton(
-                  icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+                  icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -206,8 +209,8 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
           Container(
             height: 150,
             decoration: BoxDecoration(
-              color: const Color(0xFF2C2C2C),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
@@ -216,24 +219,24 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
               maxLines: null,
               expands: true,
               textAlignVertical: TextAlignVertical.top,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: 'Describe qué actividades realizaste...',
-                hintStyle: TextStyle(color: Colors.grey[500]),
+                hintStyle: TextStyle(color: AppColors.textSecondary),
               ),
             ),
           ),
           const SizedBox(height: 24),
           SizedBox(
-            height: 50,
+            height: AppSpacing.ctaHeight,
             child: ElevatedButton(
               onPressed: _isLoading ? null : _handleSubmit,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFEF5350),
+                backgroundColor: AppColors.danger,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                disabledBackgroundColor: Colors.grey,
+                disabledBackgroundColor: AppColors.disabled,
               ),
               child: _isLoading
                   ? const SizedBox(

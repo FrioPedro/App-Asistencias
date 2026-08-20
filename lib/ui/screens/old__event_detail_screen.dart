@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
 import '../../models/assigment_model.dart';          // Tu nuevo modelo
@@ -55,7 +58,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget build(BuildContext context) {
     // Determinamos si es emergencia usando el nuevo Enum
     final isEmergency = widget.event.assigmentType == AssigmentType.emergency;
-    final primaryColor = Theme.of(context).primaryColor;
 
     // Preparamos los textos (Null Safety)
     final title = widget.event.description ?? 'Sin descripción';
@@ -64,12 +66,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final typeLabel = widget.event.assigmentType.label.toUpperCase(); // Usamos tu getter .label
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -82,7 +82,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -91,9 +91,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: isEmergency 
-                    ? const Color(0xFFFF6B6B) 
+                    ? AppColors.danger 
                     : Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppRadius.sheet),
               ),
               child: Text(
                 isEmergency ? 'EMERGENCIA' : typeLabel, // Mostramos la etiqueta real
@@ -118,9 +118,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             const SizedBox(height: 8),
             Text(
               client,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18, 
-                color: Colors.grey[400]
+                color: AppColors.textSecondary
               ),
             ),
             const SizedBox(height: 32),
@@ -130,18 +130,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               height: 200,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2C),
-                borderRadius: BorderRadius.circular(24),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.sheet),
               ),
-              child: Center(
+              child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.location_on, size: 40, color: Colors.grey[600]),
-                    const SizedBox(height: 8),
+                    Icon(Icons.location_on, size: 40, color: AppColors.textSecondary),
+                    SizedBox(height: 8),
                     Text(
                       'Cargando ubicación...', 
-                      style: TextStyle(color: Colors.grey[500]),
+                      style: TextStyle(color: AppColors.textSecondary),
                     )
                   ],
                 ),
@@ -172,19 +172,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             // 5. Botón de Acción
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: AppSpacing.ctaHeight,
               child: ElevatedButton(
                 onPressed: () {
                    ScaffoldMessenger.of(context).showSnackBar(
                      const SnackBar(content: Text("Función de registro iniciada"))
                    );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
                 child: const Text(
                   'REGISTRAR ACTIVIDAD',
                   style: TextStyle(
@@ -210,7 +204,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Icon(icon, color: Colors.white, size: 24),
         ),
@@ -220,7 +214,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
             ),
             Text(
               value,
@@ -240,7 +234,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildLoadingRow() {
     return Row(
       children: [
-        Container(width: 48, height: 48, decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(12))),
+        Container(width: 48, height: 48, decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(AppRadius.md))),
         const SizedBox(width: 16),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

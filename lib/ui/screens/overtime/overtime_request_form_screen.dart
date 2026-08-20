@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 import 'package:app_asistencias/models/log_model.dart';
 import 'package:app_asistencias/models/overtime_request_model.dart';
@@ -44,10 +47,6 @@ class OvertimeRequestFormScreen extends StatefulWidget {
 
 class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
     with WidgetsBindingObserver {
-  static const Color _bgColor = Color(0xFF18191D);
-  static const Color _cardColor = Color(0xFF2C2C2C);
-  static const Color _primaryBlue = Color(0xFF2E60C4);
-  static const Color _errorRed = Color(0xFFEF5350);
   static const double _controlHeight = 56;
 
   /// Tope de duración: más de 72 h seguidas es un error de dedo en la fecha,
@@ -250,23 +249,13 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Solicitar horas extra',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+        title: const Text('Solicitar horas extra'),
       ),
       body: SafeArea(
         child: GestureDetector(
@@ -275,7 +264,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           child: SingleChildScrollView(
             controller: _scrollController,
             padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
             child: Form(
               key: _formKey,
               child: Column(
@@ -336,14 +325,14 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
   Widget _buildContextChip(String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
       decoration: BoxDecoration(
-        color: _primaryBlue.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.primary.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
         children: [
-          const Icon(Icons.work_outline, color: _primaryBlue, size: 20),
+          const Icon(Icons.work_outline, color: AppColors.primary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -396,14 +385,14 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
       onTap: _isSubmitting ? null : onTap,
       child: Container(
         height: _controlHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         decoration: BoxDecoration(
-          color: _cardColor,
-          borderRadius: BorderRadius.circular(14),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Row(
           children: [
-            Icon(icon, color: Colors.grey[400], size: 20),
+            Icon(icon, color: AppColors.textSecondary, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -429,10 +418,10 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
         decoration: BoxDecoration(
-          color: _errorRed.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(14),
+          color: AppColors.danger.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Text(
           tooLong
@@ -440,7 +429,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
               : 'El fin tiene que ser después del inicio',
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: _errorRed,
+            color: AppColors.danger,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
@@ -450,11 +439,11 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: _primaryBlue.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _primaryBlue.withOpacity(0.4)),
+        color: AppColors.primary.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
       ),
       child: Column(
         children: [
@@ -472,7 +461,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
             Text(
               'Termina el ${OvertimeFormat.shortDate(_end)}',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey[400], fontSize: 13),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
           ],
         ],
@@ -491,14 +480,6 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           height: _controlHeight,
           child: ElevatedButton(
             onPressed: enabled ? _submit : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _primaryBlue,
-              disabledBackgroundColor: Colors.grey[800],
-              disabledForegroundColor: Colors.grey[500],
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
             child: _isSubmitting
                 ? const SizedBox(
                     width: 22,

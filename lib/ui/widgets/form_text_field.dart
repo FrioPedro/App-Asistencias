@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 /// Campo de texto reutilizable para los formularios de salida
 /// (servicio, taller, etc.).
@@ -36,10 +38,6 @@ class FormTextField extends StatelessWidget {
     this.enabled = true,
   });
 
-  static const Color _cardColor = Color(0xFF2C2C2C);
-  static const Color _errorRed = Color(0xFFEF5350);
-  static const Color _okGreen = Color(0xFF4CAF50);
-  static const Color _pendingAmber = Color(0xFFFFB300);
 
   /// Los campos con mínimo de caracteres muestran el contador en vivo, que ya
   /// dice cuánto falta. En ellos el mensaje del validador se oculta para no
@@ -77,33 +75,17 @@ class FormTextField extends StatelessWidget {
             letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            color: _cardColor,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: TextFormField(
-            controller: controller,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            style: const TextStyle(color: Colors.white, fontSize: 15),
-            maxLines: maxLines,
-            maxLength: maxChars,
-            enabled: enabled,
-            validator: _validate,
-            decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14),
-              border: InputBorder.none,
-              errorStyle: const TextStyle(
-                color: _errorRed,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                height: 2.2,
-              ),
-              counterText: '',
-              contentPadding: const EdgeInsets.all(16),
-            ),
+        const SizedBox(height: AppSpacing.sm),
+        TextFormField(
+          controller: controller,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          maxLines: maxLines,
+          maxLength: maxChars,
+          enabled: enabled,
+          validator: _validate,
+          decoration: InputDecoration(
+            hintText: hint,
+            counterText: '',
           ),
         ),
         if (_hasCounter) _buildCounter(),
@@ -127,7 +109,7 @@ class FormTextField extends StatelessWidget {
           // está vacío, ámbar si empezó y no llega, verde al cumplir. El caso
           // "vacío y obligatorio" es del validador, no de aquí.
           final color =
-              ok ? _okGreen : (empty ? Colors.grey[500] : _pendingAmber);
+              ok ? AppColors.success : (empty ? AppColors.textSecondary : AppColors.warning);
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

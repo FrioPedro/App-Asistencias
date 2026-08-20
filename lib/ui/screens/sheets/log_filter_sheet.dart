@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import '../../../models/log_model.dart';
 import '../../widgets/calendar_modal.dart';
@@ -78,10 +81,10 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.xl),
       decoration: const BoxDecoration(
-        color: Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.bg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -99,7 +102,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey),
+                icon: const Icon(Icons.close, color: AppColors.textSecondary),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -109,7 +112,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
           // TIPO DE LOG
           const Text(
             'Tipo de Log',
-            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Row(
@@ -119,15 +122,15 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
               String label;
               switch (type) {
                 case LogType.error:
-                  typeColor = const Color(0xFFEF5350);
+                  typeColor = AppColors.danger;
                   label = 'ERR';
                   break;
                 case LogType.warning:
-                  typeColor = const Color(0xFFFFCA28);
+                  typeColor = AppColors.warning;
                   label = 'ADV';
                   break;
                 case LogType.info:
-                  typeColor = const Color(0xFF42A5F5);
+                  typeColor = AppColors.info;
                   label = 'INF';
                   break;
               }
@@ -143,16 +146,16 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
                       color: isSelected
                           ? typeColor.withOpacity(0.2)
                           : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(AppRadius.sheet),
                       border: Border.all(
-                        color: isSelected ? typeColor : Colors.grey[800]!,
+                        color: isSelected ? typeColor : AppColors.border,
                         width: 1.5,
                       ),
                     ),
                     child: Text(
                       label,
                       style: TextStyle(
-                        color: isSelected ? typeColor : Colors.grey,
+                        color: isSelected ? typeColor : AppColors.textSecondary,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -167,7 +170,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
           // FECHAS
           const Text(
             'Rango de Fecha',
-            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Row(
@@ -199,7 +202,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
                     });
                   },
                   child: const Text('Limpiar Todo',
-                      style: TextStyle(color: Colors.grey)),
+                      style: TextStyle(color: AppColors.textSecondary)),
                 ),
               ),
               const SizedBox(width: 12),
@@ -217,10 +220,10 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E60C4),
+                    backgroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                        borderRadius: BorderRadius.circular(AppRadius.md)),
                   ),
                   child: const Text('APLICAR',
                       style: TextStyle(
@@ -240,22 +243,22 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2C),
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
               color:
-                  date != null ? const Color(0xFF2E60C4) : Colors.transparent),
+                  date != null ? AppColors.primary : Colors.transparent),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: const TextStyle(color: Colors.grey, fontSize: 10)),
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
             const SizedBox(height: 4),
             Row(
               children: [
                 const Icon(Icons.calendar_today,
-                    size: 14, color: Colors.white70),
+                    size: 14, color: AppColors.textSecondary),
                 const SizedBox(width: 8),
                 Text(
                   _formatDate(date),

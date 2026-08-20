@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 import 'package:app_asistencias/providers/overtime_provider.dart';
 import 'package:app_asistencias/ui/screens/overtime/overtime_requests_screen.dart';
@@ -13,10 +15,6 @@ class OvertimeHeaderButton extends StatefulWidget {
 }
 
 class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
-  static const Color _buttonColor = Color(0xFF2C2C2C);
-  static const Color _green = Color(0xFF4CAF50);
-  static const Color _amber = Color(0xFFFFB300);
-  static const Color _bgColor = Color(0xFF18191D);
 
   final OvertimeProvider _overtime = OvertimeProvider();
 
@@ -29,10 +27,10 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
 
   int get _badgeCount => _hasNews ? _approvedCount : _pendingCount;
 
-  Color get _badgeColor => _hasNews ? _green : _amber;
+  Color get _badgeColor => _hasNews ? AppColors.success : AppColors.warning;
 
-  /// El ambar necesita texto oscuro para leerse.
-  Color get _badgeTextColor => _hasNews ? Colors.white : _bgColor;
+  /// Ambar y verde son demasiado claros para texto blanco (1.79:1 y 2.84:1).
+  Color get _badgeTextColor => AppColors.onAccent;
 
   @override
   void initState() {
@@ -74,7 +72,7 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
             width: 40,
             height: 40,
             decoration: const BoxDecoration(
-              color: _buttonColor,
+              color: AppColors.surface,
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -94,8 +92,8 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
                 constraints: const BoxConstraints(minWidth: 18),
                 decoration: BoxDecoration(
                   color: _badgeColor,
-                  borderRadius: BorderRadius.circular(9),
-                  border: Border.all(color: _bgColor, width: 2),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: Border.all(color: AppColors.bg, width: 2),
                 ),
                 child: Text(
                   _badgeCount > 9 ? '9+' : '$_badgeCount',

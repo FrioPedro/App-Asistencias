@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/create_assignment_provider.dart';
 import '../../models/client_model.dart';
@@ -204,7 +206,7 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
     final darkDropdownDecoration = CustomDropdownDecoration(
       closedFillColor: colorScheme.surface,
       expandedFillColor: colorScheme.surface,
-      closedBorderRadius: BorderRadius.circular(12),
+      closedBorderRadius: BorderRadius.circular(AppRadius.md),
       hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
       headerStyle: TextStyle(color: colorScheme.onSurface),
       listItemStyle: TextStyle(color: colorScheme.onSurface),
@@ -222,11 +224,10 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
 
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: const Text('Crear Asignación'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -282,7 +283,7 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                   fillColor: colorScheme.surface,
                   hintText: 'Ingrese una descripción...',
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -335,7 +336,7 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                   filled: true,
                   fillColor: colorScheme.surface,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -370,14 +371,6 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                         label: const Text('Generar Asignación',
                             style:
                                 TextStyle(fontSize: 16, color: Colors.white)),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 14),
-                          backgroundColor: Colors.blueAccent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
                       ),
               ),
             ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -123,7 +124,7 @@ class PermissionGuard {
           context: context,
           barrierDismissible: false, // No se puede cerrar tocando afuera
           builder: (ctx) => AlertDialog(
-            backgroundColor: const Color(0xFF2C2C2C),
+            backgroundColor: AppColors.surface,
             title: const Text('Permisos Requeridos',
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold)),
@@ -137,7 +138,7 @@ class PermissionGuard {
               // No hay botón cancelar
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2E60C4),
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () async {
@@ -182,7 +183,7 @@ class PermissionGuard {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF2C2C2C),
+        backgroundColor: AppColors.surface,
         title: Text(title, style: const TextStyle(color: Colors.white)),
         content: Text(message, style: const TextStyle(color: Colors.white70)),
         actions: [
@@ -192,7 +193,7 @@ class PermissionGuard {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E60C4),
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
             onPressed: () {

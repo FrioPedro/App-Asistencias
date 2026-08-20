@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:isar/isar.dart';
 import '../models/log_model.dart';
 import '../core/database.dart';
@@ -64,11 +65,11 @@ class LogProvider {
   Color getColorByType(LogType type) {
     switch (type) {
       case LogType.error:
-        return const Color(0xFFEF5350); // Rojo suave
+        return AppColors.danger; // Rojo suave
       case LogType.warning:
-        return const Color(0xFFFFCA28); // Ámbar
+        return AppColors.warning; // Ámbar
       case LogType.info:
-        return const Color(0xFF42A5F5); // Azul claro
+        return AppColors.info; // Azul claro
     }
   }
 }

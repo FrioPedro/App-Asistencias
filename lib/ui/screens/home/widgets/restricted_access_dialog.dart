@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 class RestrictedAccessDialog extends StatelessWidget {
   const RestrictedAccessDialog({super.key});
@@ -18,11 +20,11 @@ class RestrictedAccessDialog extends StatelessWidget {
       type: MaterialType.transparency,
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.access_time_filled, size: 64, color: Colors.grey[400]),
+              const Icon(Icons.access_time_filled, size: 64, color: AppColors.textSecondary),
               const SizedBox(height: 20),
               const Text('Horario Restringido',
                   style: TextStyle(
@@ -31,20 +33,17 @@ class RestrictedAccessDialog extends StatelessWidget {
                       fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center),
               const SizedBox(height: 12),
-              Text(
+              const Text(
                   'No se pueden crear actividades en este horario.\n\nHorario permitido:\nLun - Vie: 8:00 PM - 6:00 AM\nSáb - Dom: Todo el día',
                   style: TextStyle(
-                      color: Colors.grey[400], fontSize: 16, height: 1.5),
+                      color: AppColors.textSecondary, fontSize: 16, height: 1.5),
                   textAlign: TextAlign.center),
               const SizedBox(height: 30),
               SizedBox(
                 width: 200,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2C2C2C),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12))),
+                      backgroundColor: AppColors.surface),
                   onPressed: () => Navigator.pop(context),
                   child: const Text('Entendido',
                       style: TextStyle(color: Colors.white)),

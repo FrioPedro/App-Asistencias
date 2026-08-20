@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import '../../../core/permission_guard.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -48,12 +51,6 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   static const int _maxPhotos = 20;
 
   // Colores de la app
-  static const Color _bgColor = Color(0xFF121212);
-  static const Color _cardColor = Color(0xFF2C2C2C);
-  static const Color _primaryBlue = Color(0xFF2E60C4);
-  static const Color _exitRed = Color(0xFFEF5350);
-  static const Color _pendingAmber = Color(0xFFFFB300);
-  static const Color _okGreen = Color(0xFF4CAF50);
 
   @override
   void dispose() {
@@ -72,10 +69,10 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
       requestType: RequestType.image,
       textDelegate: const SpanishAssetPickerTextDelegate(),
       pickerTheme: ThemeData.dark().copyWith(
-        primaryColor: _primaryBlue,
+        primaryColor: AppColors.primary,
         colorScheme: const ColorScheme.dark(
-          primary: _primaryBlue,
-          surface: _cardColor,
+          primary: AppColors.primary,
+          surface: AppColors.surface,
         ),
       ),
     );
@@ -88,15 +85,15 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
       shouldDeletePreviewFile: true,
       textDelegate: const SpanishCameraPickerTextDelegate(),
       theme: ThemeData.dark().copyWith(
-        primaryColor: _primaryBlue,
+        primaryColor: AppColors.primary,
         colorScheme: const ColorScheme.dark(
-          primary: _primaryBlue,
-          secondary: _primaryBlue,
-          surface: _cardColor,
-          background: _bgColor,
+          primary: AppColors.primary,
+          secondary: AppColors.primary,
+          surface: AppColors.surface,
+          background: AppColors.bg,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: _bgColor,
+          backgroundColor: AppColors.bg,
           elevation: 0,
         ),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -116,9 +113,9 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
       final shouldOpenSettings = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: _cardColor,
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           title: const Text(
             'Permisos requeridos',
@@ -127,23 +124,23 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
           content: const Text(
             'Se necesitan permisos para acceder a las fotos. '
             '¿Desea abrir la configuración para otorgar los permisos?',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: AppColors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.grey,
+                foregroundColor: AppColors.textSecondary,
               ),
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _primaryBlue,
+                backgroundColor: AppColors.primary,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
               child: const Text('Abrir Configuración'),
@@ -252,9 +249,9 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
     // Obtenemos la acción del bottom sheet
     final String? action = await showModalBottomSheet<String>(
       context: context,
-      backgroundColor: _cardColor,
+      backgroundColor: AppColors.bg,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       builder: (context) => SafeArea(
         child: Padding(
@@ -267,8 +264,8 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
-                  color: Colors.grey[600],
-                  borderRadius: BorderRadius.circular(2),
+                  color: AppColors.textSecondary,
+                  borderRadius: BorderRadius.circular(AppRadius.xs),
                 ),
               ),
               const Text(
@@ -282,7 +279,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
               const SizedBox(height: 8),
               Text(
                 'Puedes agregar hasta $remaining fotos más',
-                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
               ),
               const SizedBox(height: 24),
               Row(
@@ -353,18 +350,18 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
         width: 120,
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: _bgColor,
-          borderRadius: BorderRadius.circular(16),
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _primaryBlue.withOpacity(0.15),
+                color: AppColors.primary.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: _primaryBlue, size: 32),
+              child: Icon(icon, color: AppColors.primary, size: 32),
             ),
             const SizedBox(height: 12),
             Text(
@@ -478,20 +475,13 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back),
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Finalizar taller',
-          style: TextStyle(
-              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
+        title: const Text('Finalizar taller'),
       ),
       body: SafeArea(
         // Tocar fuera de un campo cierra el teclado. Con HitTestBehavior.opaque
@@ -502,7 +492,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
           behavior: HitTestBehavior.opaque,
           child: SingleChildScrollView(
             padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
             // Arrastrar la pantalla también cierra el teclado.
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Form(
@@ -532,20 +522,20 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                       child: Column(
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(AppRadius.sm),
                             child: LinearProgressIndicator(
                               value: _uploadProgress,
-                              backgroundColor: Colors.grey[800],
+                              backgroundColor: AppColors.surfaceRaised,
                               valueColor: const AlwaysStoppedAnimation<Color>(
-                                  Color(0xFF4CAF50)),
+                                  AppColors.success),
                               minHeight: 8,
                             ),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             'Subiendo ${_photos.length} fotos... ${(_uploadProgress * 100).toInt()}%',
-                            style: TextStyle(
-                                color: Colors.grey[400], fontSize: 13),
+                            style: const TextStyle(
+                                color: AppColors.textSecondary, fontSize: 13),
                           ),
                         ],
                       ),
@@ -556,7 +546,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                       child: Row(
                         children: [
                           const Icon(Icons.warning_amber_rounded,
-                              color: _pendingAmber, size: 18),
+                              color: AppColors.warning, size: 18),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -565,7 +555,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                                   : 'Faltan las descripciones de '
                                       '$_pendingCaptions fotos',
                               style: const TextStyle(
-                                color: _pendingAmber,
+                                color: AppColors.warning,
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -576,17 +566,17 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                     ),
                   SizedBox(
                     width: double.infinity,
-                    height: 54,
+                    height: AppSpacing.ctaHeight,
                     child: ElevatedButton(
                       onPressed: (_isSubmitting || _pendingCaptions > 0)
                           ? null
                           : _onSubmit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _exitRed,
-                        disabledBackgroundColor: Colors.grey[700],
+                        backgroundColor: AppColors.danger,
+                        disabledBackgroundColor: AppColors.disabled,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                       ),
                       child: _isSubmitting
@@ -652,14 +642,14 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: photos.isEmpty
-                    ? Colors.grey[800]
-                    : _okGreen.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
+                    ? AppColors.surfaceRaised
+                    : AppColors.success.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Text(
                 '${photos.length}/$_maxPhotos',
                 style: TextStyle(
-                  color: photos.isEmpty ? Colors.grey[500] : _okGreen,
+                  color: photos.isEmpty ? AppColors.textSecondary : AppColors.success,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
@@ -683,10 +673,10 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
             onTap: () => _showPhotoOptions(),
             child: Container(
               width: double.infinity,
-              height: 56,
+              height: AppSpacing.ctaHeight,
               decoration: BoxDecoration(
-                color: _cardColor,
-                borderRadius: BorderRadius.circular(14),
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -694,17 +684,17 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: _primaryBlue.withOpacity(0.15),
+                      color: AppColors.primary.withOpacity(0.15),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.add_a_photo_rounded,
-                        color: _primaryBlue, size: 20),
+                        color: AppColors.primary, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Text(
                     photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
-                    style: TextStyle(
-                        color: Colors.grey[300],
+                    style: const TextStyle(
+                        color: AppColors.textSecondary,
                         fontSize: 15,
                         fontWeight: FontWeight.w600),
                   ),
@@ -716,7 +706,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
-            height: 56,
+            height: AppSpacing.ctaHeight,
             child: OutlinedButton.icon(
               onPressed: () => _openCaptions(),
               icon: Icon(
@@ -731,11 +721,11 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                     const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: pending > 0 ? _pendingAmber : _okGreen,
+                foregroundColor: pending > 0 ? AppColors.warning : AppColors.success,
                 side: BorderSide(
-                    color: pending > 0 ? _pendingAmber : _okGreen, width: 1.5),
+                    color: pending > 0 ? AppColors.warning : AppColors.success, width: 1.5),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
               ),
             ),
@@ -747,7 +737,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
             child: Text(
               '* Este campo es obligatorio',
               style: TextStyle(
-                color: _exitRed,
+                color: AppColors.danger,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),

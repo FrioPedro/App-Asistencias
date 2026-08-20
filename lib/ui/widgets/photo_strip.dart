@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import '../../models/activity/photo_item.dart';
@@ -27,9 +29,6 @@ class PhotoStrip extends StatefulWidget {
 }
 
 class _PhotoStripState extends State<PhotoStrip> {
-  static const Color _bgColor = Color(0xFF121212);
-  static const Color _pendingAmber = Color(0xFFFFB300);
-  static const Color _okGreen = Color(0xFF4CAF50);
 
   static const double _thumbSize = 100;
   static const double _gap = 12;
@@ -113,7 +112,7 @@ class _PhotoStripState extends State<PhotoStrip> {
             gradient: LinearGradient(
               begin: alignLeft ? Alignment.centerLeft : Alignment.centerRight,
               end: alignLeft ? Alignment.centerRight : Alignment.centerLeft,
-              colors: const [_bgColor, Colors.transparent],
+              colors: const [AppColors.bg, Colors.transparent],
             ),
           ),
         ),
@@ -134,14 +133,14 @@ class _PhotoStripState extends State<PhotoStrip> {
         children: [
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(
-                color: described ? _okGreen : _pendingAmber,
+                color: described ? AppColors.success : AppColors.warning,
                 width: 2,
               ),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(AppRadius.md),
               child: AssetEntityImage(
                 item.asset,
                 width: _thumbSize,
@@ -157,12 +156,12 @@ class _PhotoStripState extends State<PhotoStrip> {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: described ? _okGreen : _pendingAmber,
+                color: described ? AppColors.success : AppColors.warning,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 described ? Icons.check : Icons.priority_high,
-                color: Colors.white,
+                color: AppColors.onAccent,
                 size: 13,
               ),
             ),

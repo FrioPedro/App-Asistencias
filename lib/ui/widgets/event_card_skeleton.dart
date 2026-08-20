@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
 
 class EventCardSkeleton extends StatelessWidget {
@@ -10,8 +12,8 @@ class EventCardSkeleton extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       height: 140, // Altura aproximada de tu EventCard real
       decoration: BoxDecoration(
-        color: const Color(0xFF1F1F1F), // Mismo fondo que tu tarjeta
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surfaceAlt, // Mismo fondo que tu tarjeta
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       // El widget Shimmer anima todo lo que está adentro
       child: Shimmer.fromColors(
@@ -35,7 +37,7 @@ class EventCardSkeleton extends StatelessWidget {
                       height: 20,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -45,7 +47,7 @@ class EventCardSkeleton extends StatelessWidget {
                       height: 14,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -55,7 +57,7 @@ class EventCardSkeleton extends StatelessWidget {
                       height: 12,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
                     ),
                   ],
@@ -68,7 +70,7 @@ class EventCardSkeleton extends StatelessWidget {
                 height: 24,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(AppRadius.sheet),
                 ),
               ),
             ],

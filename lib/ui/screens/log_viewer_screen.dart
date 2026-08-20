@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'dart:ui';
 import '../../models/log_model.dart';
 import '../../providers/log_provider.dart';
@@ -139,16 +142,14 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
         toolbarHeight: 20,
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -237,7 +238,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       {bool isActive = false}) {
     return Container(
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF4CAF50) : const Color(0xFF2C2C2C),
+        color: isActive ? AppColors.success : AppColors.surface,
         shape: BoxShape.circle,
       ),
       child: IconButton(
@@ -251,9 +252,9 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF2E60C4).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2E60C4).withOpacity(0.5)),
+        color: AppColors.primary.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(AppRadius.sheet),
+        border: Border.all(color: AppColors.primary.withOpacity(0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -261,7 +262,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
           Text(
             label,
             style: const TextStyle(
-                color: Color(0xFF2E60C4),
+                color: AppColors.primary,
                 fontSize: 12,
                 fontWeight: FontWeight.bold),
           ),
@@ -275,7 +276,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
               }
               _applyFilter();
             },
-            child: const Icon(Icons.close, color: Color(0xFF2E60C4), size: 18),
+            child: const Icon(Icons.close, color: AppColors.primary, size: 18),
           )
         ],
       ),
@@ -285,22 +286,22 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   Widget _buildLoadingState() {
     return const Center(
       child: CircularProgressIndicator(
-        color: Color(0xFF4CAF50),
+        color: AppColors.success,
         strokeWidth: 3,
       ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.description_outlined, size: 60, color: Colors.grey[800]),
-          const SizedBox(height: 16),
+          Icon(Icons.description_outlined, size: 60, color: AppColors.iconMuted),
+          SizedBox(height: 16),
           Text(
             'No se encontraron logs',
-            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
           ),
         ],
       ),
@@ -326,8 +327,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: const Color(0xFF1F1F1F),
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.15),
@@ -403,7 +404,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: color.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(AppRadius.sheet),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -426,8 +427,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     // Timestamp
                     Text(
                       _formatTimestamp(log.timestamp),
-                      style: TextStyle(
-                        color: Colors.grey[500],
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
                         fontSize: 11,
                       ),
                     ),

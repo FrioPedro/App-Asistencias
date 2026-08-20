@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -44,7 +46,7 @@ class _CalendarModalState extends State<CalendarModal> {
       return const SizedBox(
         height: 350,
         child:
-            Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
+            Center(child: CircularProgressIndicator(color: AppColors.success)),
       );
     }
 
@@ -58,8 +60,8 @@ class _CalendarModalState extends State<CalendarModal> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       decoration: const BoxDecoration(
-        color: Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.bg,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min, // Sidebar del tamaño del contenido
@@ -69,7 +71,7 @@ class _CalendarModalState extends State<CalendarModal> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.grey),
+                icon: const Icon(Icons.close, color: AppColors.textSecondary),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -108,7 +110,7 @@ class _CalendarModalState extends State<CalendarModal> {
                       child: Center(
                           child: Text(d,
                               style: const TextStyle(
-                                  color: Colors.grey,
+                                  color: AppColors.textSecondary,
                                   fontWeight: FontWeight.bold))),
                     ))
                 .toList(),
@@ -142,20 +144,20 @@ class _CalendarModalState extends State<CalendarModal> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF4CAF50)
+                        ? AppColors.success
                         : (isToday
-                            ? const Color(0xFF4CAF50).withOpacity(0.2)
+                            ? AppColors.success.withOpacity(0.2)
                             : Colors.transparent),
                     shape: BoxShape.circle,
                     border: isToday && !isSelected
-                        ? Border.all(color: const Color(0xFF4CAF50))
+                        ? Border.all(color: AppColors.success)
                         : null,
                   ),
                   child: Center(
                     child: Text(
                       date.day.toString(),
                       style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.white70,
+                        color: isSelected ? Colors.white : AppColors.textSecondary,
                         fontWeight: isSelected || isToday
                             ? FontWeight.bold
                             : FontWeight.normal,

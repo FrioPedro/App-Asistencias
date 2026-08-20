@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
 
 import '../../../models/assigment_model.dart';
@@ -58,8 +60,8 @@ class EventCard extends StatelessWidget {
       clipBehavior:
           Clip.antiAlias, // Para recortar la imagen de fondo y el ripple
       decoration: BoxDecoration(
-        color: const Color(0xFF1F1F1F), // Gris oscuro
-        borderRadius: BorderRadius.circular(16),
+        color: AppColors.surfaceAlt, // Gris oscuro
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Material(
         color: Colors.transparent,
@@ -114,8 +116,8 @@ class EventCard extends StatelessWidget {
                           assigmentType.label.toUpperCase(),
                           style: TextStyle(
                             color: _isAlert(assigmentType)
-                                ? const Color(0xFFC62828) // Rojo
-                                : Colors.grey[500], // Gris
+                                ? AppColors.danger // Rojo
+                                : AppColors.textSecondary, // Gris
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.5,
@@ -124,10 +126,10 @@ class EventCard extends StatelessWidget {
 
                         // B) Nombre de la Tarea (SOLO SI taskName != null)
                         if (taskName != null) ...[
-                          Text(
+                          const Text(
                             ' - ',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                               fontSize: 11,
                               fontWeight: FontWeight.w900,
                             ),
@@ -167,8 +169,8 @@ class EventCard extends StatelessWidget {
                       companyName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey[400],
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
                         fontSize: 13,
                       ),
                     ),
@@ -176,8 +178,8 @@ class EventCard extends StatelessWidget {
                     // 4. DOCUMENTO
                     Text(
                       eventCode,
-                      style: TextStyle(
-                        color: Colors.grey[500],
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
                         fontSize: 11,
                       ),
                     ),
@@ -188,8 +190,8 @@ class EventCard extends StatelessWidget {
                         'Inicio: $startTime',
                         style: TextStyle(
                           color: isParticipating
-                              ? const Color(0xFF82B1FF)
-                              : Colors.grey[400],
+                              ? AppColors.info
+                              : AppColors.textSecondary,
                           fontSize: 11,
                           fontWeight: FontWeight.w500,
                         ),
@@ -200,8 +202,8 @@ class EventCard extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         'Actividad en curso: $activeTaskName',
-                        style: TextStyle(
-                          color: Colors.grey[600],
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
                           fontSize: 11,
                           fontStyle: FontStyle.italic,
                         ),
@@ -268,11 +270,11 @@ class EventCard extends StatelessWidget {
 
   Color _getTaskColor(String taskName) {
     final name = taskName.toLowerCase();
-    if (name.contains('oficina')) return Colors.grey;
-    if (name.contains('taller')) return const Color(0xFF4CAF50); // Verde
+    if (name.contains('oficina')) return AppColors.textSecondary;
+    if (name.contains('taller')) return AppColors.success; // Verde
     if (name.contains('transporte')) return const Color(0xFFFF9800); // Naranja
-    if (name.contains('servicio')) return const Color(0xFF2E60C4); // Azul
-    return const Color(0xFF2E60C4); // Default Azul
+    if (name.contains('servicio')) return AppColors.primary; // Azul
+    return AppColors.primary; // Default Azul
   }
 
   String? _getTaskImageAsset(String taskName) {

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import '../../core/permission_guard.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/log_provider.dart';
@@ -99,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onTap: () => FocusScope.of(context).unfocus(),
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -132,19 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   // BOTÓN DE LOGIN
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: AppSpacing.ctaHeight,
                     child: ElevatedButton(
                       // Si está cargando, deshabilitamos el botón (null)
                       onPressed: _isLoading ? null : _handleLogin,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        disabledBackgroundColor:
-                            Colors.grey, // Color cuando está deshabilitado
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
                       child: _isLoading
                           ? const SizedBox(
                               height: 24,
@@ -184,16 +178,13 @@ class _LoginScreenState extends State<LoginScreen> {
       obscureText: isPassword ? _isObscured : false,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        filled: true,
-        fillColor: const Color(0xFF2C2C2C),
         hintText: hintText,
-        hintStyle: TextStyle(color: Colors.grey[500]),
-        prefixIcon: Icon(icon, color: Colors.grey[500]),
+        prefixIcon: Icon(icon, color: AppColors.textSecondary),
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
                   _isObscured ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey[500],
+                  color: AppColors.textSecondary,
                 ),
                 onPressed: () {
                   setState(() {
@@ -203,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
               )
             : null,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),

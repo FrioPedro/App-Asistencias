@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
+import 'package:app_asistencias/ui/theme/app_colors.dart';
 import '../../../core/permission_guard.dart';
 import '../../../models/assigment_model.dart';
 import '../../../providers/attendance_provider.dart';
@@ -68,12 +70,12 @@ class AssigmentModal extends StatefulWidget {
     print('[IS ANY EVENT ACTIVE]: $isAnyEventActive');
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: AppColors.bg,
       isScrollControlled: true,
       isDismissible: false,
       enableDrag: false,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       builder: (context) => AssigmentModal(
         assignment: assignment,
@@ -138,12 +140,12 @@ class _EventActionModalState extends State<AssigmentModal> {
       else if (currentTask == TaskType.office) {
         final result = await showModalBottomSheet(
           context: context,
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: AppColors.bg,
           isScrollControlled: true,
           isDismissible: false,
           enableDrag: false,
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
           ),
           builder: (_) => OfficeWorkshopExitModal(
             event: widget.assignment,
@@ -252,12 +254,12 @@ class _EventActionModalState extends State<AssigmentModal> {
 
       final result = await showModalBottomSheet(
         context: context,
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: AppColors.bg,
         isScrollControlled: true,
         isDismissible: false,
         enableDrag: false,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
         ),
         builder: (_) => OfficeWorkshopExitModal(
           event: widget.assignment,
@@ -344,7 +346,7 @@ class _EventActionModalState extends State<AssigmentModal> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      CircularProgressIndicator(color: Color(0xFF4CAF50)),
+                      CircularProgressIndicator(color: AppColors.success),
                       SizedBox(height: 16),
                       Text("Procesando...",
                           style: TextStyle(color: Colors.white)),
@@ -380,10 +382,8 @@ class _EventActionModalState extends State<AssigmentModal> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+              icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
               onPressed: () => Navigator.pop(context),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
             ),
           ],
         ),
@@ -434,17 +434,15 @@ class _EventActionModalState extends State<AssigmentModal> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+              icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
               onPressed: () => Navigator.pop(context),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
           (widget.isActiveactivity ? 'Puedes gestionar tu turno o solicitar horas extra.' : 'Puedes solicitar horas extra.'),
-          style: TextStyle(color: Colors.grey[400], fontSize: 14),
+          style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         if (!widget.isAnyEventActive || widget.isActiveactivity)
           _buildManageShiftButton(),
@@ -465,11 +463,11 @@ class _EventActionModalState extends State<AssigmentModal> {
             label: Text(
                 widget.isActiveactivity ? "Marcar horas" : "Iniciar turno"),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E60C4),
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
             ),
             onPressed: () => setState(() => _showShiftContent = true),
@@ -498,17 +496,15 @@ class _EventActionModalState extends State<AssigmentModal> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+              icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
               onPressed: () => Navigator.pop(context),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        Text(
+        const Text(
           'Puedes cambiar tu actividad actual o finalizar el turno.',
-          style: TextStyle(color: Colors.grey[400], fontSize: 14),
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         const SizedBox(height: 20),
         if (activeIcon != Icons.business)
@@ -547,11 +543,11 @@ class _EventActionModalState extends State<AssigmentModal> {
             icon: const Icon(Icons.logout),
             label: const Text("SALIDA"),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFEF5350),
+              backgroundColor: AppColors.danger,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
             ),
             onPressed: _onExitSelected,
@@ -573,21 +569,21 @@ class _EventActionModalState extends State<AssigmentModal> {
           width: double.infinity,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[800],
+              backgroundColor: AppColors.surfaceRaised,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               minimumSize: const Size.fromHeight(56),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
             ),
             onPressed: _isLoading ? null : () => _openOvertimeForm(label),
-            child: Row(
+            child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.bedtime_outlined, color: Colors.grey[300], size: 28),
-                const SizedBox(width: 8),
-                const Text(
+                Icon(Icons.bedtime_outlined, color: AppColors.textSecondary, size: 28),
+                SizedBox(width: 8),
+                Text(
                   'Solicitar horas extra',
                   style: TextStyle(
                     color: Colors.white,
