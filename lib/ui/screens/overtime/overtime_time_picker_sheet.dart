@@ -36,7 +36,8 @@ class OvertimeTimePickerSheet extends StatefulWidget {
       backgroundColor: AppColors.bg,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       builder: (_) => OvertimeTimePickerSheet(
         title: title,
@@ -51,7 +52,6 @@ class OvertimeTimePickerSheet extends StatefulWidget {
 }
 
 class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
-
   /// 1..12 tal como se lee en la rueda.
   late int _hour12;
 
@@ -160,9 +160,9 @@ class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
             _buildCurrentValue(),
             _buildColumnLabels(),
             _buildWheels(),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             _buildActions(),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
@@ -171,7 +171,7 @@ class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
       child: Row(
         children: [
           Expanded(
@@ -185,7 +185,8 @@ class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 26),
+            icon: const Icon(Icons.close,
+                color: AppColors.textSecondary, size: 26),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -195,7 +196,7 @@ class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
 
   Widget _buildCurrentValue() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Row(
         children: [
           Expanded(
@@ -212,7 +213,8 @@ class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
             onPressed: _setNow,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
             ),
             child: const Text(
               'AHORA',
@@ -243,7 +245,7 @@ class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
         );
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         children: [
           label('HORA'),
@@ -370,7 +372,7 @@ class _OvertimeTimePickerSheetState extends State<OvertimeTimePickerSheet> {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: SizedBox(
             height: AppSpacing.ctaHeight,

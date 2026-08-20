@@ -227,14 +227,15 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
         title: const Text('Crear Asignación'),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
               const Text('Cliente:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               FormField<String>(
                 validator: (value) =>
                     _selectedClient == null ? 'Seleccione un cliente' : null,
@@ -256,7 +257,8 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                       ),
                       if (field.hasError)
                         Padding(
-                          padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+                          padding: const EdgeInsets.only(
+                              top: AppSpacing.sm, left: AppSpacing.md),
                           child: Text(
                             field.errorText!,
                             style: TextStyle(
@@ -269,10 +271,10 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                   );
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               const Text('Descripción:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               TextFormField(
                 controller: _descriptionController,
                 maxLines: 3,
@@ -288,10 +290,10 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               const Text('Colaboradores:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               FormField<List<String>>(
                 validator: (values) => (_selectedCollaborators.isEmpty)
                     ? 'Seleccione al menos un colaborador'
@@ -312,7 +314,8 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                       ),
                       if (field.hasError)
                         Padding(
-                          padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+                          padding: const EdgeInsets.only(
+                              top: AppSpacing.sm, left: AppSpacing.md),
                           child: Text(
                             field.errorText!,
                             style: TextStyle(
@@ -325,10 +328,10 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                   );
                 },
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               const Text('Tipo de Asignación:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               DropdownButtonFormField<String>(
                 value: _selectedType,
                 isExpanded: true,
@@ -346,10 +349,10 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                 ],
                 onChanged: (v) => setState(() => _selectedType = v),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               const Text('Zona:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               CustomDropdown<String>.search(
                 items: _fixedZones,
                 initialItem: selectedZone,
@@ -358,7 +361,7 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
                 hintText: 'Seleccione zona',
                 overlayHeight: 340,
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: AppSpacing.xxl),
               Center(
                 child: isSubmitting
                     ? const CircularProgressIndicator() // 🔄 carga mientras envía

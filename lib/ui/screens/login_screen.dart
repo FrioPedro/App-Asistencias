@@ -102,7 +102,8 @@ class _LoginScreenState extends State<LoginScreen> {
           onTap: () => FocusScope.of(context).unfocus(),
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -113,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fit: BoxFit.contain,
                   ),
 
-                  const SizedBox(height: 80),
+                  const SizedBox(height: AppSpacing.xxxl),
 
                   // INPUT USUARIO
                   _buildTextField(
@@ -121,7 +122,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: 'Usuario',
                     icon: Icons.person_outline,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // INPUT CONTRASEÑA
                   _buildTextField(
@@ -130,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: Icons.lock_outline,
                     isPassword: true,
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.xl),
 
                   // BOTÓN DE LOGIN
                   SizedBox(
@@ -197,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       ),
     );
   }

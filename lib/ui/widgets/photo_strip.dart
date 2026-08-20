@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -29,7 +30,6 @@ class PhotoStrip extends StatefulWidget {
 }
 
 class _PhotoStripState extends State<PhotoStrip> {
-
   static const double _thumbSize = 100;
   static const double _gap = 12;
   static const double _fadeWidth = 28;
@@ -85,7 +85,7 @@ class _PhotoStripState extends State<PhotoStrip> {
         children: [
           ListView.separated(
             controller: _controller,
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
             scrollDirection: Axis.horizontal,
             itemCount: widget.photos.length,
             separatorBuilder: (_, __) => const SizedBox(width: _gap),
@@ -154,7 +154,7 @@ class _PhotoStripState extends State<PhotoStrip> {
             bottom: 6,
             right: 6,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
                 color: described ? AppColors.success : AppColors.warning,
                 shape: BoxShape.circle,

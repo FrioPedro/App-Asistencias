@@ -24,21 +24,24 @@ class RestrictedAccessDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.access_time_filled, size: 64, color: AppColors.textSecondary),
-              const SizedBox(height: 20),
+              const Icon(Icons.access_time_filled,
+                  size: 64, color: AppColors.textSecondary),
+              const SizedBox(height: AppSpacing.xl),
               const Text('Horario Restringido',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
                       fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               const Text(
                   'No se pueden crear actividades en este horario.\n\nHorario permitido:\nLun - Vie: 8:00 PM - 6:00 AM\nSáb - Dom: Todo el día',
                   style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 16, height: 1.5),
+                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                      height: 1.5),
                   textAlign: TextAlign.center),
-              const SizedBox(height: 30),
+              const SizedBox(height: AppSpacing.xxl),
               SizedBox(
                 width: 200,
                 child: ElevatedButton(

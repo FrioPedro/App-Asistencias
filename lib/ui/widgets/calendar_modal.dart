@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -58,10 +59,12 @@ class _CalendarModalState extends State<CalendarModal> {
     final weekDays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.xl),
       decoration: const BoxDecoration(
         color: AppColors.bg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min, // Sidebar del tamaño del contenido
@@ -99,7 +102,7 @@ class _CalendarModalState extends State<CalendarModal> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
 
           // Días de la semana
           Row(
@@ -115,7 +118,7 @@ class _CalendarModalState extends State<CalendarModal> {
                     ))
                 .toList(),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
 
           // Grid de Días
           GridView.builder(
@@ -157,7 +160,8 @@ class _CalendarModalState extends State<CalendarModal> {
                     child: Text(
                       date.day.toString(),
                       style: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textSecondary,
+                        color:
+                            isSelected ? Colors.white : AppColors.textSecondary,
                         fontWeight: isSelected || isToday
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -168,7 +172,7 @@ class _CalendarModalState extends State<CalendarModal> {
               );
             },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );

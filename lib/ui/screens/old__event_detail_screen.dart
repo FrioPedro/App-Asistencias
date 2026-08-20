@@ -4,7 +4,7 @@ import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 // --- IMPORTS ACTUALIZADOS ---
-import '../../models/assigment_model.dart';          // Tu nuevo modelo
+import '../../models/assigment_model.dart'; // Tu nuevo modelo
 import '../../providers/old__event_detail_provider.dart'; // El provider
 
 class EventDetailScreen extends StatefulWidget {
@@ -37,10 +37,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   // Carga los datos que faltan usando el ID del documento
   Future<void> _loadExtraDetails() async {
     // Usamos el documentId (ej. ORD-001) o el ID numérico como respaldo
-    final String searchId = widget.event.documentId ?? widget.event.id.toString();
-    
+    final String searchId =
+        widget.event.documentId ?? widget.event.id.toString();
+
     final details = await _provider.getExtraDetails(searchId);
-    
+
     if (mounted) {
       setState(() {
         _extraDetails = details;
@@ -63,7 +64,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final title = widget.event.description ?? 'Sin descripción';
     final client = widget.event.client ?? 'Cliente desconocido';
     final dateString = _formatDateTime(widget.event.updatedAt);
-    final typeLabel = widget.event.assigmentType.label.toUpperCase(); // Usamos tu getter .label
+    final typeLabel = widget.event.assigmentType.label
+        .toUpperCase(); // Usamos tu getter .label
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -77,7 +79,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onPressed: () {
               // Menú de opciones
-            }, 
+            },
           ),
         ],
       ),
@@ -88,15 +90,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           children: [
             // 1. Etiqueta de Estado
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
               decoration: BoxDecoration(
-                color: isEmergency 
-                    ? AppColors.danger 
+                color: isEmergency
+                    ? AppColors.danger
                     : Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(AppRadius.sheet),
               ),
               child: Text(
-                isEmergency ? 'EMERGENCIA' : typeLabel, // Mostramos la etiqueta real
+                isEmergency
+                    ? 'EMERGENCIA'
+                    : typeLabel, // Mostramos la etiqueta real
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -104,26 +109,23 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
 
             // 2. Título (Descripción) y Empresa (Cliente)
             Text(
               title,
               style: const TextStyle(
-                fontSize: 32, 
-                fontWeight: FontWeight.bold, 
-                color: Colors.white
-              ),
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               client,
-              style: const TextStyle(
-                fontSize: 18, 
-                color: AppColors.textSecondary
-              ),
+              style:
+                  const TextStyle(fontSize: 18, color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xxl),
 
             // 3. Tarjeta de Mapa
             Container(
@@ -137,37 +139,40 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.location_on, size: 40, color: AppColors.textSecondary),
-                    SizedBox(height: 8),
+                    Icon(Icons.location_on,
+                        size: 40, color: AppColors.textSecondary),
+                    SizedBox(height: AppSpacing.sm),
                     Text(
-                      'Cargando ubicación...', 
+                      'Cargando ubicación...',
                       style: TextStyle(color: AppColors.textSecondary),
                     )
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xxl),
 
             // 4. Detalles de la Asignación
-            
+
             // Fecha (Convertida de DateTime)
             _buildDetailRow(Icons.calendar_today, 'Fecha', dateString),
-            const SizedBox(height: 24),
-            
+            const SizedBox(height: AppSpacing.xl),
+
             // Horario (Viene del provider)
-            _isLoadingExtras 
-                ? _buildLoadingRow() 
-                : _buildDetailRow(Icons.access_time, 'Horario', _extraDetails['schedule'] ?? 'No definido'),
-            
-            const SizedBox(height: 24),
-            
+            _isLoadingExtras
+                ? _buildLoadingRow()
+                : _buildDetailRow(Icons.access_time, 'Horario',
+                    _extraDetails['schedule'] ?? 'No definido'),
+
+            const SizedBox(height: AppSpacing.xl),
+
             // Supervisor (Viene del provider)
-            _isLoadingExtras 
-                ? _buildLoadingRow() 
-                : _buildDetailRow(Icons.person_outline, 'Supervisor', _extraDetails['supervisor'] ?? 'No asignado'),
-            
-            const SizedBox(height: 40),
+            _isLoadingExtras
+                ? _buildLoadingRow()
+                : _buildDetailRow(Icons.person_outline, 'Supervisor',
+                    _extraDetails['supervisor'] ?? 'No asignado'),
+
+            const SizedBox(height: AppSpacing.xxl),
 
             // 5. Botón de Acción
             SizedBox(
@@ -175,9 +180,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               height: AppSpacing.ctaHeight,
               child: ElevatedButton(
                 onPressed: () {
-                   ScaffoldMessenger.of(context).showSnackBar(
-                     const SnackBar(content: Text("Función de registro iniciada"))
-                   );
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Función de registro iniciada")));
                 },
                 child: const Text(
                   'REGISTRAR ACTIVIDAD',
@@ -189,7 +193,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
@@ -201,28 +205,28 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.05),
             borderRadius: BorderRadius.circular(AppRadius.md),
           ),
           child: Icon(icon, color: Colors.white, size: 24),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.lg),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+              style:
+                  const TextStyle(color: AppColors.textSecondary, fontSize: 12),
             ),
             Text(
               value,
               style: const TextStyle(
-                color: Colors.white, 
-                fontSize: 16, 
-                fontWeight: FontWeight.w500
-              ),
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -234,14 +238,21 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget _buildLoadingRow() {
     return Row(
       children: [
-        Container(width: 48, height: 48, decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(AppRadius.md))),
-        const SizedBox(width: 16),
+        Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(AppRadius.md))),
+        const SizedBox(width: AppSpacing.lg),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(width: 60, height: 10, color: Colors.white.withOpacity(0.05)),
-            const SizedBox(height: 8),
-            Container(width: 120, height: 14, color: Colors.white.withOpacity(0.05)),
+            Container(
+                width: 60, height: 10, color: Colors.white.withOpacity(0.05)),
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+                width: 120, height: 14, color: Colors.white.withOpacity(0.05)),
           ],
         )
       ],

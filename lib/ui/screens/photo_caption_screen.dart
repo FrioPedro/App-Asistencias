@@ -35,7 +35,6 @@ class PhotoCaptionScreen extends StatefulWidget {
 }
 
 class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
-
   static const int _thumbsPerRow = 8;
 
   final _focusNode = FocusNode();
@@ -92,13 +91,13 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+            style:
+                TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.danger),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
             child: const Text('Sí, borrar'),
           ),
         ],
@@ -167,7 +166,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Center(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.md),
@@ -180,7 +179,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.xl),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -195,7 +194,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                           letterSpacing: 0.5,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       TextField(
                         // La key fuerza un campo nuevo al cambiar de foto, para
                         // que el cursor no herede la posición de la anterior.
@@ -215,25 +214,25 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                           fillColor: AppColors.surface,
                           hintText:
                               'Ej: Serpentín con hielo antes de la limpieza.',
-                          hintStyle:
-                              const TextStyle(color: AppColors.textSecondary, fontSize: 15),
-                          contentPadding: const EdgeInsets.all(16),
+                          hintStyle: const TextStyle(
+                              color: AppColors.textSecondary, fontSize: 15),
+                          contentPadding: const EdgeInsets.all(AppSpacing.lg),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(AppRadius.md),
                             borderSide: BorderSide.none,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       _buildStatusRow(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.xl),
                       _buildThumbnailStrip(),
                     ],
                   ),
                 ),
               ),
               _buildActions(),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
             ],
           ),
         ),
@@ -258,7 +257,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                 color: ok ? AppColors.success : AppColors.warning,
                 size: 15,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 ok ? 'Guardado' : 'Escribe un poco más',
                 style: TextStyle(
@@ -296,7 +295,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
       final count = end - start;
 
       rows.add(Padding(
-        padding: EdgeInsets.only(bottom: end < total ? 6 : 0),
+        padding: EdgeInsets.only(bottom: end < total ? AppSpacing.sm : 0),
         child: Row(
           children: [
             for (int i = start; i < end; i++)
@@ -321,7 +320,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
     final isCurrent = i == _index;
 
     return Padding(
-      padding: const EdgeInsets.only(right: 6),
+      padding: const EdgeInsets.only(right: AppSpacing.sm),
       child: GestureDetector(
         onTap: () => _goTo(i),
         child: Stack(
@@ -335,7 +334,9 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                 border: Border.all(
                   color: isCurrent
                       ? Colors.white
-                      : (item.isDescribed ? AppColors.success : AppColors.warning),
+                      : (item.isDescribed
+                          ? AppColors.success
+                          : AppColors.warning),
                   width: isCurrent ? 2.5 : 1.5,
                 ),
               ),
@@ -356,7 +357,8 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
               child: Container(
                 padding: const EdgeInsets.all(1.5),
                 decoration: BoxDecoration(
-                  color: item.isDescribed ? AppColors.success : AppColors.warning,
+                  color:
+                      item.isDescribed ? AppColors.success : AppColors.warning,
                   shape: BoxShape.circle,
                   border: Border.all(color: AppColors.bg, width: 1.5),
                 ),
@@ -394,7 +396,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: SizedBox(
             height: AppSpacing.ctaHeight,
@@ -418,7 +420,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Icon(
                     _isLast ? Icons.check : Icons.arrow_forward,
                     color: Colors.white,

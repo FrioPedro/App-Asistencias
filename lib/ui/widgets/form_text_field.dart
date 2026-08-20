@@ -38,7 +38,6 @@ class FormTextField extends StatelessWidget {
     this.enabled = true,
   });
 
-
   /// Los campos con mínimo de caracteres muestran el contador en vivo, que ya
   /// dice cuánto falta. En ellos el mensaje del validador se oculta para no
   /// repetir la misma información en dos lugares.
@@ -97,7 +96,7 @@ class FormTextField extends StatelessWidget {
   /// operario vea cuánto le falta en lugar de descubrirlo al intentar enviar.
   Widget _buildCounter() {
     return Padding(
-      padding: const EdgeInsets.only(top: 6),
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller,
         builder: (context, value, _) {
@@ -108,8 +107,9 @@ class FormTextField extends StatelessWidget {
           // Mismos tres estados que las descripciones de fotos: gris mientras
           // está vacío, ámbar si empezó y no llega, verde al cumplir. El caso
           // "vacío y obligatorio" es del validador, no de aquí.
-          final color =
-              ok ? AppColors.success : (empty ? AppColors.textSecondary : AppColors.warning);
+          final color = ok
+              ? AppColors.success
+              : (empty ? AppColors.textSecondary : AppColors.warning);
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,7 +131,7 @@ class FormTextField extends StatelessWidget {
                       color: color,
                       size: 15,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       ok ? 'Listo' : 'Escribe un poco más',
                       style: TextStyle(

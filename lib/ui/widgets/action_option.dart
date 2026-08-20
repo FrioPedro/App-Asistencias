@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 
@@ -21,8 +22,8 @@ class ActionOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
           color: AppColors.surface, // Gris un poco más claro que el fondo
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -30,7 +31,7 @@ class ActionOption extends StatelessWidget {
         child: Row(
           children: [
             Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.lg),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +44,7 @@ class ActionOption extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xs),
                   Text(
                     subtitle,
                     style: const TextStyle(

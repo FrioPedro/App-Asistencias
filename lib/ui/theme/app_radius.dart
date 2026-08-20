@@ -10,6 +10,9 @@ class AppRadius {
   /// Chips y badges de estado, que se leen como píldora.
   static const double chip = 20;
 
+  /// Redondeo total: contadores y badges circulares, sea cual sea su alto.
+  static const double pill = 999;
+
   /// Radio superior de todos los bottom sheets.
   static const double sheet = 24;
 

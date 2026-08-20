@@ -263,27 +263,29 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           behavior: HitTestBehavior.opaque,
           child: SingleChildScrollView(
             controller: _scrollController,
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (widget.contextLabel != null) ...[
+                    _buildLabel('Asignación'),
+                    const SizedBox(height: AppSpacing.sm),
                     _buildContextChip(widget.contextLabel!),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                   _buildLabel('Inicio'),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildDateTimeRow(isEnd: false),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.lg),
                   _buildLabel('Fin'),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
                   _buildDateTimeRow(isEnd: true),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.lg),
                   _buildTotalDuration(),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: AppSpacing.xxl),
                   Focus(
                     onFocusChange: (hasFocus) {
                       if (hasFocus) _scrollToBottom();
@@ -293,15 +295,15 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
                       controller: _justificationController,
                       hint: '¿Por qué necesita hacer horas extra?',
                       isRequired: true,
-                      maxLines: 5,
+                      maxLines: 4,
                       minChars: OvertimeRequestFormScreen.minJustificationChars,
                       maxChars: OvertimeRequestFormScreen.maxJustificationChars,
                       enabled: !_isSubmitting,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxl),
                   _buildSubmitButton(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
               ),
             ),
@@ -325,7 +327,8 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
   Widget _buildContextChip(String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg, vertical: AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.15),
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -333,7 +336,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
       child: Row(
         children: [
           const Icon(Icons.work_outline, color: AppColors.primary, size: 20),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               label,
@@ -363,7 +366,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
             onTap: () => _pickDate(isEnd: isEnd),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           flex: 2,
           child: _buildPickerField(
@@ -393,7 +396,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
         child: Row(
           children: [
             Icon(icon, color: AppColors.textSecondary, size: 20),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 text,
@@ -418,7 +421,8 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
         decoration: BoxDecoration(
           color: AppColors.danger.withOpacity(0.15),
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -426,7 +430,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
         child: Text(
           tooLong
               ? 'Son más de 72 horas seguidas. Revise la fecha de fin.'
-              : 'El fin tiene que ser después del inicio',
+              : 'El fin debe ser después del inicio',
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: AppColors.danger,
@@ -439,7 +443,8 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.15),
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -452,16 +457,17 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 22,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
           if (_spansDays) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               'Termina el ${OvertimeFormat.shortDate(_end)}',
               textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              style:
+                  const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             ),
           ],
         ],

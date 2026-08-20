@@ -190,14 +190,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
         ),
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- BUSCADOR Y BOTÓN CALENDARIO ---
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
-              child: Row(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- BUSCADOR Y BOTÓN CALENDARIO ---
+              Row(
                 children: [
                   Expanded(
                     child: CustomSearchBar(
@@ -207,7 +207,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           setState(() => _searchQuery = val.toLowerCase()),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.md),
                   // Botón Calendario
                   Container(
                     decoration: BoxDecoration(
@@ -224,19 +224,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 ],
               ),
-            ),
 
-            // --- CHIP FILTRO ---
-            if (isDateFilterActive)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
+              const SizedBox(height: AppSpacing.lg),
+
+              // --- CHIP FILTRO ---
+              if (isDateFilterActive)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
+                          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
                       decoration: BoxDecoration(
                         color: AppColors.success.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(AppRadius.sheet),
@@ -253,7 +252,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                           GestureDetector(
                             onTap: _clearDateFilter,
                             child: const Icon(Icons.close,
@@ -264,73 +263,76 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                 ),
-              ),
 
-            // --- LISTA ---
-            Expanded(
-              child: _isLoading
-                  ? _buildSkeletons()
-                  : RefreshIndicator(
-                      onRefresh: _loadData,
-                      color: AppColors.primary,
-                      backgroundColor: AppColors.surface,
-                      child: filteredSessions.isEmpty
-                          ? ListView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              children: [
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.4,
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(Icons.event_busy,
-                                            size: 60, color: AppColors.iconMuted),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                            isDateFilterActive
-                                                ? 'No hay actividades para esta fecha'
-                                                : 'No se encontraron actividades',
-                                            style: const TextStyle(
-                                                color: AppColors.textSecondary)),
-                                      ],
+              // --- LISTA ---
+              Expanded(
+                child: _isLoading
+                    ? _buildSkeletons()
+                    : RefreshIndicator(
+                        onRefresh: _loadData,
+                        color: AppColors.primary,
+                        backgroundColor: AppColors.surface,
+                        child: filteredSessions.isEmpty
+                            ? ListView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                children: [
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.4,
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.event_busy,
+                                              size: 60,
+                                              color: AppColors.iconMuted),
+                                          const SizedBox(height: AppSpacing.lg),
+                                          Text(
+                                              isDateFilterActive
+                                                  ? 'No hay actividades para esta fecha'
+                                                  : 'No se encontraron actividades',
+                                              style: const TextStyle(
+                                                  color:
+                                                      AppColors.textSecondary)),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            )
-                          : ListView.builder(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
-                              itemCount: filteredSessions.length,
-                              itemBuilder: (context, index) {
-                                final session = filteredSessions[index];
+                                ],
+                              )
+                            : ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: const EdgeInsets.only(
+                                    bottom: AppSpacing.xl),
+                                itemCount: filteredSessions.length,
+                                itemBuilder: (context, index) {
+                                  final session = filteredSessions[index];
 
-                                return EventCard(
-                                  eventName:
-                                      session.description ?? 'Sin descripción',
-                                  companyName: session.client ?? 'Sin cliente',
-                                  eventCode: session.documentId ?? '---',
-                                  taskName: session.task.label,
+                                  return EventCard(
+                                    eventName: session.description ??
+                                        'Sin descripción',
+                                    companyName:
+                                        session.client ?? 'Sin cliente',
+                                    eventCode: session.documentId ?? '---',
+                                    taskName: session.task.label,
 
-                                  // Mapeo de tiempos unificado
-                                  entryTime:
-                                      _formatTime(session.entryTimestamp),
-                                  exitTime: session.exitTimestamp != null
-                                      ? _formatTime(session.exitTimestamp!)
-                                      : null,
+                                    // Mapeo de tiempos unificado
+                                    entryTime:
+                                        _formatTime(session.entryTimestamp),
+                                    exitTime: session.exitTimestamp != null
+                                        ? _formatTime(session.exitTimestamp!)
+                                        : null,
 
-                                  hasPendingSync: session.hasPendingSync,
-                                  assigmentType: session.activityType,
-                                );
-                              },
-                            ),
-                    ),
-            ),
-          ],
+                                    hasPendingSync: session.hasPendingSync,
+                                    assigmentType: session.activityType,
+                                  );
+                                },
+                              ),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -340,6 +342,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return ListView.builder(
       itemCount: 5,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
       itemBuilder: (context, index) {
         return const EventCardSkeleton();
       },

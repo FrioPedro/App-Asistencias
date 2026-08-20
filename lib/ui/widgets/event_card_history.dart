@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
@@ -46,7 +47,7 @@ class EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       clipBehavior: Clip.antiAlias, // Para recortar la imagen de fondo
       decoration: BoxDecoration(
         color: AppColors.surfaceAlt, // Gris oscuro
@@ -82,7 +83,8 @@ class EventCard extends StatelessWidget {
 
           // --- CAPA 2: CONTENIDO DE LA TARJETA ---
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -124,7 +126,7 @@ class EventCard extends StatelessWidget {
                     ),
                     // Icono offline al lado del nombre de actividad
                     if (hasPendingSync) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       const Icon(
                         Icons.cloud_off_outlined,
                         color: Colors.orangeAccent,
@@ -134,7 +136,7 @@ class EventCard extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xs),
 
                 // 2. DESCRIPCIÓN (Nombre de la actividad realizada)
                 Text(
@@ -148,7 +150,7 @@ class EventCard extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xs),
 
                 // 3. CLIENTE
                 Text(
@@ -170,7 +172,7 @@ class EventCard extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 6),
+                const SizedBox(height: AppSpacing.sm),
 
                 // 5. TIEMPOS (Inicio y Salida en línea pequeña)
                 if (entryTime != null || exitTime != null)
@@ -178,12 +180,12 @@ class EventCard extends StatelessWidget {
                     children: [
                       _buildTimeChip('Inicio:', entryTime),
                       if (exitTime != null && exitTime!.isNotEmpty) ...[
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.md),
                         Container(
                             width: 1,
                             height: 12,
                             color: AppColors.textSecondary), // Separador
-                        const SizedBox(width: 12),
+                        const SizedBox(width: AppSpacing.md),
                         _buildTimeChip('Salida:', exitTime),
                       ]
                     ],

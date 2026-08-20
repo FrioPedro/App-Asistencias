@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import '../../../core/permission_guard.dart';
@@ -66,7 +67,6 @@ class AssigmentModal extends StatefulWidget {
         onactivityStarted,
     required void Function(String eventKey) onactivityEnded,
   }) {
-    
     print('[IS ANY EVENT ACTIVE]: $isAnyEventActive');
     showModalBottomSheet(
       context: context,
@@ -75,7 +75,8 @@ class AssigmentModal extends StatefulWidget {
       isDismissible: false,
       enableDrag: false,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       builder: (context) => AssigmentModal(
         assignment: assignment,
@@ -145,7 +146,8 @@ class _EventActionModalState extends State<AssigmentModal> {
           isDismissible: false,
           enableDrag: false,
           shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+            borderRadius:
+                BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
           ),
           builder: (_) => OfficeWorkshopExitModal(
             event: widget.assignment,
@@ -259,7 +261,8 @@ class _EventActionModalState extends State<AssigmentModal> {
         isDismissible: false,
         enableDrag: false,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
         ),
         builder: (_) => OfficeWorkshopExitModal(
           event: widget.assignment,
@@ -347,7 +350,7 @@ class _EventActionModalState extends State<AssigmentModal> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircularProgressIndicator(color: AppColors.success),
-                      SizedBox(height: 16),
+                      SizedBox(height: AppSpacing.lg),
                       Text("Procesando...",
                           style: TextStyle(color: Colors.white)),
                     ],
@@ -382,12 +385,13 @@ class _EventActionModalState extends State<AssigmentModal> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
+              icon: const Icon(Icons.close,
+                  color: AppColors.textSecondary, size: 28),
               onPressed: () => Navigator.pop(context),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.lg),
         ActionOption(
           icon: Icons.business,
           title: 'Oficina',
@@ -412,7 +416,7 @@ class _EventActionModalState extends State<AssigmentModal> {
           subtitle: 'Visitas técnicas',
           onTap: () => _onActivitySelected('Servicio', Icons.construction),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
       ],
     );
   }
@@ -434,19 +438,22 @@ class _EventActionModalState extends State<AssigmentModal> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
+              icon: const Icon(Icons.close,
+                  color: AppColors.textSecondary, size: 28),
               onPressed: () => Navigator.pop(context),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
-          (widget.isActiveactivity ? 'Puedes gestionar tu turno o solicitar horas extra.' : 'Puedes solicitar horas extra.'),
+          (widget.isActiveactivity
+              ? 'Puedes gestionar tu turno o solicitar horas extra.'
+              : 'Puedes solicitar horas extra.'),
           style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         if (!widget.isAnyEventActive || widget.isActiveactivity)
           _buildManageShiftButton(),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
         _buildOvertimeShortcut(),
       ],
     );
@@ -455,7 +462,7 @@ class _EventActionModalState extends State<AssigmentModal> {
   Widget _buildManageShiftButton() {
     return Column(
       children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
@@ -465,7 +472,7 @@ class _EventActionModalState extends State<AssigmentModal> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
@@ -496,17 +503,18 @@ class _EventActionModalState extends State<AssigmentModal> {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
+              icon: const Icon(Icons.close,
+                  color: AppColors.textSecondary, size: 28),
               onPressed: () => Navigator.pop(context),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         const Text(
           'Puedes cambiar tu actividad actual o finalizar el turno.',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
         if (activeIcon != Icons.business)
           ActionOption(
             icon: Icons.business,
@@ -536,7 +544,7 @@ class _EventActionModalState extends State<AssigmentModal> {
             subtitle: 'Visitas técnicas',
             onTap: () => _onActivitySelected('Servicio', Icons.construction),
           ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.md),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
@@ -545,7 +553,7 @@ class _EventActionModalState extends State<AssigmentModal> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.danger,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
@@ -553,7 +561,7 @@ class _EventActionModalState extends State<AssigmentModal> {
             onPressed: _onExitSelected,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: AppSpacing.xl),
       ],
     );
   }
@@ -571,7 +579,8 @@ class _EventActionModalState extends State<AssigmentModal> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.surfaceRaised,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
               minimumSize: const Size.fromHeight(56),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -581,8 +590,9 @@ class _EventActionModalState extends State<AssigmentModal> {
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.bedtime_outlined, color: AppColors.textSecondary, size: 28),
-                SizedBox(width: 8),
+                Icon(Icons.bedtime_outlined,
+                    color: AppColors.textSecondary, size: 28),
+                SizedBox(width: AppSpacing.sm),
                 Text(
                   'Solicitar horas extra',
                   style: TextStyle(
@@ -595,7 +605,7 @@ class _EventActionModalState extends State<AssigmentModal> {
             ),
           ),
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: AppSpacing.xxl),
       ],
     );
   }

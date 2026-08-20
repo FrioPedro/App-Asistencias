@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import '../../history_screen.dart';
 import '../../profile_screen.dart';
@@ -64,7 +65,7 @@ class _HomeHeaderState extends State<HomeHeader> {
         Row(
           children: [
             const OvertimeHeaderButton(),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
 
             _buildHeaderButton(
               context,
@@ -74,7 +75,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                 MaterialPageRoute(builder: (_) => const HistoryScreen()),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
 
             // Botón de Perfil con Iniciales
             GestureDetector(

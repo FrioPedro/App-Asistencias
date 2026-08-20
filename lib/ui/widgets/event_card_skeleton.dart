@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:shimmer/shimmer.dart';
@@ -9,7 +10,7 @@ class EventCardSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       height: 140, // Altura aproximada de tu EventCard real
       decoration: BoxDecoration(
         color: AppColors.surfaceAlt, // Mismo fondo que tu tarjeta
@@ -18,10 +19,10 @@ class EventCardSkeleton extends StatelessWidget {
       // El widget Shimmer anima todo lo que está adentro
       child: Shimmer.fromColors(
         // Colores ajustados para tu tema oscuro:
-        baseColor: Colors.white.withOpacity(0.05),      // Gris muy oscuro
-        highlightColor: Colors.white.withOpacity(0.1),  // Brillo más claro
+        baseColor: Colors.white.withOpacity(0.05), // Gris muy oscuro
+        highlightColor: Colors.white.withOpacity(0.1), // Brillo más claro
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -40,7 +41,7 @@ class EventCardSkeleton extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.md),
                     // Subtítulo (Barra mediana)
                     Container(
                       width: 150,
@@ -50,7 +51,7 @@ class EventCardSkeleton extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.xs),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     // Código (Barra corta)
                     Container(
                       width: 100,
@@ -63,7 +64,7 @@ class EventCardSkeleton extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.lg),
               // DERECHA (Simulando el Tag o Ícono)
               Container(
                 width: 60,

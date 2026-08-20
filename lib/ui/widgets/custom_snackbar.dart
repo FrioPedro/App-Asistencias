@@ -3,7 +3,8 @@ import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 class CustomSnackBar {
-  static void show(BuildContext context, String message, {bool isError = false}) {
+  static void show(BuildContext context, String message,
+      {bool isError = false}) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -12,7 +13,7 @@ class CustomSnackBar {
         content: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isError

@@ -53,14 +53,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: AppColors.surface, // Fondo Dark
         behavior: SnackBarBehavior.floating,
         elevation: 6,
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.all(AppSpacing.lg),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.xs)), // Borde 5px
         content: Row(
           children: [
             // Esfera del ícono
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isError
@@ -69,12 +69,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               child: Icon(
                 isError ? Icons.close : Icons.check,
-                color:
-                    isError ? AppColors.danger : AppColors.success,
+                color: isError ? AppColors.danger : AppColors.success,
                 size: 20,
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: AppSpacing.md),
             // Texto
             Expanded(
               child: Text(
@@ -204,18 +203,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: AppColors.surfaceRaised,
             child: Icon(Icons.person, size: 50, color: Colors.white),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: AppSpacing.xxl),
 
           _buildInfoTile(
               'Nombres', fullName.isNotEmpty ? fullName : 'Sin Nombre'),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           _buildInfoTile('Documento', document),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
 
           // Selector de Zona
           _buildZoneSelector(),
 
-          const SizedBox(height: 40),
+          const SizedBox(height: AppSpacing.xxl),
 
           SizedBox(
             width: double.infinity,
@@ -243,13 +242,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: AppSpacing.xxl),
 
           GestureDetector(
             onTap: _handleSecretTap,
             behavior: HitTestBehavior.opaque,
             child: const Padding(
-              padding: EdgeInsets.all(12.0),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Text(
                 "Versión 1.0.3",
                 style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
@@ -269,10 +268,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           label,
           style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.lg),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -310,7 +310,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'Zona',
           style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         CustomDropdown<String>(
           items: _zones,
           initialItem: _selectedZoneLabel,

@@ -57,7 +57,8 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.gutter, vertical: AppSpacing.lg),
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppRadius.xs),
@@ -72,7 +73,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: isError
@@ -81,13 +82,11 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
                   ),
                   child: Icon(
                     isError ? Icons.close : Icons.check,
-                    color: isError
-                        ? AppColors.danger
-                        : AppColors.success,
+                    color: isError ? AppColors.danger : AppColors.success,
                     size: 20,
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     message,
@@ -169,11 +168,11 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
 
     return Padding(
       padding: EdgeInsets.only(
-        left: 24.0,
-        right: 24.0,
-        top: 20.0,
+        left: AppSpacing.xl,
+        right: AppSpacing.xl,
+        top: AppSpacing.xl,
         // ✅ 2. SUBIMOS EL CONTENIDO DEL MODAL
-        // Aumentamos de 40 a 100. Esto empuja el botón hacia arriba
+        // Aumentamos de AppSpacing.xxl a 100. Esto empuja el botón hacia arriba
         // dejando espacio vacío abajo para que el mensaje no lo tape.
         bottom: bottomInset + 100.0,
       ),
@@ -185,7 +184,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
             alignment: Alignment.centerLeft,
             children: [
               Padding(
-                padding: const EdgeInsets.only(right: 48.0),
+                padding: const EdgeInsets.only(right: AppSpacing.xxxl),
                 child: Text(
                   'Reporte de ${widget.task.label}',
                   style: const TextStyle(
@@ -199,20 +198,22 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
                 right: -12,
                 top: -8,
                 child: IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.textSecondary, size: 28),
+                  icon: const Icon(Icons.close,
+                      color: AppColors.textSecondary, size: 28),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           Container(
             height: 150,
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
             child: TextField(
               controller: _descriptionController,
               style: const TextStyle(color: Colors.white),
@@ -226,7 +227,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
           SizedBox(
             height: AppSpacing.ctaHeight,
             child: ElevatedButton(

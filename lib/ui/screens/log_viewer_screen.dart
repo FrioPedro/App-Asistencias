@@ -149,13 +149,14 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
               _buildHeader(context),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
 
               // Buscador
               CustomSearchBar(
@@ -166,7 +167,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                   _applyFilter();
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
 
               // Chips de filtros activos
               if (_selectedDateRange != null || _selectedTypes.isNotEmpty) ...[
@@ -176,13 +177,13 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     children: [
                       if (_selectedDateRange != null) _buildFilterChip('Fecha'),
                       if (_selectedTypes.isNotEmpty) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         _buildFilterChip('Tipo (${_selectedTypes.length})'),
                       ],
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
               ],
 
               // Lista de logs
@@ -223,7 +224,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
               () => _openFilterSheet(),
               isActive: _selectedDateRange != null || _selectedTypes.isNotEmpty,
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             _buildHeaderButton(
               Icons.arrow_back,
               () => Navigator.pop(context),
@@ -250,7 +251,8 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
 
   Widget _buildFilterChip(String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.primary.withOpacity(0.15),
         borderRadius: BorderRadius.circular(AppRadius.sheet),
@@ -266,7 +268,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                 fontSize: 12,
                 fontWeight: FontWeight.bold),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           GestureDetector(
             onTap: () {
               if (label == 'Fecha') {
@@ -297,8 +299,9 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.description_outlined, size: 60, color: AppColors.iconMuted),
-          SizedBox(height: 16),
+          Icon(Icons.description_outlined,
+              size: 60, color: AppColors.iconMuted),
+          SizedBox(height: AppSpacing.lg),
           Text(
             'No se encontraron logs',
             style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
@@ -324,7 +327,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
     final typeLabel = _getTypeLabel(log.type);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: AppColors.surfaceAlt,
@@ -389,7 +392,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
 
           // Contenido
           Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -401,7 +404,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     // Badge de tipo
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                          horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
                       decoration: BoxDecoration(
                         color: color.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(AppRadius.sheet),
@@ -410,7 +413,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(icon, size: 12, color: color),
-                          const SizedBox(width: 2),
+                          const SizedBox(width: AppSpacing.xs),
                           Text(
                             typeLabel,
                             style: TextStyle(
@@ -423,7 +426,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     // Timestamp
                     Text(
                       _formatTimestamp(log.timestamp),
@@ -434,11 +437,11 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.md),
                 // Mensaje
                 Padding(
                   padding: const EdgeInsets.only(
-                      right: 60), // Espacio para no tapar el ícono
+                      right: AppSpacing.xxxl), // Espacio para no tapar el ícono
                   child: Text(
                     log.message,
                     maxLines: 1,

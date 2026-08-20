@@ -81,10 +81,12 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.gutter, vertical: AppSpacing.xl),
       decoration: const BoxDecoration(
         color: AppColors.bg,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -107,14 +109,15 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
 
           // TIPO DE LOG
           const Text(
             'Tipo de Log',
-            style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: AppColors.textSecondary, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: LogType.values.map((type) {
               final isSelected = _selectedTypes.contains(type);
@@ -136,12 +139,12 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
               }
 
               return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+                padding: const EdgeInsets.only(right: AppSpacing.sm),
                 child: GestureDetector(
                   onTap: () => _toggleType(type),
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: isSelected
                           ? typeColor.withOpacity(0.2)
@@ -165,21 +168,22 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
               );
             }).toList(),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xl),
 
           // FECHAS
           const Text(
             'Rango de Fecha',
-            style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                color: AppColors.textSecondary, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(
                 child: _buildDateSelector(
                     'Desde', _startDate, () => _openDatePicker(true)),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _buildDateSelector(
                     'Hasta', _endDate, () => _openDatePicker(false)),
@@ -187,7 +191,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
             ],
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xxl),
 
           // BOTONES
           Row(
@@ -205,7 +209,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
                       style: TextStyle(color: AppColors.textSecondary)),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -221,7 +225,8 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: AppSpacing.md),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppRadius.md)),
                   ),
@@ -241,25 +246,25 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
-              color:
-                  date != null ? AppColors.primary : Colors.transparent),
+              color: date != null ? AppColors.primary : Colors.transparent),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 10)),
-            const SizedBox(height: 4),
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 10)),
+            const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
                 const Icon(Icons.calendar_today,
                     size: 14, color: AppColors.textSecondary),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   _formatDate(date),
                   style: const TextStyle(

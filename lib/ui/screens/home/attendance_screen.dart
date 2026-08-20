@@ -217,18 +217,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.gutter, vertical: AppSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const HomeHeader(),
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.lg),
               CustomSearchBar(
                 controller: _searchController,
                 onChanged: (val) =>
                     setState(() => _searchQuery = val.toLowerCase()),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.lg),
               Expanded(
                 child: _isLoading
                     ? _buildSkeletons()
@@ -259,6 +260,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     return ListView.builder(
       itemCount: 5,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
       itemBuilder: (context, index) => const EventCardSkeleton(),
     );
   }
@@ -288,6 +290,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     } else {
       listContent = ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: AppSpacing.xl),
         itemCount: Attendance.length,
         itemBuilder: (context, index) {
           final event = Attendance[index];

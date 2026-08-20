@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'dart:ui'; // Necesario para ImageFilter.blur
@@ -56,7 +57,7 @@ class EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       clipBehavior:
           Clip.antiAlias, // Para recortar la imagen de fondo y el ripple
       decoration: BoxDecoration(
@@ -100,8 +101,8 @@ class EventCard extends StatelessWidget {
 
               // --- CAPA 2: CONTENIDO DE LA TARJETA ---
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg, vertical: AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -148,7 +149,7 @@ class EventCard extends StatelessWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xs),
 
                     // 2. DESCRIPCIÓN (Nombre del evento/proyecto)
                     Text(
@@ -162,7 +163,7 @@ class EventCard extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 2),
+                    const SizedBox(height: AppSpacing.xs),
 
                     // 3. CLIENTE
                     Text(
@@ -184,8 +185,8 @@ class EventCard extends StatelessWidget {
                       ),
                     ),
 
-                    if (startTime != null && startTime!= "") ...[
-                      const SizedBox(height: 6),
+                    if (startTime != null && startTime != "") ...[
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         'Inicio: $startTime',
                         style: TextStyle(
@@ -199,7 +200,7 @@ class EventCard extends StatelessWidget {
                     ],
 
                     if (!isParticipating && activeTaskName != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         'Actividad en curso: $activeTaskName',
                         style: const TextStyle(

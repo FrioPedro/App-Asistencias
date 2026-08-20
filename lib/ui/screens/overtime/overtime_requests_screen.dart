@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 
@@ -16,7 +17,6 @@ class OvertimeRequestsScreen extends StatefulWidget {
 }
 
 class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
-
   final OvertimeProvider _overtime = OvertimeProvider();
 
   /// Mientras el backend no devuelve solicitudes, se muestra una de ejemplo
@@ -48,7 +48,15 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
   @override
   void initState() {
     super.initState();
-    _load();
+    _bootstrap();
+  }
+
+  /// Muestra primero lo que hay en local y despues consulta al servidor, para
+  /// no dejar la pantalla en blanco mientras responden los proyectos.
+  Future<void> _bootstrap() async {
+    await _load();
+    await _overtime.syncNow();
+    await _load();
   }
 
   Future<void> _load() async {
@@ -87,10 +95,15 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
               : _visibleRequests.isEmpty
                   ? _buildEmptyState()
                   : ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.gutter,
+                        AppSpacing.sm,
+                        AppSpacing.gutter,
+                        AppSpacing.xl,
+                      ),
                       itemCount: _visibleRequests.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 14),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: AppSpacing.lg),
                       itemBuilder: (context, index) => _OvertimeRequestCard(
                         request: _visibleRequests[index],
                       ),
@@ -107,14 +120,14 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
           child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.hourglass_empty,
                       size: 64, color: AppColors.iconMuted),
-                  SizedBox(height: 24),
+                  SizedBox(height: AppSpacing.xl),
                   Text(
                     'Todavía no ha solicitado\nhoras extra',
                     textAlign: TextAlign.center,
@@ -125,7 +138,7 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
                       height: 1.4,
                     ),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: AppSpacing.md),
                   Text(
                     'Pide horas extra desde la asignación.',
                     textAlign: TextAlign.center,
@@ -195,7 +208,7 @@ class _OvertimeRequestCard extends StatelessWidget {
     final submittedAgo = OvertimeFormat.submittedAgo(request.submittedAt);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
@@ -207,7 +220,7 @@ class _OvertimeRequestCard extends StatelessWidget {
           Row(
             children: [
               Icon(_statusIcon, color: _statusColor, size: 20),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   _statusLabel,
@@ -222,11 +235,12 @@ class _OvertimeRequestCard extends StatelessWidget {
               if (submittedAgo.isNotEmpty)
                 Text(
                   submittedAgo,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: const TextStyle(
+                      color: AppColors.textSecondary, fontSize: 12),
                 ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.md),
           Text(
             OvertimeFormat.dateRange(request),
             style: const TextStyle(
@@ -235,14 +249,15 @@ class _OvertimeRequestCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             '${OvertimeFormat.timeRange(request)}  ·  '
             '${OvertimeFormat.duration(request.duration)}',
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            style:
+                const TextStyle(color: AppColors.textSecondary, fontSize: 14),
           ),
           if (_footer.isNotEmpty) ...[
-            const SizedBox(height: 14),
+            const SizedBox(height: AppSpacing.md),
             Text(
               _footer,
               style: const TextStyle(

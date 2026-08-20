@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -51,7 +52,7 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.camera_alt, color: Colors.white, size: 30),
-                SizedBox(height: 4),
+                SizedBox(height: AppSpacing.xs),
                 Text("Cámara",
                     style: TextStyle(color: Colors.white, fontSize: 12))
               ],
@@ -92,11 +93,11 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
         if (_selectedAssets.isNotEmpty)
           Container(
             height: 110,
-            margin: const EdgeInsets.only(bottom: 12),
+            margin: const EdgeInsets.only(bottom: AppSpacing.md),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: _selectedAssets.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
               itemBuilder: (context, index) {
                 final asset = _selectedAssets[index];
                 return Stack(
@@ -118,7 +119,7 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
                       child: GestureDetector(
                         onTap: () => _removeAsset(asset),
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(AppSpacing.xs),
                           decoration: BoxDecoration(
                             color: AppColors.danger,
                             shape: BoxShape.circle,
@@ -154,13 +155,14 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.add_a_photo, color: AppColors.textSecondary),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     _selectedAssets.isEmpty
                         ? "Subir Fotos (Máx ${widget.maxPhotos})"
                         : "Agregar más (${_selectedAssets.length}/${widget.maxPhotos})",
                     style: const TextStyle(
-                        color: AppColors.textSecondary, fontWeight: FontWeight.bold),
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
               ),

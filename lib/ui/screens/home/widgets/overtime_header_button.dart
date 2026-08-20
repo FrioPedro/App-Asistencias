@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 
@@ -15,7 +16,6 @@ class OvertimeHeaderButton extends StatefulWidget {
 }
 
 class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
-
   final OvertimeProvider _overtime = OvertimeProvider();
 
   int _pendingCount = 0;
@@ -88,11 +88,12 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
               top: -2,
               right: -2,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                constraints: const BoxConstraints(minWidth: 18),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: _badgeColor,
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
                   border: Border.all(color: AppColors.bg, width: 2),
                 ),
                 child: Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -59,7 +60,8 @@ class _HorizontalCalendarState extends State<HorizontalCalendar> {
       children: [
         // --- MONTH HEADER ---
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -96,7 +98,7 @@ class _HorizontalCalendarState extends State<HorizontalCalendar> {
           height: 80,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             itemCount: daysInMonth.length,
             itemBuilder: (context, index) {
               final date = daysInMonth[index];
@@ -109,11 +111,9 @@ class _HorizontalCalendarState extends State<HorizontalCalendar> {
                 onTap: () => widget.onDateSelected(date),
                 child: Container(
                   width: 50,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
                   decoration: BoxDecoration(
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.surface,
+                    color: isSelected ? AppColors.primary : AppColors.surface,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                     border: isSelected
                         ? Border.all(color: Colors.blueAccent, width: 1.5)
@@ -127,12 +127,14 @@ class _HorizontalCalendarState extends State<HorizontalCalendar> {
                             .format(date)
                             .toUpperCase(), // LUN/MAR
                         style: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textSecondary,
+                          color: isSelected
+                              ? Colors.white
+                              : AppColors.textSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         date.day.toString(),
                         style: const TextStyle(
