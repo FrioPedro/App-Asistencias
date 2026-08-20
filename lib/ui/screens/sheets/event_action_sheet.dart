@@ -64,6 +64,8 @@ class AssigmentModal extends StatefulWidget {
         onactivityStarted,
     required void Function(String eventKey) onactivityEnded,
   }) {
+    
+    print('[IS ANY EVENT ACTIVE]: $isAnyEventActive');
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E1E1E),
@@ -444,7 +446,7 @@ class _EventActionModalState extends State<AssigmentModal> {
           (widget.isActiveactivity ? 'Puedes gestionar tu turno o solicitar horas extra.' : 'Puedes solicitar horas extra.'),
           style: TextStyle(color: Colors.grey[400], fontSize: 14),
         ),
-        if (widget.isAnyEventActive && widget.isActiveactivity)
+        if (!widget.isAnyEventActive || widget.isActiveactivity)
           _buildManageShiftButton(),
         const SizedBox(height: 20),
         _buildOvertimeShortcut(),
@@ -461,7 +463,7 @@ class _EventActionModalState extends State<AssigmentModal> {
           child: ElevatedButton.icon(
             icon: Icon(widget.isActiveactivity ? Icons.timer : Icons.login),
             label: Text(
-                widget.isActiveactivity ? "MARCAR HORAS" : "INICIAR TURNO"),
+                widget.isActiveactivity ? "Marcar horas" : "Iniciar turno"),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF2E60C4),
               foregroundColor: Colors.white,
@@ -584,7 +586,7 @@ class _EventActionModalState extends State<AssigmentModal> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.bedtime_outlined, color: Colors.grey[300], size: 28),
-                const SizedBox(width: 16),
+                const SizedBox(width: 8),
                 const Text(
                   'Solicitar horas extra',
                   style: TextStyle(

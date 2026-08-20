@@ -67,7 +67,7 @@ class _HomeHeaderState extends State<HomeHeader> {
 
             _buildHeaderButton(
               context,
-              Icons.calendar_month, // Calendario (Historial)
+              Icons.history, // Calendario (Historial)
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const HistoryScreen()),
