@@ -19,6 +19,8 @@ class FormTextField extends StatelessWidget {
   /// Mínimo de caracteres exigido cuando [isRequired] es `true`.
   final int minChars;
 
+  final int? maxChars;
+
   /// Se deshabilita mientras el formulario se está enviando.
   final bool enabled;
 
@@ -30,6 +32,7 @@ class FormTextField extends StatelessWidget {
     this.isRequired = true,
     this.maxLines = 3,
     this.minChars = 0,
+    this.maxChars,
     this.enabled = true,
   });
 
@@ -85,6 +88,7 @@ class FormTextField extends StatelessWidget {
             autovalidateMode: AutovalidateMode.onUserInteraction,
             style: const TextStyle(color: Colors.white, fontSize: 15),
             maxLines: maxLines,
+            maxLength: maxChars,
             enabled: enabled,
             validator: _validate,
             decoration: InputDecoration(
@@ -97,6 +101,7 @@ class FormTextField extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 height: 2.2,
               ),
+              counterText: '',
               contentPadding: const EdgeInsets.all(16),
             ),
           ),
@@ -156,7 +161,7 @@ class FormTextField extends StatelessWidget {
                   ],
                 ),
               Text(
-                '$length/$minChars',
+                '$length/${maxChars ?? minChars}',
                 style: TextStyle(
                   color: color,
                   fontSize: 12,

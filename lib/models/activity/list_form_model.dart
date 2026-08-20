@@ -5,9 +5,13 @@ enum ListForm {
   incidencias,
   conclusiones,
   recomendaciones,
+  foto_general,
 }
 
 extension ListFormX on ListForm {
+  /// Id del backend, arranca en 1. No confundir con el mapa 0-based de
+  /// `note_model.g.dart`, que es el indice de declaracion que Isar usa para
+  /// guardar el enum en la base local.
   int get id {
     switch (this) {
       case ListForm.foto_antes:
@@ -22,6 +26,8 @@ extension ListFormX on ListForm {
         return 5;
       case ListForm.recomendaciones:
         return 6;
+      case ListForm.foto_general:
+        return 7;
     }
   }
 
@@ -29,12 +35,14 @@ extension ListFormX on ListForm {
     final s = (label ?? '').trim().toLowerCase();
 
     if (s == "foto antes") return ListForm.foto_antes;
-    if (s == "foto despues" || s == "foto después")
+    if (s == "foto despues" || s == "foto después") {
       return ListForm.foto_despues;
+    }
     if (s == "acciones") return ListForm.acciones;
     if (s == "incidencias" || s == "indicencias") return ListForm.incidencias;
     if (s == "conclusiones") return ListForm.conclusiones;
     if (s == "recomendaciones") return ListForm.recomendaciones;
+    if (s == "foto general") return ListForm.foto_general;
 
     return ListForm.foto_antes;
   }
@@ -53,6 +61,8 @@ extension ListFormX on ListForm {
         return "Conclusiones";
       case ListForm.recomendaciones:
         return "Recomendaciones";
+      case ListForm.foto_general:
+        return "Foto general";
     }
   }
 }

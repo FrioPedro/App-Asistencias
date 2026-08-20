@@ -13,6 +13,7 @@ import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
 import '../../widgets/custom_snackbar.dart';
 import '../../widgets/form_text_field.dart';
+import '../../../models/activity/list_form_model.dart';
 import '../../../models/activity/photo_item.dart';
 import '../photo_caption_screen.dart';
 import '../../widgets/photo_strip.dart';
@@ -52,7 +53,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
   bool _esMantenimiento = false;
 
   /// Cuando no es mantenimiento solo se usa [_photosAntes], que es el grupo
-  /// único (se envía como `ListForm.foto_antes`).
+  /// único (se envía como `ListForm.foto_general`).
   List<PhotoItem> _photosAntes = [];
   List<PhotoItem> _photosDespues = [];
 
@@ -202,6 +203,9 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       setState(() => _uploadProgress = 0.3);
 
       // Llamada al provider refactorizado
+      final photoNoteType =
+          _esMantenimiento ? ListForm.foto_antes : ListForm.foto_general;
+
       final uploadSuccess = await ServiceExitAsNotes.saveAll(
         sid: widget.event.serverId ?? 0,
         taskType: TaskType.service,
@@ -215,6 +219,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         photosDespues: _esMantenimiento ? (_photosDespues.map((p) => p.asset).toList()) : [],
         descripcionesDespues:
             _esMantenimiento ? (_photosDespues.map((p) => p.caption.text).toList()) : [],
+        photoNoteType: photoNoteType,
       );
 
       if (!uploadSuccess && mounted) {
@@ -277,6 +282,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
 
     // Verificar estado actual de permisos
     final PermissionState ps = await PhotoManager.requestPermissionExtend();
+    if (!mounted) return;
+
     final bool isLimited = ps == PermissionState.limited;
 
     // Obtenemos la acción del bottom sheet
@@ -361,6 +368,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       }
     } else if (action == 'camera') {
       // Para cámara usamos el nuevo PermissionGuard
+      if (!mounted) return;
+
       final hasCameraAccess =
           await PermissionGuard.checkCameraPermission(context);
       if (hasCameraAccess) {
@@ -636,7 +645,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                     controller: _accionesController,
                     hint: 'Describa las acciones realizadas...',
                     isRequired: true,
-                    minChars: 50,
+                    minChars: 30,
                     enabled: !_isSubmitting,
                   ),
                   const SizedBox(height: 16),

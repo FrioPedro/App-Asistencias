@@ -245,6 +245,8 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
 
     // Verificar estado actual de permisos
     final PermissionState ps = await PhotoManager.requestPermissionExtend();
+    if (!mounted) return;
+
     final bool isLimited = ps == PermissionState.limited;
 
     // Obtenemos la acción del bottom sheet
@@ -327,6 +329,8 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
         await _pickFromGallery(maxAssets: remaining);
       }
     } else if (action == 'camera') {
+      if (!mounted) return;
+
       final hasCameraAccess =
           await PermissionGuard.checkCameraPermission(context);
       if (hasCameraAccess) {
@@ -511,7 +515,7 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                     controller: _notesController,
                     hint: 'Describa las actividades realizadas...',
                     isRequired: true,
-                    minChars: 50,
+                    minChars: 30,
                     maxLines: 5,
                     enabled: !_isSubmitting,
                   ),

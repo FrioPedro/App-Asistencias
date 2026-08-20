@@ -115,6 +115,8 @@ class ServiceExitAsNotes {
     List<AssetEntity> photosDespues = const [],
     /// Una descripción por foto, alineada por índice con [photosDespues].
     List<String> descripcionesDespues = const [],
+    /// Si es un servicio de mantenimiento: foto_antes, else foto_general
+    required ListForm photoNoteType,
   }) async {
     assert(
       photosAntes.length == descripcionesAntes.length,
@@ -170,7 +172,7 @@ class ServiceExitAsNotes {
             type: ListForm.recomendaciones);
       }
 
-      // 2) Fotos ANTES
+      // 2) Fotos GENERALES o ANTES
       for (int i = 0; i < photosAntes.length; i++) {
         final File? file = await _resolveAssetFile(photosAntes[i]);
         if (file == null) continue;
@@ -181,7 +183,7 @@ class ServiceExitAsNotes {
             imagePath: file.path,
             activity: activityKey,
             taskType: taskType,
-            type: ListForm.foto_antes);
+            type: photoNoteType); // aquí se pobla el tipo de nota, pero antes y general usan el mismo controlador
       }
 
       // 3) Fotos DESPUÉS

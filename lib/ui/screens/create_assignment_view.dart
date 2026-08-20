@@ -46,6 +46,8 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
         const Duration(milliseconds: 400)); // da tiempo al build
 
     final connectivityResult = await Connectivity().checkConnectivity();
+    if (!mounted) return;
+
     if (connectivityResult.contains(ConnectivityResult.none)) {
       if (!mounted) return;
       showDialog(
@@ -127,6 +129,8 @@ class _CreateAssignmentViewState extends ConsumerState<CreateAssignmentView> {
 
     // 🔹 Verifica conexión a internet
     final connectivityResult = await Connectivity().checkConnectivity();
+    if (!mounted) return;
+
     if (connectivityResult.contains(ConnectivityResult.none)) {
       CustomSnackBar.show(context, 'No hay conexión a internet', isError: true);
       return;

@@ -10,6 +10,7 @@ import 'office_workshop_exit_sheet.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
+import '../overtime/overtime_request_form_screen.dart';
 
 class AssigmentModal extends StatefulWidget {
   final AssigmentModel assignment;
@@ -21,6 +22,10 @@ class AssigmentModal extends StatefulWidget {
   final String keyGroup;
 
   final bool isActiveactivity;
+
+  /// Hay un turno activo en cualquier proyecto, no necesariamente en este.
+  final bool isAnyEventActive;
+
   final IconData? activeIcon;
   final String? activeTaskName;
 
@@ -38,6 +43,7 @@ class AssigmentModal extends StatefulWidget {
     required this.eventKey,
     required this.keyGroup,
     required this.isActiveactivity,
+    this.isAnyEventActive = false,
     this.activeIcon,
     this.activeTaskName,
     required this.onactivityStarted,
@@ -50,6 +56,7 @@ class AssigmentModal extends StatefulWidget {
     required String eventKey,
     required String keyGroup,
     required bool isActiveactivity,
+    bool isAnyEventActive = false,
     IconData? activeIcon,
     String? activeTaskName,
     required void Function(
@@ -71,6 +78,7 @@ class AssigmentModal extends StatefulWidget {
         eventKey: eventKey,
         keyGroup: keyGroup,
         isActiveactivity: isActiveactivity,
+        isAnyEventActive: isAnyEventActive,
         activeIcon: activeIcon,
         activeTaskName: activeTaskName,
         onactivityStarted: onactivityStarted,
@@ -87,6 +95,10 @@ class _EventActionModalState extends State<AssigmentModal> {
   final AttendanceProvider _attendanceService = AttendanceProvider();
   bool _isLoading = false;
 
+  /// El sheet abre en el pre menu; el boton de turno pasa al contenido de
+  /// siempre, que depende de si hay una actividad activa.
+  bool _showShiftContent = false;
+
   void _showCustomSnackBar(String message, {bool isError = false}) {
     if (!mounted) return;
     CustomSnackBar.show(context, message, isError: isError);
@@ -95,7 +107,7 @@ class _EventActionModalState extends State<AssigmentModal> {
   Future<void> _onActivitySelected(String title, IconData icon) async {
     final hasPermission =
         await PermissionGuard.checkLocationPermission(context);
-    if (!hasPermission) return;
+    if (!hasPermission || !mounted) return;
 
     // --- Intercepción de formularios si hay actividad activa ---
     if (widget.isActiveactivity) {
@@ -338,9 +350,11 @@ class _EventActionModalState extends State<AssigmentModal> {
                   ),
                 ),
               )
-            : widget.isActiveactivity
-                ? _buildExitactivityContent()
-                : _buildStartactivityContent(),
+            : _showShiftContent
+                ? (widget.isActiveactivity
+                    ? _buildExitactivityContent()
+                    : _buildStartactivityContent())
+                : _buildPreMenu(),
       ),
     );
   }
@@ -401,6 +415,68 @@ class _EventActionModalState extends State<AssigmentModal> {
     );
   }
 
+  Widget _buildPreMenu() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Gestionar proyecto',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, color: Colors.grey, size: 28),
+              onPressed: () => Navigator.pop(context),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          (widget.isActiveactivity ? 'Puedes gestionar tu turno o solicitar horas extra.' : 'Puedes solicitar horas extra.'),
+          style: TextStyle(color: Colors.grey[400], fontSize: 14),
+        ),
+        if (widget.isAnyEventActive && widget.isActiveactivity)
+          _buildManageShiftButton(),
+        const SizedBox(height: 20),
+        _buildOvertimeShortcut(),
+      ],
+    );
+  }
+
+  Widget _buildManageShiftButton() {
+    return Column(
+      children: [
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            icon: Icon(widget.isActiveactivity ? Icons.timer : Icons.login),
+            label: Text(
+                widget.isActiveactivity ? "MARCAR HORAS" : "INICIAR TURNO"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2E60C4),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () => setState(() => _showShiftContent = true),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildExitactivityContent() {
     final activeIcon = widget.activeIcon;
 
@@ -408,8 +484,6 @@ class _EventActionModalState extends State<AssigmentModal> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Expanded(
               child: Text(
@@ -435,16 +509,6 @@ class _EventActionModalState extends State<AssigmentModal> {
           style: TextStyle(color: Colors.grey[400], fontSize: 14),
         ),
         const SizedBox(height: 20),
-        const Text(
-          'CAMBIAR ACTIVIDAD',
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 12),
         if (activeIcon != Icons.business)
           ActionOption(
             icon: Icons.business,
@@ -491,8 +555,72 @@ class _EventActionModalState extends State<AssigmentModal> {
             onPressed: _onExitSelected,
           ),
         ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+
+  Widget _buildOvertimeShortcut() {
+    final label = widget.assignment.description ?? widget.assignment.documentId;
+    if (label == null || label.trim().isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[800],
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              minimumSize: const Size.fromHeight(56),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: _isLoading ? null : () => _openOvertimeForm(label),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.bedtime_outlined, color: Colors.grey[300], size: 28),
+                const SizedBox(width: 16),
+                const Text(
+                  'Solicitar horas extra',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         const SizedBox(height: 30),
       ],
+    );
+  }
+
+  Future<void> _openOvertimeForm(String label) async {
+    final now = DateTime.now();
+
+    // Sin hora de fin programada en la asignación, se sugiere la próxima media
+    // hora; el operario la confirma en el formulario.
+    final rounded = now.minute == 0 || now.minute == 30
+        ? now
+        : now.add(Duration(minutes: (now.minute < 30 ? 30 : 60) - now.minute));
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OvertimeRequestFormScreen(
+          projectId: widget.assignment.serverId,
+          initialDate: now,
+          initialStartMinutes: rounded.hour * 60 + rounded.minute,
+          contextLabel: label,
+        ),
+      ),
     );
   }
 }

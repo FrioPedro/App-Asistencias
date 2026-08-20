@@ -64,7 +64,7 @@ class ActivitySyncService {
 
         final res = await api.post('/api/attendance/v3', data: payload);
         print("[SYNC] RESPUESTA: ${res.data}");
-        print("[SYNC] DATA: ${payload}");
+        print("[SYNC] DATA: $payload");
 
         final ok = res.statusCode == 200 || res.statusCode == 201;
         if (!ok) {

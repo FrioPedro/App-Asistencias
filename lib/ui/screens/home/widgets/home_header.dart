@@ -4,6 +4,7 @@ import '../../profile_screen.dart';
 import '../../../../providers/profile_provider.dart';
 import '../../../../providers/log_provider.dart';
 import '../../../../models/log_model.dart';
+import 'overtime_header_button.dart';
 
 class HomeHeader extends StatefulWidget {
   const HomeHeader({super.key});
@@ -61,6 +62,9 @@ class _HomeHeaderState extends State<HomeHeader> {
         ),
         Row(
           children: [
+            const OvertimeHeaderButton(),
+            const SizedBox(width: 12),
+
             _buildHeaderButton(
               context,
               Icons.calendar_month, // Calendario (Historial)

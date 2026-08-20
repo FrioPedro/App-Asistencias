@@ -3,16 +3,11 @@ import '../../../models/assigment_model.dart';
 import '../../../providers/attendance_provider.dart';
 import 'card.dart';
 import '../../widgets/event_card_skeleton.dart';
-import '../../widgets/custom_snackbar.dart';
 import '../../widgets/custom_search_bar.dart';
 import '../create_assignment_view.dart';
 import 'widgets/restricted_access_dialog.dart';
 import '../sheets/event_action_sheet.dart';
 import 'widgets/home_header.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
-import '../sheets/service_exit_form_sheet.dart';
-import '../sheets/workshop_exit_form_sheet.dart';
-// import '../../../models/activity/activity_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
 
 class AttendanceScreen extends StatefulWidget {
@@ -172,15 +167,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     print(
         '[TAP] participating keys = ${_participatingAttendance.keys.toList()}');
 
-    if (isAnyEventActive && !isParticipating) {
-      CustomSnackBar.show(
-        context,
-        'Ya tienes un turno activo. Debes marcar salida.',
-        isError: true,
-      );
-      return;
-    }
-
     final keyGroupToSend =
         isParticipating ? (_eventKeyToKeyGroup[eventKey] ?? '') : eventKey;
 
@@ -193,6 +179,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       eventKey: eventKey, // "622"
       keyGroup: keyGroupToSend, // "mRZ..."
       isActiveactivity: isParticipating,
+      isAnyEventActive: isAnyEventActive,
       activeIcon: _participatingAttendance[eventKey],
       activeTaskName: _activeTaskNames[eventKey],
       onactivityStarted: (eventKey, keyGroup, icon, taskName) {
@@ -242,7 +229,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     setState(() => _searchQuery = val.toLowerCase()),
               ),
               const SizedBox(height: 12),
-              if (kDebugMode) _buildDevShortcuts(),
               Expanded(
                 child: _isLoading
                     ? _buildSkeletons()
@@ -265,92 +251,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         },
         backgroundColor: const Color(0xFF2E60C4),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
-      ),
-    );
-  }
-
-  /// Atajos de desarrollo: abren los formularios de salida sin necesidad de
-  /// iniciar y cerrar una asistencia real. Solo se muestran en modo debug
-  /// ([kDebugMode]), por lo que no aparecen en los builds de release.
-  ///
-  /// Usan una asignación ficticia en memoria (nunca se guarda en Isar), así que
-  /// sirven para revisar la interfaz. Enviar el formulario sí generaría notas
-  /// locales con `serverId` 0, por lo que conviene salir con la flecha atrás.
-  Widget _buildDevShortcuts() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildDevShortcutButton(
-              label: 'Ver salida SERVICIO',
-              icon: Icons.build_circle_outlined,
-              onTap: () => _openDevForm(TaskType.service),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _buildDevShortcutButton(
-              label: 'Ver salida TALLER',
-              icon: Icons.handyman_outlined,
-              onTap: () => _openDevForm(TaskType.workshop),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDevShortcutButton({
-    required String label,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return SizedBox(
-      height: 48,
-      child: OutlinedButton.icon(
-        onPressed: onTap,
-        icon: Icon(icon, size: 18),
-        label: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF2E60C4),
-          side: const BorderSide(color: Color(0xFF2E60C4)),
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Abre el formulario de salida correspondiente con datos de prueba.
-  void _openDevForm(TaskType task) {
-    final fakeEvent = AssigmentModel(
-      serverId: 0,
-      documentId: task == TaskType.service ? 'PRS-000000' : 'PRD-000000',
-      client: 'Cliente de prueba',
-      description: 'Asignación de prueba para revisar el formulario',
-    );
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => task == TaskType.service
-            ? ServiceExitFormScreen(
-                event: fakeEvent,
-                eventKey: '0',
-                task: TaskType.service,
-              )
-            : WorkshopExitFormScreen(
-                event: fakeEvent,
-                eventKey: '0',
-                task: TaskType.workshop,
-              ),
       ),
     );
   }

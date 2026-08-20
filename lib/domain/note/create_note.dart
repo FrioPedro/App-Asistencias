@@ -10,9 +10,9 @@ class CreateNote {
     required TaskType taskType,
     String? imagePath,
     String? activity,
-    ListForm type = ListForm.foto_antes,
+    required ListForm type,
   }) async {
-    final activityKey = taskType.name;
+    // final activityKey = taskType.name;
 
     final ts = DateTime.now();
 

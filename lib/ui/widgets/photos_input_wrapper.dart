@@ -29,6 +29,10 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
       specialItemBuilder: (context, path, length) {
         return GestureDetector(
           onTap: () async {
+            // El pop cierra el picker, no esta pantalla: se toma el Navigator
+            // de su context antes de abrir la camara.
+            final navigator = Navigator.of(context);
+
             final AssetEntity? result = await CameraPicker.pickFromCamera(
               context,
               pickerConfig: const CameraPickerConfig(
@@ -36,9 +40,8 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
                 shouldDeletePreviewFile: true,
               ),
             );
-            if (result != null && mounted) {
-              Navigator.pop(context, [result]);
-            }
+
+            if (result != null) navigator.pop([result]);
           },
           child: Container(
             color: Colors.grey[900],

@@ -6,6 +6,7 @@ import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/models/user/user_model.dart';
 import 'package:app_asistencias/models/note_model.dart';
 import 'package:app_asistencias/models/log_model.dart';
+import 'package:app_asistencias/models/overtime_request_model.dart';
 
 class Database {
   static Isar? _instance;
@@ -39,6 +40,7 @@ class Database {
         UserModelSchema,
         NoteModelSchema,
         LogModelSchema,
+        OvertimeRequestModelSchema,
       ],
       directory: dir.path,
       inspector: true,

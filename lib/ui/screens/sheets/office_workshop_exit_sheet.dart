@@ -7,6 +7,7 @@ import 'package:app_asistencias/providers/notes_provider.dart';
 import 'package:app_asistencias/providers/log_provider.dart';
 import 'package:app_asistencias/models/log_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
+import 'package:app_asistencias/models/activity/list_form_model.dart';
 
 class OfficeWorkshopExitModal extends StatefulWidget {
   final AssigmentModel event;
@@ -133,7 +134,8 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
             taskType: widget.task,
             document: sid.toString(),
             description:
-                "[Reporte ${widget.task.label}]: ${_descriptionController.text.trim()}");
+                "[Reporte ${widget.task.label}]: ${_descriptionController.text.trim()}",
+            type: ListForm.acciones);
       }
 
       if (mounted) {

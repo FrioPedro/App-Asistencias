@@ -1,0 +1,174 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+import 'package:isar/isar.dart';
+
+import 'package:app_asistencias/models/note_model.dart' show SyncStatus;
+
+part 'overtime_request_model.g.dart';
+
+/// Estado de la solicitud desde el punto de vista del operario.
+enum OvertimeStatus { pending, approved, rejected }
+
+/// Solicitud anticipada de horas extra.
+///
+/// El servidor maneja el bloque como dos timestamps (`Initial` / `Finish`),
+/// asi que aca se guardan igual. La sincronizacion vive en
+/// `lib/domain/overtime/sync_overtime_request.dart`.
+@collection
+class OvertimeRequestModel {
+  Id id = Isar.autoIncrement;
+
+  /// Identifier de la asignacion (`AssigmentModel.serverId`). Es el `project`
+  /// que piden los dos endpoints.
+  @Index()
+  late int projectId;
+
+  /// Inicio del bloque, fecha y hora juntas.
+  late DateTime start;
+
+  /// Fin del bloque, fecha y hora juntas.
+  late DateTime end;
+
+  /// Viaja al servidor como `description`.
+  late String justification;
+
+  /// Sello local: el servidor no guarda cuando se envio la solicitud. Queda
+  /// en null en las solicitudes que solo existen en el servidor.
+  @Index()
+  DateTime? submittedAt;
+
+  /// Nombre del colaborador, tal como lo devuelve el listado.
+  String? collaborator;
+
+  @enumerated
+  OvertimeStatus status = OvertimeStatus.pending;
+
+  @Index()
+  @enumerated
+  SyncStatus syncStatus = SyncStatus.pending;
+
+  @Index(unique: true, replace: true)
+  late String dedupKey;
+
+  /// Constructor que usa Isar al leer de la base.
+  OvertimeRequestModel({
+    required this.projectId,
+    required this.start,
+    required this.end,
+    required this.justification,
+    this.submittedAt,
+    this.collaborator,
+    this.status = OvertimeStatus.pending,
+    this.syncStatus = SyncStatus.pending,
+  }) {
+    dedupKey = buildDedupKey(projectId: projectId, start: start, end: end);
+  }
+
+  /// Constructor de la app: descarta los segundos y sella la fecha de envio.
+  factory OvertimeRequestModel.create({
+    required int projectId,
+    required DateTime start,
+    required DateTime end,
+    required String justification,
+    DateTime? submittedAt,
+    OvertimeStatus status = OvertimeStatus.pending,
+    SyncStatus syncStatus = SyncStatus.pending,
+  }) {
+    return OvertimeRequestModel(
+      projectId: projectId,
+      start: toMinute(start),
+      end: toMinute(end),
+      justification: justification,
+      submittedAt: submittedAt ?? DateTime.now(),
+      status: status,
+      syncStatus: syncStatus,
+    );
+  }
+
+  /// El listado no devuelve el proyecto: lo aporta quien hizo la consulta.
+  OvertimeRequestModel.fromServer(
+    Map<String, dynamic> json, {
+    required int projectId,
+  }) {
+    this.projectId = projectId;
+    start = toMinute(_parseDate(json['Initial']));
+    end = toMinute(_parseDate(json['Finish']));
+    justification = (json['Description'] as String?) ?? '';
+    collaborator = json['Collaborator'] as String?;
+    status = _parseStatus(json['Status']);
+
+    syncStatus = SyncStatus.synced;
+
+    dedupKey = buildDedupKey(projectId: projectId, start: start, end: end);
+  }
+
+  // ---------------- calculo de horas ----------------
+
+  @ignore
+  Duration get duration => end.difference(start);
+
+  @ignore
+  int get totalMinutes => duration.inMinutes;
+
+  /// El fin cae en un dia distinto al del inicio.
+  @ignore
+  bool get spansDays => dateOnly(end).isAfter(dateOnly(start));
+
+  // ---------------- helpers ----------------
+
+  /// Normaliza a medianoche local.
+  static DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  /// Descarta segundos y milisegundos: el servidor trabaja al minuto.
+  static DateTime toMinute(DateTime d) =>
+      DateTime(d.year, d.month, d.day, d.hour, d.minute);
+
+  static String buildDedupKey({
+    required int projectId,
+    required DateTime start,
+    required DateTime end,
+  }) {
+    final base = [
+      projectId.toString(),
+      toMinute(start).toIso8601String(),
+      toMinute(end).toIso8601String(),
+    ].join('|');
+
+    return sha1.convert(utf8.encode(base)).toString().substring(0, 20);
+  }
+
+  static OvertimeStatus _parseStatus(dynamic v) {
+    final raw = (v is String ? v : v?.toString() ?? '').trim().toLowerCase();
+    switch (raw) {
+      case 'approved':
+      case 'aprobado':
+      case 'aprobada':
+        return OvertimeStatus.approved;
+      case 'rejected':
+      case 'rechazado':
+      case 'rechazada':
+        return OvertimeStatus.rejected;
+      default:
+        return OvertimeStatus.pending;
+    }
+  }
+
+  static DateTime _parseDate(dynamic v) {
+    final fallback = DateTime.fromMillisecondsSinceEpoch(0);
+
+    if (v == null) return fallback;
+    if (v is DateTime) return v;
+    if (v is int) return DateTime.fromMillisecondsSinceEpoch(v);
+
+    if (v is String) {
+      final iso = DateTime.tryParse(v);
+      if (iso != null) return iso;
+
+      final fixed = DateTime.tryParse(v.replaceFirst(' ', 'T'));
+      if (fixed != null) return fixed;
+    }
+
+    return fallback;
+  }
+}

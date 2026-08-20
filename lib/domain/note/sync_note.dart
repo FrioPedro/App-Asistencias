@@ -169,7 +169,7 @@ class NoteSyncService {
       'type': n.type.id,
     };
 
-    print("[Notes]: ${map}");
+    print("[Notes]: $map");
 
     if (n.imagePath != null && n.imagePath!.trim().isNotEmpty) {
       final file = File(n.imagePath!);

@@ -30,6 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Traduce los dialogos nativos de Material (showDatePicker / showTimePicker)
+  # al español; sin esto salen en ingles.
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -46,7 +50,10 @@ dependencies:
   flutter_riverpod: ^2.5.1
   animated_custom_dropdown: ^3.1.1
   workmanager: ^0.7.0
-  intl: ^0.20.2
+  # Cuidado para no romper con el SDK
+  intl: ">=0.19.0 <0.21.0"
+  # Usado directamente por los `dedupKey` de notas y horas extra.
+  crypto: ^3.0.6
   wechat_assets_picker: ^9.1.0
   wechat_camera_picker: ^4.3.1
   permission_handler: ^11.3.1

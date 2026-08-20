@@ -290,6 +290,7 @@ const _NoteModeltypeEnumValueMap = {
   'incidencias': 3,
   'conclusiones': 4,
   'recomendaciones': 5,
+  'foto_general': 6,
 };
 const _NoteModeltypeValueEnumMap = {
   0: ListForm.foto_antes,
@@ -298,6 +299,7 @@ const _NoteModeltypeValueEnumMap = {
   3: ListForm.incidencias,
   4: ListForm.conclusiones,
   5: ListForm.recomendaciones,
+  6: ListForm.foto_general,
 };
 
 Id _noteModelGetId(NoteModel object) {
