@@ -76,7 +76,7 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.hourglass_empty,
+              icon: const Icon(Icons.assignment,
                   color: Colors.white, size: 20),
               padding: EdgeInsets.zero,
               tooltip: 'Mis solicitudes de horas extra',

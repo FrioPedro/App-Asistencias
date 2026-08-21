@@ -18,49 +18,74 @@ const OvertimeRequestModelSchema = CollectionSchema(
   name: r'OvertimeRequestModel',
   id: -4773019173707968068,
   properties: {
-    r'collaborator': PropertySchema(
+    r'approver': PropertySchema(
       id: 0,
+      name: r'approver',
+      type: IsarType.string,
+    ),
+    r'collaborator': PropertySchema(
+      id: 1,
       name: r'collaborator',
       type: IsarType.string,
     ),
     r'dedupKey': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'dedupKey',
       type: IsarType.string,
     ),
     r'end': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'end',
       type: IsarType.dateTime,
     ),
     r'justification': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'justification',
       type: IsarType.string,
     ),
+    r'previousEnd': PropertySchema(
+      id: 5,
+      name: r'previousEnd',
+      type: IsarType.dateTime,
+    ),
+    r'previousStart': PropertySchema(
+      id: 6,
+      name: r'previousStart',
+      type: IsarType.dateTime,
+    ),
     r'projectId': PropertySchema(
-      id: 4,
+      id: 7,
       name: r'projectId',
       type: IsarType.long,
     ),
+    r'resolvedAt': PropertySchema(
+      id: 8,
+      name: r'resolvedAt',
+      type: IsarType.dateTime,
+    ),
     r'start': PropertySchema(
-      id: 5,
+      id: 9,
       name: r'start',
       type: IsarType.dateTime,
     ),
     r'status': PropertySchema(
-      id: 6,
+      id: 10,
       name: r'status',
       type: IsarType.byte,
       enumMap: _OvertimeRequestModelstatusEnumValueMap,
     ),
     r'submittedAt': PropertySchema(
-      id: 7,
+      id: 11,
       name: r'submittedAt',
       type: IsarType.dateTime,
     ),
+    r'sustenance': PropertySchema(
+      id: 12,
+      name: r'sustenance',
+      type: IsarType.string,
+    ),
     r'syncStatus': PropertySchema(
-      id: 8,
+      id: 13,
       name: r'syncStatus',
       type: IsarType.byte,
       enumMap: _OvertimeRequestModelsyncStatusEnumValueMap,
@@ -140,6 +165,12 @@ int _overtimeRequestModelEstimateSize(
 ) {
   var bytesCount = offsets.last;
   {
+    final value = object.approver;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.collaborator;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -147,6 +178,12 @@ int _overtimeRequestModelEstimateSize(
   }
   bytesCount += 3 + object.dedupKey.length * 3;
   bytesCount += 3 + object.justification.length * 3;
+  {
+    final value = object.sustenance;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -156,15 +193,20 @@ void _overtimeRequestModelSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.collaborator);
-  writer.writeString(offsets[1], object.dedupKey);
-  writer.writeDateTime(offsets[2], object.end);
-  writer.writeString(offsets[3], object.justification);
-  writer.writeLong(offsets[4], object.projectId);
-  writer.writeDateTime(offsets[5], object.start);
-  writer.writeByte(offsets[6], object.status.index);
-  writer.writeDateTime(offsets[7], object.submittedAt);
-  writer.writeByte(offsets[8], object.syncStatus.index);
+  writer.writeString(offsets[0], object.approver);
+  writer.writeString(offsets[1], object.collaborator);
+  writer.writeString(offsets[2], object.dedupKey);
+  writer.writeDateTime(offsets[3], object.end);
+  writer.writeString(offsets[4], object.justification);
+  writer.writeDateTime(offsets[5], object.previousEnd);
+  writer.writeDateTime(offsets[6], object.previousStart);
+  writer.writeLong(offsets[7], object.projectId);
+  writer.writeDateTime(offsets[8], object.resolvedAt);
+  writer.writeDateTime(offsets[9], object.start);
+  writer.writeByte(offsets[10], object.status.index);
+  writer.writeDateTime(offsets[11], object.submittedAt);
+  writer.writeString(offsets[12], object.sustenance);
+  writer.writeByte(offsets[13], object.syncStatus.index);
 }
 
 OvertimeRequestModel _overtimeRequestModelDeserialize(
@@ -174,20 +216,25 @@ OvertimeRequestModel _overtimeRequestModelDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = OvertimeRequestModel(
-    collaborator: reader.readStringOrNull(offsets[0]),
-    end: reader.readDateTime(offsets[2]),
-    justification: reader.readString(offsets[3]),
-    projectId: reader.readLong(offsets[4]),
-    start: reader.readDateTime(offsets[5]),
+    approver: reader.readStringOrNull(offsets[0]),
+    collaborator: reader.readStringOrNull(offsets[1]),
+    end: reader.readDateTime(offsets[3]),
+    justification: reader.readString(offsets[4]),
+    previousEnd: reader.readDateTimeOrNull(offsets[5]),
+    previousStart: reader.readDateTimeOrNull(offsets[6]),
+    projectId: reader.readLong(offsets[7]),
+    resolvedAt: reader.readDateTimeOrNull(offsets[8]),
+    start: reader.readDateTime(offsets[9]),
     status: _OvertimeRequestModelstatusValueEnumMap[
-            reader.readByteOrNull(offsets[6])] ??
+            reader.readByteOrNull(offsets[10])] ??
         OvertimeStatus.pending,
-    submittedAt: reader.readDateTimeOrNull(offsets[7]),
+    submittedAt: reader.readDateTimeOrNull(offsets[11]),
+    sustenance: reader.readStringOrNull(offsets[12]),
     syncStatus: _OvertimeRequestModelsyncStatusValueEnumMap[
-            reader.readByteOrNull(offsets[8])] ??
+            reader.readByteOrNull(offsets[13])] ??
         SyncStatus.pending,
   );
-  object.dedupKey = reader.readString(offsets[1]);
+  object.dedupKey = reader.readString(offsets[2]);
   object.id = id;
   return object;
 }
@@ -202,22 +249,32 @@ P _overtimeRequestModelDeserializeProp<P>(
     case 0:
       return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readDateTime(offset)) as P;
-    case 3:
       return (reader.readString(offset)) as P;
-    case 4:
-      return (reader.readLong(offset)) as P;
-    case 5:
+    case 3:
       return (reader.readDateTime(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readDateTimeOrNull(offset)) as P;
     case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
+      return (reader.readLong(offset)) as P;
+    case 8:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 9:
+      return (reader.readDateTime(offset)) as P;
+    case 10:
       return (_OvertimeRequestModelstatusValueEnumMap[
               reader.readByteOrNull(offset)] ??
           OvertimeStatus.pending) as P;
-    case 7:
+    case 11:
       return (reader.readDateTimeOrNull(offset)) as P;
-    case 8:
+    case 12:
+      return (reader.readStringOrNull(offset)) as P;
+    case 13:
       return (_OvertimeRequestModelsyncStatusValueEnumMap[
               reader.readByteOrNull(offset)] ??
           SyncStatus.pending) as P;
@@ -777,6 +834,162 @@ extension OvertimeRequestModelQueryWhere
 extension OvertimeRequestModelQueryFilter on QueryBuilder<OvertimeRequestModel,
     OvertimeRequestModel, QFilterCondition> {
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'approver',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'approver',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'approver',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'approver',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'approver',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'approver',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'approver',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'approver',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+          QAfterFilterCondition>
+      approverContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'approver',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+          QAfterFilterCondition>
+      approverMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'approver',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'approver',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> approverIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'approver',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
       QAfterFilterCondition> collaboratorIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1321,6 +1534,154 @@ extension OvertimeRequestModelQueryFilter on QueryBuilder<OvertimeRequestModel,
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousEndIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'previousEnd',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousEndIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'previousEnd',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousEndEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'previousEnd',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousEndGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'previousEnd',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousEndLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'previousEnd',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousEndBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'previousEnd',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousStartIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'previousStart',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousStartIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'previousStart',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousStartEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'previousStart',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousStartGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'previousStart',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousStartLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'previousStart',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> previousStartBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'previousStart',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
       QAfterFilterCondition> projectIdEqualTo(int value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1368,6 +1729,80 @@ extension OvertimeRequestModelQueryFilter on QueryBuilder<OvertimeRequestModel,
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'projectId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> resolvedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'resolvedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> resolvedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'resolvedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> resolvedAtEqualTo(DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'resolvedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> resolvedAtGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'resolvedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> resolvedAtLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'resolvedAt',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> resolvedAtBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'resolvedAt',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -1563,6 +1998,162 @@ extension OvertimeRequestModelQueryFilter on QueryBuilder<OvertimeRequestModel,
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'sustenance',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'sustenance',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sustenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'sustenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'sustenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'sustenance',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'sustenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'sustenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+          QAfterFilterCondition>
+      sustenanceContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'sustenance',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+          QAfterFilterCondition>
+      sustenanceMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'sustenance',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'sustenance',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
+      QAfterFilterCondition> sustenanceIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'sustenance',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel,
       QAfterFilterCondition> syncStatusEqualTo(SyncStatus value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -1628,6 +2219,20 @@ extension OvertimeRequestModelQueryLinks on QueryBuilder<OvertimeRequestModel,
 extension OvertimeRequestModelQuerySortBy
     on QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QSortBy> {
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByApprover() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'approver', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByApproverDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'approver', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
       sortByCollaborator() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'collaborator', Sort.asc);
@@ -1684,6 +2289,34 @@ extension OvertimeRequestModelQuerySortBy
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByPreviousEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousEnd', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByPreviousEndDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousEnd', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByPreviousStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousStart', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByPreviousStartDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousStart', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
       sortByProjectId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'projectId', Sort.asc);
@@ -1694,6 +2327,20 @@ extension OvertimeRequestModelQuerySortBy
       sortByProjectIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'projectId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByResolvedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resolvedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortByResolvedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resolvedAt', Sort.desc);
     });
   }
 
@@ -1740,6 +2387,20 @@ extension OvertimeRequestModelQuerySortBy
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortBySustenance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sustenance', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      sortBySustenanceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sustenance', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
       sortBySyncStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'syncStatus', Sort.asc);
@@ -1756,6 +2417,20 @@ extension OvertimeRequestModelQuerySortBy
 
 extension OvertimeRequestModelQuerySortThenBy
     on QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QSortThenBy> {
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByApprover() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'approver', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByApproverDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'approver', Sort.desc);
+    });
+  }
+
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
       thenByCollaborator() {
     return QueryBuilder.apply(this, (query) {
@@ -1827,6 +2502,34 @@ extension OvertimeRequestModelQuerySortThenBy
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByPreviousEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousEnd', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByPreviousEndDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousEnd', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByPreviousStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousStart', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByPreviousStartDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'previousStart', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
       thenByProjectId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'projectId', Sort.asc);
@@ -1837,6 +2540,20 @@ extension OvertimeRequestModelQuerySortThenBy
       thenByProjectIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'projectId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByResolvedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resolvedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenByResolvedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'resolvedAt', Sort.desc);
     });
   }
 
@@ -1883,6 +2600,20 @@ extension OvertimeRequestModelQuerySortThenBy
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenBySustenance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sustenance', Sort.asc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
+      thenBySustenanceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'sustenance', Sort.desc);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QAfterSortBy>
       thenBySyncStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'syncStatus', Sort.asc);
@@ -1899,6 +2630,13 @@ extension OvertimeRequestModelQuerySortThenBy
 
 extension OvertimeRequestModelQueryWhereDistinct
     on QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct> {
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
+      distinctByApprover({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'approver', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
       distinctByCollaborator({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1929,9 +2667,30 @@ extension OvertimeRequestModelQueryWhereDistinct
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
+      distinctByPreviousEnd() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'previousEnd');
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
+      distinctByPreviousStart() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'previousStart');
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
       distinctByProjectId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'projectId');
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
+      distinctByResolvedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'resolvedAt');
     });
   }
 
@@ -1957,6 +2716,13 @@ extension OvertimeRequestModelQueryWhereDistinct
   }
 
   QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
+      distinctBySustenance({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'sustenance', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, OvertimeRequestModel, QDistinct>
       distinctBySyncStatus() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'syncStatus');
@@ -1969,6 +2735,13 @@ extension OvertimeRequestModelQueryProperty on QueryBuilder<
   QueryBuilder<OvertimeRequestModel, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, String?, QQueryOperations>
+      approverProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'approver');
     });
   }
 
@@ -1999,10 +2772,31 @@ extension OvertimeRequestModelQueryProperty on QueryBuilder<
     });
   }
 
+  QueryBuilder<OvertimeRequestModel, DateTime?, QQueryOperations>
+      previousEndProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'previousEnd');
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, DateTime?, QQueryOperations>
+      previousStartProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'previousStart');
+    });
+  }
+
   QueryBuilder<OvertimeRequestModel, int, QQueryOperations>
       projectIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'projectId');
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, DateTime?, QQueryOperations>
+      resolvedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'resolvedAt');
     });
   }
 
@@ -2024,6 +2818,13 @@ extension OvertimeRequestModelQueryProperty on QueryBuilder<
       submittedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'submittedAt');
+    });
+  }
+
+  QueryBuilder<OvertimeRequestModel, String?, QQueryOperations>
+      sustenanceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'sustenance');
     });
   }
 

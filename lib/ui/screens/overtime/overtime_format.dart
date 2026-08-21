@@ -35,8 +35,41 @@ class OvertimeFormat {
   static String shortDate(DateTime d) =>
       '${_weekdays[d.weekday - 1]} ${d.day} ${_months[d.month - 1]}';
 
+  /// "20"
+  static String day(DateTime d) => '${d.day}';
+
   /// "20 Ago"
   static String dayMonth(DateTime d) => '${d.day} ${_months[d.month - 1]}';
+
+  /// "20 Ago 27"
+  static String dayMonthYear(DateTime d) => '${d.day} ${_months[d.month - 1]} '
+      '${(d.year % 100).toString().padLeft(2, '0')}';
+
+  /// "por Juan Perez", o vacio: una solicitud pendiente todavia no tiene quien
+  /// la resuelva.
+  static String approverLine(OvertimeRequestModel r) {
+    final approver = r.approver;
+
+    if (r.status == OvertimeStatus.pending ||
+        approver == null ||
+        approver.isEmpty) {
+      return '';
+    }
+
+    return 'por $approver';
+  }
+
+  /// "Pendiente" / "Aprobado" / "Rechazado".
+  static String statusLabel(OvertimeStatus status) {
+    switch (status) {
+      case OvertimeStatus.approved:
+        return 'Aprobado';
+      case OvertimeStatus.rejected:
+        return 'Rechazado';
+      case OvertimeStatus.pending:
+        return 'Pendiente';
+    }
+  }
 
   /// "6:00 p.m." a partir de un DateTime.
   static String timeOf(DateTime d) => time(d.hour * 60 + d.minute);
@@ -54,19 +87,16 @@ class OvertimeFormat {
     return '$hour12:${minute.toString().padLeft(2, '0')} $suffix';
   }
 
-  /// "Jue 20 Ago", o "Jue 20 Ago → Vie 21 Ago" si cruza a otro día.
+  /// "20 Ago", "20 Ago → 21 Ago", o "31 Dic 26 → 1 Ene 27" cuando el
+  /// rango cruza de año.
   static String dateRange(OvertimeRequestModel r) {
-    if (!r.spansDays) return shortDate(r.start);
-    return '${shortDate(r.start)} → ${shortDate(r.end)}';
-  }
-
-  /// "6:00 p.m. – 10:00 p.m.", o "6:00 p.m. – 2:00 a.m. del 21 Ago" si cruza
-  /// a otro día.
-  static String timeRange(OvertimeRequestModel r) {
-    if (!r.spansDays) {
-      return '${timeOf(r.start)} – ${timeOf(r.end)}';
+    if (!r.spansDays) return dayMonth(r.start);
+    if (r.start.year != r.end.year) {
+      return '${dayMonthYear(r.start)} → ${dayMonthYear(r.end)}';
+    } else if (r.start.month == r.end.month) {
+      return '${day(r.start)} → ${dayMonth(r.end)}';
     }
-    return '${timeOf(r.start)} – ${timeOf(r.end)} del ${dayMonth(r.end)}';
+    return '${dayMonth(r.start)} → ${dayMonth(r.end)}';
   }
 
   /// "4 h" / "19 h 24 min" / "45 min".
@@ -99,7 +129,15 @@ class OvertimeFormat {
     return '$hours h $minutes min extra';
   }
 
-  /// "recién enviado" / "enviado hace 5 h" / "enviado hace 3d". Devuelve
+  /// "20 Ago 27, 6:00 p.m.". Vacio cuando la solicitud vino del servidor, que
+  /// no devuelve el envio.
+  static String submittedOn(DateTime? submittedAt) {
+    if (submittedAt == null) return '';
+
+    return '${dayMonthYear(submittedAt)}, ${timeOf(submittedAt)}';
+  }
+
+  /// "recién" / "5 h" / "3d". Devuelve
   /// vacío cuando la solicitud vino del servidor, que no guarda el envío.
   static String submittedAgo(DateTime? submittedAt, {DateTime? now}) {
     if (submittedAt == null) return '';
@@ -107,14 +145,14 @@ class OvertimeFormat {
     final reference = now ?? DateTime.now();
     final diff = reference.difference(submittedAt);
 
-    if (diff.isNegative || diff.inMinutes < 60) return 'recién enviado';
-    if (diff.inHours < 24) return 'enviado hace ${diff.inHours} h';
-    if (diff.inDays < 7) return 'enviado hace ${diff.inDays}d';
+    if (diff.isNegative || diff.inMinutes < 60) return 'recién';
+    if (diff.inHours < 24) return 'hace ${diff.inHours} h';
+    if (diff.inDays < 7) return 'hace ${diff.inDays}d';
 
     final weeks = diff.inDays ~/ 7;
-    if (weeks < 5) return 'enviado hace $weeks sem';
+    if (weeks < 5) return 'hace $weeks sem';
 
     final months = diff.inDays ~/ 30;
-    return 'enviado hace $months mes${months == 1 ? '' : 'es'}';
+    return 'hace $months mes${months == 1 ? '' : 'es'}';
   }
 }

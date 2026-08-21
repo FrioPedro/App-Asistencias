@@ -113,8 +113,10 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
   bool get _spansDays => OvertimeRequestModel.dateOnly(_end)
       .isAfter(OvertimeRequestModel.dateOnly(_start));
 
+  bool get _startIsPast => !_start.isAfter(DateTime.now());
+
   bool get _hasValidRange =>
-      _duration > Duration.zero && _duration <= _maxDuration;
+      !_startIsPast && _duration > Duration.zero && _duration <= _maxDuration;
 
   bool get _canSubmit =>
       !_isSubmitting &&
@@ -418,6 +420,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
   Widget _buildTotalDuration() {
     if (!_hasValidRange) {
       final tooLong = _duration > _maxDuration;
+      final startIsPast = _startIsPast;
 
       return Container(
         width: double.infinity,
@@ -428,9 +431,11 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Text(
-          tooLong
-              ? 'Son más de 72 horas seguidas. Revise la fecha de fin.'
-              : 'El fin debe ser después del inicio',
+          startIsPast
+              ? 'Inicio no válido. Las horas extra se deben solicitar por adelantado.'
+              : tooLong
+                  ? 'Son más de 72 horas seguidas. Revise la fecha de fin.'
+                  : 'El fin debe ser después del inicio',
           textAlign: TextAlign.center,
           style: const TextStyle(
             color: AppColors.danger,

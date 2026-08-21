@@ -33,13 +33,32 @@ class OvertimeRequestModel {
   /// Viaja al servidor como `description`.
   late String justification;
 
-  /// Sello local: el servidor no guarda cuando se envio la solicitud. Queda
-  /// en null en las solicitudes que solo existen en el servidor.
+  /// Cuando se envio la solicitud. Lo sella la app al crearla y lo confirma
+  /// el servidor al listar. Queda en null si ninguno de los dos lo aporta.
   @Index()
   DateTime? submittedAt;
 
   /// Nombre del colaborador, tal como lo devuelve el listado.
   String? collaborator;
+
+  /// Quien aprobo o rechazo la solicitud (`Approver`). Vacio mientras esta
+  /// pendiente.
+  String? approver;
+
+  /// Respuesta del supervisor (`Sustenance`).
+  String? sustenance;
+
+  /// Cuando el supervisor resolvio la solicitud. Null mientras sigue
+  /// pendiente.
+  DateTime? resolvedAt;
+
+  /// Inicio que se habia solicitado antes de que el supervisor lo moviera
+  /// (`InitialChanged`). Null cuando nadie lo toco: `start` siempre es el
+  /// valor vigente.
+  DateTime? previousStart;
+
+  /// Igual que [previousStart], para el fin (`FinishChanged`).
+  DateTime? previousEnd;
 
   @enumerated
   OvertimeStatus status = OvertimeStatus.pending;
@@ -59,6 +78,11 @@ class OvertimeRequestModel {
     required this.justification,
     this.submittedAt,
     this.collaborator,
+    this.approver,
+    this.sustenance,
+    this.resolvedAt,
+    this.previousStart,
+    this.previousEnd,
     this.status = OvertimeStatus.pending,
     this.syncStatus = SyncStatus.pending,
   }) {
@@ -96,6 +120,12 @@ class OvertimeRequestModel {
     end = toMinute(_parseDate(json['Finish']));
     justification = (json['Description'] as String?) ?? '';
     collaborator = json['Collaborator'] as String?;
+    approver = _parseText(json['Approver']);
+    sustenance = _parseText(json['Sustenance']);
+    resolvedAt = _parseResolvedAt(json);
+    previousStart = _changedFrom(json['InitialChanged'], start);
+    previousEnd = _changedFrom(json['FinishChanged'], end);
+    submittedAt = _parseNullableDate(json['Timestamp']);
     status = _parseStatus(json['Status']);
 
     syncStatus = SyncStatus.synced;
@@ -107,9 +137,6 @@ class OvertimeRequestModel {
 
   @ignore
   Duration get duration => end.difference(start);
-
-  @ignore
-  int get totalMinutes => duration.inMinutes;
 
   /// El fin cae en un dia distinto al del inicio.
   @ignore
@@ -123,6 +150,30 @@ class OvertimeRequestModel {
   /// Descarta segundos y milisegundos: el servidor trabaja al minuto.
   static DateTime toMinute(DateTime d) =>
       DateTime(d.year, d.month, d.day, d.hour, d.minute);
+
+  /// `Approved` sella la aprobacion y tambien el rechazo; `Modified` sella el
+  /// cambio de horas, que equivale a una re-aprobacion. Gana la mas reciente:
+  /// esa es la ultima vez que el supervisor definio el bloque.
+  static DateTime? _parseResolvedAt(Map<String, dynamic> json) {
+    final dates = [json['Approved'], json['Modified']]
+        .map(_parseNullableDate)
+        .whereType<DateTime>()
+        .toList();
+
+    if (dates.isEmpty) return null;
+
+    return dates.reduce((a, b) => a.isAfter(b) ? a : b);
+  }
+
+  /// El listado manda `InitialChanged`/`FinishChanged` incluso cuando el
+  /// supervisor no movio la hora: solo cuenta si difiere del vigente.
+  static DateTime? _changedFrom(dynamic raw, DateTime current) {
+    final previous = _parseNullableDate(raw);
+    if (previous == null) return null;
+
+    final normalized = toMinute(previous);
+    return normalized.isAtSameMomentAs(current) ? null : normalized;
+  }
 
   static String buildDedupKey({
     required int projectId,
@@ -138,16 +189,30 @@ class OvertimeRequestModel {
     return sha1.convert(utf8.encode(base)).toString().substring(0, 20);
   }
 
+  /// Para los campos opcionales del listado: ausente, null o ilegible es null,
+  /// no la fecha cero que devuelve [_parseDate].
+  static DateTime? _parseNullableDate(dynamic v) {
+    if (v == null) return null;
+
+    final parsed = _parseDate(v);
+    return parsed.millisecondsSinceEpoch == 0 ? null : toMinute(parsed);
+  }
+
+  /// El listado manda los textos vacios como `""`: se guardan como null para
+  /// que la UI los trate igual que un campo ausente.
+  static String? _parseText(dynamic v) {
+    if (v is! String) return null;
+
+    final trimmed = v.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
   static OvertimeStatus _parseStatus(dynamic v) {
     final raw = (v is String ? v : v?.toString() ?? '').trim().toLowerCase();
     switch (raw) {
-      case 'approved':
       case 'aprobado':
-      case 'aprobada':
         return OvertimeStatus.approved;
-      case 'rejected':
       case 'rechazado':
-      case 'rechazada':
         return OvertimeStatus.rejected;
       default:
         return OvertimeStatus.pending;

@@ -624,7 +624,7 @@ class _EventActionModalState extends State<AssigmentModal> {
       MaterialPageRoute(
         builder: (_) => OvertimeRequestFormScreen(
           projectId: widget.assignment.serverId,
-          initialDate: now,
+          initialDate: rounded,
           initialStartMinutes: rounded.hour * 60 + rounded.minute,
           contextLabel: label,
         ),

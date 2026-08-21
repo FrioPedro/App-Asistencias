@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app_asistencias/core/database.dart';
 import 'package:app_asistencias/core/enpoinService.dart';
 import 'package:app_asistencias/domain/connectivity/network_info.dart';
@@ -60,6 +62,9 @@ class OvertimeSyncService {
         .syncStatusEqualTo(SyncStatus.pending)
         .or()
         .syncStatusEqualTo(SyncStatus.failed)
+        .or()
+        // `uploading` quedo colgado: el proceso murio entre marcar y responder.
+        .syncStatusEqualTo(SyncStatus.uploading)
         .sortByStart()
         .findAll();
 
@@ -80,7 +85,10 @@ class OvertimeSyncService {
 
       try {
         final payload = buildPayload(r);
-        print('[OVERTIME_SYNC] POST $createEndpoint $payload');
+        print('[OVERTIME_SYNC] POST $createEndpoint');
+        print('[OVERTIME_SYNC] payload=${jsonEncode(payload)}');
+        print('[OVERTIME_SYNC] tipos='
+            '${payload.map((k, v) => MapEntry(k, v.runtimeType))}');
 
         final res = await api.post(createEndpoint, data: payload);
 
@@ -130,6 +138,8 @@ class OvertimeSyncService {
         .toSet()
         .toList();
 
+    print('[OVERTIME_SYNC] pull de proyectos: $projectIds');
+
     if (projectIds.isEmpty) return;
 
     for (final projectId in projectIds) {
@@ -147,7 +157,18 @@ class OvertimeSyncService {
         data: <String, dynamic>{'project': projectId},
       );
 
-      if (res.statusCode != 200) return;
+      print('[OVERTIME_SYNC] project=$projectId status=${res.statusCode} '
+          'body=${res.data}');
+
+      if (res.statusCode != 200) {
+        LogProvider.log(
+          'El listado de horas extra del proyecto $projectId respondio '
+          '${res.statusCode}: ${res.data}',
+          type: LogType.error,
+          origin: 'OvertimeSyncService',
+        );
+        return;
+      }
 
       final data = res.data;
       final rawList = data is List
@@ -173,8 +194,7 @@ class OvertimeSyncService {
 
           if (existing != null) {
             r.id = existing.id;
-            // El servidor no guarda el envio: se conserva el sello local.
-            r.submittedAt = existing.submittedAt;
+            r.submittedAt ??= existing.submittedAt;
           }
 
           await isar.overtimeRequestModels.put(r);
