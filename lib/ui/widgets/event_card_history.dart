@@ -181,7 +181,8 @@ class EventCard extends StatelessWidget {
                     runSpacing: AppSpacing.xs,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      _buildTimeChip('Inicio:', entryTime),
+                      if (entryTime != null && entryTime!.isNotEmpty)
+                        _buildTimeChip('Inicio:', entryTime),
                       if (exitTime != null && exitTime!.isNotEmpty)
                         _buildTimeChip('Salida:', exitTime),
                     ],

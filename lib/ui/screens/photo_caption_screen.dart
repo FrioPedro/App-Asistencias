@@ -435,13 +435,15 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ConstrainedBox(
-            constraints:
-                const BoxConstraints(minHeight: AppSpacing.ctaHeight),
+            constraints: const BoxConstraints(minHeight: AppSpacing.ctaHeight),
             child: iconOnly
-                ? OutlinedButton(
-                    onPressed: _confirmRemove,
-                    style: removeStyle,
-                    child: const Icon(Icons.delete_outline, size: 22),
+                ? Tooltip(
+                    message: 'Borrar foto',
+                    child: OutlinedButton(
+                      onPressed: _confirmRemove,
+                      style: removeStyle,
+                      child: const Icon(Icons.delete_outline, size: 22),
+                    ),
                   )
                 : OutlinedButton.icon(
                     onPressed: _confirmRemove,
@@ -470,12 +472,16 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                   ),
                 ),
                 child: iconOnly
-                    ? nextIcon
+                    ? Tooltip(
+                        message: _isLast ? 'Listo' : 'Siguiente',
+                        child: nextIcon,
+                      )
                     : Text.rich(
                         TextSpan(
                           children: [
                             TextSpan(text: _isLast ? 'LISTO' : 'SIGUIENTE'),
-                            const WidgetSpan(child: SizedBox(width: AppSpacing.sm)),
+                            const WidgetSpan(
+                                child: SizedBox(width: AppSpacing.sm)),
                             WidgetSpan(
                               alignment: PlaceholderAlignment.middle,
                               child: nextIcon,

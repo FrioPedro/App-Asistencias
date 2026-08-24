@@ -4,8 +4,10 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 /// Textos en español para el selector de fotos (wechat_assets_picker)
 class SpanishAssetPickerTextDelegate extends AssetPickerTextDelegate {
   /// El picker es de wechat_assets_picker: no podemos tocar su layout, solo
-  /// los textos que le pasamos. Con [compact] la barra inferior se queda con
-  /// el contador "(8/10)" en vez de "Confirmar (8/10)".
+  /// los textos que le pasamos. Con [compact] la barra inferior queda como
+  /// "OK (8/10)" en vez de "Confirmar (8/10)". El paquete usa este mismo texto
+  /// como etiqueta de accesibilidad y, sin seleccion, como unica etiqueta del
+  /// boton, asi que no puede ser cadena vacia.
   final bool compact;
 
   const SpanishAssetPickerTextDelegate({this.compact = false});
@@ -14,7 +16,7 @@ class SpanishAssetPickerTextDelegate extends AssetPickerTextDelegate {
   String get languageCode => 'es';
 
   @override
-  String get confirm => compact ? '' : 'Confirmar';
+  String get confirm => compact ? 'OK' : 'Confirmar';
 
   @override
   String get cancel => 'Cancelar';

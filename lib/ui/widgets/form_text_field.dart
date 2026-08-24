@@ -160,7 +160,7 @@ class FormTextField extends StatelessWidget {
                           child: Icon(
                             ok ? Icons.check_circle : Icons.edit_outlined,
                             color: color,
-                            size: 15,
+                            size: MediaQuery.textScalerOf(context).scale(15),
                           ),
                         ),
                       ),
