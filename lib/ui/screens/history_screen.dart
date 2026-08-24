@@ -74,6 +74,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void _openCalendarModal() {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       isDismissible: false,
@@ -197,32 +198,35 @@ class _HistoryScreenState extends State<HistoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- BUSCADOR Y BOTÓN CALENDARIO ---
-              Row(
-                children: [
-                  Expanded(
-                    child: CustomSearchBar(
-                      controller: _searchController,
-                      hintText: 'Buscar actividad',
-                      onChanged: (val) =>
-                          setState(() => _searchQuery = val.toLowerCase()),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: CustomSearchBar(
+                        controller: _searchController,
+                        hintText: 'Buscar actividad',
+                        onChanged: (val) =>
+                            setState(() => _searchQuery = val.toLowerCase()),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  // Botón Calendario
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDateFilterActive
-                          ? AppColors.success
-                          : AppColors.surface,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    const SizedBox(width: AppSpacing.md),
+                    // Botón Calendario
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDateFilterActive
+                            ? AppColors.success
+                            : AppColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.calendar_month,
+                            color: Colors.white),
+                        onPressed: _openCalendarModal,
+                      ),
                     ),
-                    child: IconButton(
-                      icon:
-                          const Icon(Icons.calendar_month, color: Colors.white),
-                      onPressed: _openCalendarModal,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
               const SizedBox(height: AppSpacing.lg),

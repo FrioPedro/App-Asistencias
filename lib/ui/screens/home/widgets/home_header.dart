@@ -49,22 +49,31 @@ class _HomeHeaderState extends State<HomeHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final scaler = MediaQuery.textScalerOf(context);
+
+    // 36 es lo maximo que deja los tres controles en la misma fila.
+    final titleSize = scaler.scale(28).clamp(28.0, 36.0);
+
+    final buttonSize = scaler.scale(40).clamp(40.0, 64.0);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Expanded(
+        Expanded(
           child: Text(
             'Asignaciones',
+            textScaler: TextScaler.noScaling,
             style: TextStyle(
-              fontSize: 28,
+              fontSize: titleSize,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
         ),
+        const SizedBox(width: AppSpacing.sm),
         Row(
           children: [
-            const OvertimeHeaderButton(),
+            OvertimeHeaderButton(size: buttonSize),
             const SizedBox(width: AppSpacing.md),
 
             _buildHeaderButton(
@@ -74,6 +83,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                 context,
                 MaterialPageRoute(builder: (_) => const HistoryScreen()),
               ),
+              buttonSize,
             ),
             const SizedBox(width: AppSpacing.md),
 
@@ -91,8 +101,8 @@ class _HomeHeaderState extends State<HomeHeader> {
                 );
               },
               child: Container(
-                width: 40,
-                height: 40,
+                width: buttonSize,
+                height: buttonSize,
                 decoration: const BoxDecoration(
                   color: AppColors.surface,
                   shape: BoxShape.circle,
@@ -101,13 +111,15 @@ class _HomeHeaderState extends State<HomeHeader> {
                 child: _initials.isNotEmpty
                     ? Text(
                         _initials,
-                        style: const TextStyle(
+                        textScaler: TextScaler.noScaling,
+                        style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: buttonSize * 0.35,
                         ),
                       )
-                    : const Icon(Icons.person, color: Colors.white, size: 24),
+                    : Icon(Icons.person,
+                        color: Colors.white, size: buttonSize * 0.6),
               ),
             ),
           ],
@@ -117,16 +129,16 @@ class _HomeHeaderState extends State<HomeHeader> {
   }
 
   Widget _buildHeaderButton(
-      BuildContext context, IconData icon, VoidCallback onTap) {
+      BuildContext context, IconData icon, VoidCallback onTap, double size) {
     return Container(
-      width: 40, // Asegurar tamaño consistente
-      height: 40,
+      width: size,
+      height: size,
       decoration: const BoxDecoration(
         color: AppColors.surface,
         shape: BoxShape.circle,
       ),
       child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 20), // Icono ajustado
+        icon: Icon(icon, color: Colors.white, size: size * 0.5),
         padding: EdgeInsets.zero,
         onPressed: onTap,
       ),

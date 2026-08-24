@@ -81,6 +81,7 @@ class _LogViewerScreenState extends State<LogViewerScreen> {
   void _openFilterSheet() {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       isDismissible: false,

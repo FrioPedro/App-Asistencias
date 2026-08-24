@@ -176,18 +176,14 @@ class EventCard extends StatelessWidget {
 
                 // 5. TIEMPOS (Inicio y Salida en línea pequeña)
                 if (entryTime != null || exitTime != null)
-                  Row(
+                  Wrap(
+                    spacing: AppSpacing.md,
+                    runSpacing: AppSpacing.xs,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       _buildTimeChip('Inicio:', entryTime),
-                      if (exitTime != null && exitTime!.isNotEmpty) ...[
-                        const SizedBox(width: AppSpacing.md),
-                        Container(
-                            width: 1,
-                            height: 12,
-                            color: AppColors.textSecondary), // Separador
-                        const SizedBox(width: AppSpacing.md),
+                      if (exitTime != null && exitTime!.isNotEmpty)
                         _buildTimeChip('Salida:', exitTime),
-                      ]
                     ],
                   ),
               ],
@@ -207,9 +203,8 @@ class EventCard extends StatelessWidget {
 
   Widget _buildTimeChip(String label, String? time) {
     if (time == null || time.isEmpty) return const SizedBox.shrink();
-    return RichText(
-      text: TextSpan(
-        style: const TextStyle(fontSize: 12),
+    return Text.rich(
+      TextSpan(
         children: [
           TextSpan(
             text: '$label ',
@@ -222,6 +217,7 @@ class EventCard extends StatelessWidget {
           ),
         ],
       ),
+      style: const TextStyle(fontSize: 12),
     );
   }
 

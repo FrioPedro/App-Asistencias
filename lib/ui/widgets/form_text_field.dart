@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
+import 'package:app_asistencias/ui/theme/app_radius.dart';
 
 /// Campo de texto reutilizable para los formularios de salida
 /// (servicio, taller, etc.).
@@ -75,20 +76,49 @@ class FormTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        TextFormField(
-          controller: controller,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          maxLines: maxLines,
-          maxLength: maxChars,
-          enabled: enabled,
-          validator: _validate,
-          decoration: InputDecoration(
-            hintText: hint,
-            counterText: '',
-          ),
-        ),
+        if (_hasCounter)
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: controller,
+            builder: (context, value, _) =>
+                _buildField(ring: _ringColor(value.text)),
+          )
+        else
+          _buildField(),
         if (_hasCounter) _buildCounter(),
       ],
+    );
+  }
+
+  Widget _buildField({Color? ring}) {
+    return TextFormField(
+      controller: controller,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      maxLines: maxLines,
+      maxLength: maxChars,
+      enabled: enabled,
+      validator: _validate,
+      decoration: InputDecoration(
+        hintText: hint,
+        counterText: '',
+        border: ring == null ? null : _ringBorder(ring, 1.5),
+        enabledBorder: ring == null ? null : _ringBorder(ring, 1.5),
+        focusedBorder: ring == null ? null : _ringBorder(ring, 2),
+      ),
+    );
+  }
+
+  /// El aro repite los tres estados del contador: gris mientras está vacío,
+  /// ámbar si empezó y no llega al mínimo, verde al cumplir.
+  Color _ringColor(String text) {
+    final length = text.trim().length;
+    if (length == 0) return AppColors.border;
+    return length >= minChars ? AppColors.success : AppColors.warning;
+  }
+
+  OutlineInputBorder _ringBorder(Color color, double width) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      borderSide: BorderSide(color: color, width: width),
     );
   }
 
@@ -111,11 +141,8 @@ class FormTextField extends StatelessWidget {
               ? AppColors.success
               : (empty ? AppColors.textSecondary : AppColors.warning);
 
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (empty)
-                Text(
+          final status = empty
+              ? Text(
                   'Escribe al menos $minChars letras',
                   style: TextStyle(
                     color: color,
@@ -123,33 +150,57 @@ class FormTextField extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 )
-              else
-                Row(
-                  children: [
-                    Icon(
-                      ok ? Icons.check_circle : Icons.edit_outlined,
-                      color: color,
-                      size: 15,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      ok ? 'Listo' : 'Escribe un poco más',
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
+              : Text.rich(
+                  TextSpan(
+                    children: [
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: AppSpacing.sm),
+                          child: Icon(
+                            ok ? Icons.check_circle : Icons.edit_outlined,
+                            color: color,
+                            size: 15,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              Text(
-                '$length/${maxChars ?? minChars}',
-                style: TextStyle(
-                  color: color,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                      TextSpan(text: ok ? 'Listo' : 'Escribe un poco más'),
+                    ],
+                  ),
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+
+          final counter = Text(
+            '$length/${maxChars ?? minChars}',
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+
+          // 16 px es donde el mensaje y el contador dejan de caber juntos.
+          if (MediaQuery.textScalerOf(context).scale(12) > 16) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                status,
+                const SizedBox(height: AppSpacing.xs),
+                counter,
+              ],
+            );
+          }
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(child: status),
+              const SizedBox(width: AppSpacing.sm),
+              counter,
             ],
           );
         },

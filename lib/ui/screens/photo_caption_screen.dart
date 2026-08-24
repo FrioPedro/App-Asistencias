@@ -186,7 +186,7 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        '¿QUÉ SE VE EN ESTA FOTO?',
+                        'Descripción',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -217,16 +217,16 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
                           hintStyle: const TextStyle(
                               color: AppColors.textSecondary, fontSize: 15),
                           contentPadding: const EdgeInsets.all(AppSpacing.lg),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            borderSide: BorderSide.none,
-                          ),
+                          border: _ring(_ringColor, 1.5),
+                          enabledBorder: _ring(_ringColor, 1.5),
+                          focusedBorder: _ring(_ringColor, 2),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       _buildStatusRow(),
                       const SizedBox(height: AppSpacing.xl),
                       _buildThumbnailStrip(),
+                      const SizedBox(height: AppSpacing.xl),
                     ],
                   ),
                 ),
@@ -242,45 +242,81 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
 
   /// Confirmación en vivo de que el texto ya quedó guardado, más el mínimo
   /// exigido.
+  /// El aro del campo repite los tres estados del contador: gris mientras
+  /// esta vacio, ambar si empezo y no llega al minimo, verde al cumplir.
+  Color get _ringColor {
+    final length = _current.caption.text.trim().length;
+    if (length == 0) return AppColors.border;
+    return _current.isDescribed ? AppColors.success : AppColors.warning;
+  }
+
+  OutlineInputBorder _ring(Color color, double width) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      borderSide: BorderSide(color: color, width: width),
+    );
+  }
+
   Widget _buildStatusRow() {
     final length = _current.caption.text.trim().length;
     final ok = _current.isDescribed;
 
+    final status = length > 0
+        ? Text.rich(
+            TextSpan(
+              children: [
+                WidgetSpan(
+                  alignment: PlaceholderAlignment.middle,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: AppSpacing.sm),
+                    child: Icon(
+                      ok ? Icons.check_circle : Icons.edit_outlined,
+                      color: ok ? AppColors.success : AppColors.warning,
+                      size: 15,
+                    ),
+                  ),
+                ),
+                TextSpan(text: ok ? 'Guardado' : 'Escribe un poco más'),
+              ],
+            ),
+            style: TextStyle(
+              color: ok ? AppColors.success : AppColors.warning,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          )
+        : const Text(
+            'Escribe al menos ${PhotoItem.minCaptionChars} letras',
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          );
+
+    final counter = Text(
+      '$length/${PhotoItem.minCaptionChars}',
+      style: TextStyle(
+        color: ok ? AppColors.success : AppColors.textSecondary,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+
+    // Mismo umbral que el contador de form_text_field.dart.
+    if (MediaQuery.textScalerOf(context).scale(12) > 16) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          status,
+          const SizedBox(height: AppSpacing.xs),
+          counter,
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (length > 0)
-          Row(
-            children: [
-              Icon(
-                ok ? Icons.check_circle : Icons.edit_outlined,
-                color: ok ? AppColors.success : AppColors.warning,
-                size: 15,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                ok ? 'Guardado' : 'Escribe un poco más',
-                style: TextStyle(
-                  color: ok ? AppColors.success : AppColors.warning,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          )
-        else
-          const Text(
-            'Escribe al menos ${PhotoItem.minCaptionChars} letras',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
-          ),
-        Text(
-          '$length/${PhotoItem.minCaptionChars}',
-          style: TextStyle(
-            color: ok ? AppColors.success : AppColors.textSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Flexible(child: status),
+        const SizedBox(width: AppSpacing.sm),
+        counter,
       ],
     );
   }
@@ -376,62 +412,88 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
   }
 
   Widget _buildActions() {
-    return Row(
-      children: [
-        SizedBox(
-          height: AppSpacing.ctaHeight,
-          child: OutlinedButton.icon(
-            onPressed: _confirmRemove,
-            icon: const Icon(Icons.delete_outline, size: 18),
-            label: const Text(
-              'Borrar foto',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.danger,
-              side: const BorderSide(color: AppColors.danger),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Expanded(
-          child: SizedBox(
-            height: AppSpacing.ctaHeight,
-            child: ElevatedButton(
-              onPressed: _onNext,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _isLast ? 'LISTO' : 'SIGUIENTE',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+    // 26 px es donde los dos labels dejan de caber juntos en la fila; pasado
+    // ese punto los botones se quedan solo con su icono.
+    final iconOnly = MediaQuery.textScalerOf(context).scale(16) > 26;
+
+    final removeStyle = OutlinedButton.styleFrom(
+      foregroundColor: AppColors.danger,
+      side: const BorderSide(color: AppColors.danger),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+    );
+
+    final nextIcon = Icon(
+      _isLast ? Icons.check : Icons.arrow_forward,
+      color: Colors.white,
+      size: 20,
+    );
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ConstrainedBox(
+            constraints:
+                const BoxConstraints(minHeight: AppSpacing.ctaHeight),
+            child: iconOnly
+                ? OutlinedButton(
+                    onPressed: _confirmRemove,
+                    style: removeStyle,
+                    child: const Icon(Icons.delete_outline, size: 22),
+                  )
+                : OutlinedButton.icon(
+                    onPressed: _confirmRemove,
+                    icon: const Icon(Icons.delete_outline, size: 18),
+                    label: const Text(
+                      'Borrar foto',
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
+                    style: removeStyle,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Icon(
-                    _isLast ? Icons.check : Icons.arrow_forward,
-                    color: Colors.white,
-                    size: 20,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: ConstrainedBox(
+              constraints:
+                  const BoxConstraints(minHeight: AppSpacing.ctaHeight),
+              child: ElevatedButton(
+                onPressed: _onNext,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                ],
+                ),
+                child: iconOnly
+                    ? nextIcon
+                    : Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: _isLast ? 'LISTO' : 'SIGUIENTE'),
+                            const WidgetSpan(child: SizedBox(width: AppSpacing.sm)),
+                            WidgetSpan(
+                              alignment: PlaceholderAlignment.middle,
+                              child: nextIcon,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

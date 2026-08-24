@@ -53,6 +53,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
   void _openDatePicker(bool isStart) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       isDismissible: false,
@@ -75,6 +76,33 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
           });
         },
       ),
+    );
+  }
+
+  Widget buildDateTimeRow(BuildContext context) {
+    if (MediaQuery.textScalerOf(context).scale(15) > 20) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildDateSelector('Desde', _startDate, () => _openDatePicker(true)),
+          const SizedBox(height: AppSpacing.md),
+          _buildDateSelector('Hasta', _endDate, () => _openDatePicker(false)),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildDateSelector(
+              'Desde', _startDate, () => _openDatePicker(true)),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _buildDateSelector(
+              'Hasta', _endDate, () => _openDatePicker(false)),
+        ),
+      ],
     );
   }
 
@@ -177,19 +205,7 @@ class _LogFilterSheetState extends State<LogFilterSheet> {
                 color: AppColors.textSecondary, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.md),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDateSelector(
-                    'Desde', _startDate, () => _openDatePicker(true)),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _buildDateSelector(
-                    'Hasta', _endDate, () => _openDatePicker(false)),
-              ),
-            ],
-          ),
+          buildDateTimeRow(context),
 
           const SizedBox(height: AppSpacing.xxl),
 

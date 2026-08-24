@@ -82,7 +82,9 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
       maxAssets: maxAssets,
       selectedAssets: [],
       requestType: RequestType.image,
-      textDelegate: const SpanishAssetPickerTextDelegate(),
+      textDelegate: SpanishAssetPickerTextDelegate(
+        compact: MediaQuery.textScalerOf(context).scale(14) > 18,
+      ),
       // Eliminamos themeColor porque causa conflicto si se usa pickerTheme simultáneamente
       pickerTheme: ThemeData.dark().copyWith(
         primaryColor: AppColors.primary,
@@ -289,14 +291,17 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     // Obtenemos la acción del bottom sheet
     final String? action = await showModalBottomSheet<String>(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.bg,
       shape: const RoundedRectangleBorder(
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(AppRadius.sheet)),
       ),
+      isScrollControlled: true,
       builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.xl, horizontal: AppSpacing.gutter),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -320,24 +325,32 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 'Puedes agregar hasta $remaining fotos más',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                     color: AppColors.textSecondary, fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildOptionButton(
-                    icon: Icons.photo_library_rounded,
-                    label: 'Galería',
-                    onTap: () => Navigator.pop(context, 'gallery'),
-                  ),
-                  _buildOptionButton(
-                    icon: Icons.camera_alt_rounded,
-                    label: 'Cámara',
-                    onTap: () => Navigator.pop(context, 'camera'),
-                  ),
-                ],
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: _buildOptionButton(
+                        icon: Icons.photo_library_rounded,
+                        label: 'Galería',
+                        onTap: () => Navigator.pop(context, 'gallery'),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: _buildOptionButton(
+                        icon: Icons.camera_alt_rounded,
+                        label: 'Cámara',
+                        onTap: () => Navigator.pop(context, 'camera'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (isLimited) ...[
                 const SizedBox(height: AppSpacing.xxl),
@@ -391,8 +404,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 120,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.xl, horizontal: AppSpacing.md),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -410,6 +423,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
             const SizedBox(height: AppSpacing.md),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -738,12 +752,12 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                     ),
                   SizedBox(
                     width: double.infinity,
-                    height: AppSpacing.ctaHeight,
                     child: ElevatedButton(
                       onPressed: (_isSubmitting || _pendingCaptions > 0)
                           ? null
                           : _onSubmit,
                       style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                         backgroundColor: AppColors.danger,
                         disabledBackgroundColor: AppColors.disabled,
                         elevation: 0,
@@ -760,20 +774,26 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                                 strokeWidth: 2.5,
                               ),
                             )
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.check_circle_outline,
-                                    color: Colors.white, size: 22),
-                                const SizedBox(width: AppSpacing.sm),
-                                Text(
-                                  'FINALIZAR (${_allPhotos.length} fotos)',
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
+                          : Text.rich(
+                              TextSpan(
+                                children: [
+                                  const WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                          right: AppSpacing.xs),
+                                      child: Icon(Icons.check_circle_outline,
+                                          color: Colors.white, size: 14),
+                                    ),
+                                  ),
+                                  TextSpan(text: 'FINALIZAR (${_allPhotos.length} fotos)'),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
                             ),
                     ),
                   ),
@@ -840,15 +860,18 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              isRequired ? '$label (OBLIGATORIO)' : label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
+            Expanded(
+              child: Text(
+                isRequired ? '$label (OBLIGATORIO)' : label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
+            const SizedBox(width: AppSpacing.sm),
             Container(
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
@@ -860,6 +883,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               ),
               child: Text(
                 '${photos.length}/$_maxPhotosPerSection',
+                textScaler: TextScaler.noScaling,
                 style: TextStyle(
                   color: photos.isEmpty
                       ? AppColors.textSecondary
@@ -887,53 +911,51 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
             onTap: () => _showPhotoOptions(isAntes: isAntes),
             child: Container(
               width: double.infinity,
-              height: AppSpacing.ctaHeight,
+              constraints:
+                  const BoxConstraints(minHeight: AppSpacing.ctaHeight),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.15),
-                      shape: BoxShape.circle,
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Container(
+                        margin: const EdgeInsets.only(right: AppSpacing.md),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.add_a_photo_rounded,
+                            color: AppColors.primary, size: 20),
+                      ),
                     ),
-                    child: const Icon(Icons.add_a_photo_rounded,
-                        color: AppColors.primary, size: 20),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Text(
-                    photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
-                    style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600),
-                  ),
-                ],
+                    TextSpan(
+                      text:
+                          photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600),
               ),
             ),
           ),
         if (photos.isNotEmpty && !_isSubmitting) ...[
           const SizedBox(height: AppSpacing.sm),
-          SizedBox(
-            width: double.infinity,
-            height: AppSpacing.ctaHeight,
-            child: OutlinedButton.icon(
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+                minWidth: double.infinity, minHeight: AppSpacing.ctaHeight),
+            child: OutlinedButton(
               onPressed: () => _openCaptions(isAntes: isAntes),
-              icon: Icon(
-                pending > 0 ? Icons.edit_note_rounded : Icons.check_circle,
-                size: 20,
-              ),
-              label: Text(
-                pending > 0
-                    ? 'DESCRIBIR FOTOS  ·  faltan $pending'
-                    : 'DESCRIPCIONES LISTAS (${photos.length})',
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor:
                     pending > 0 ? AppColors.warning : AppColors.success,
@@ -943,6 +965,32 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
+              ),
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: AppSpacing.sm),
+                        child: Icon(
+                          pending > 0
+                              ? Icons.edit_note_rounded
+                              : Icons.check_circle,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                    TextSpan(
+                      text: pending > 0
+                          ? 'DESCRIBIR FOTOS  ·  faltan $pending'
+                          : 'DESCRIPCIONES LISTAS (${photos.length})',
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
             ),
           ),

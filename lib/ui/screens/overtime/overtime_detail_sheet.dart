@@ -33,6 +33,7 @@ class OvertimeDetailSheet extends StatelessWidget {
   }) {
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.bg,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -60,7 +61,7 @@ class OvertimeDetailSheet extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               _buildStatusPanel(),
               const SizedBox(height: AppSpacing.md),
-              _buildDataPanel(),
+              _buildDataPanel(context),
               const SizedBox(height: AppSpacing.xl),
             ],
           ),
@@ -113,19 +114,22 @@ class OvertimeDetailSheet extends StatelessWidget {
   Widget _buildStatusPanel() {
     return _panel([
       _statusLine(),
-      if (request.status != OvertimeStatus.pending && _reviewerMessage.isNotEmpty)
+      if (request.status != OvertimeStatus.pending &&
+          _reviewerMessage.isNotEmpty)
         _block('Sustento', _reviewerMessage),
     ]);
   }
 
   /// Datos de la solicitud
-  Widget _buildDataPanel() {
+  Widget _buildDataPanel(BuildContext context) {
+    final useCompactText = MediaQuery.textScalerOf(context).scale(16) > 26;
     return _panel([
       _row('Inicio', _dateTime(request.start),
           previousValue: request.previousStart),
       _row('Fin', _dateTime(request.end), previousValue: request.previousEnd),
       _row('Duración', OvertimeFormat.duration(request.duration)),
-      if (_submittedOn.isNotEmpty) _row('Solicitud enviada', _submittedOn),
+      if (_submittedOn.isNotEmpty)
+        _row(useCompactText ? 'Solicitado' : 'Solicitud enviada', _submittedOn),
       _block('Justificación', request.justification),
     ]);
   }
@@ -213,32 +217,40 @@ class OvertimeDetailSheet extends StatelessWidget {
   }
 
   Widget _statusLine() {
-    final approver = OvertimeFormat.approverLine(request);
     final label = OvertimeFormat.statusLabel(request.status);
-    final statusChangeTimestamp = request.resolvedAt != null ? 'el ${OvertimeFormat.submittedOn(request.resolvedAt)}' : '';
+    final approver = OvertimeFormat.approverLine(request);
+    final statusChangeTimestamp = request.resolvedAt != null
+        ? 'el ${OvertimeFormat.submittedOn(request.resolvedAt)}'
+        : '';
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child:
-                Icon(request.status.icon, color: request.status.color, size: 16),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: Text(
-              approver.isEmpty ? '$label $statusChangeTimestamp' : '$label $approver $statusChangeTimestamp',
-              style: TextStyle(
-                color: request.status.color,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+      child: SizedBox(
+        width: double.infinity,
+        child: Text.rich(
+          TextSpan(
+            children: [
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.xs),
+                  child: Icon(request.status.icon,
+                      color: request.status.color, size: 16),
+                ),
               ),
-            ),
+              TextSpan(
+                text: approver.isEmpty
+                    ? '$label $statusChangeTimestamp'
+                    : '$label $approver $statusChangeTimestamp',
+              ),
+            ],
           ),
-        ],
+          style: TextStyle(
+            color: request.status.color,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }

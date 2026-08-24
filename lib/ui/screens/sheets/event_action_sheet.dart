@@ -70,6 +70,7 @@ class AssigmentModal extends StatefulWidget {
     print('[IS ANY EVENT ACTIVE]: $isAnyEventActive');
     showModalBottomSheet(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.bg,
       isScrollControlled: true,
       isDismissible: false,
@@ -141,6 +142,7 @@ class _EventActionModalState extends State<AssigmentModal> {
       else if (currentTask == TaskType.office) {
         final result = await showModalBottomSheet(
           context: context,
+          useSafeArea: true,
           backgroundColor: AppColors.bg,
           isScrollControlled: true,
           isDismissible: false,
@@ -256,6 +258,7 @@ class _EventActionModalState extends State<AssigmentModal> {
 
       final result = await showModalBottomSheet(
         context: context,
+        useSafeArea: true,
         backgroundColor: AppColors.bg,
         isScrollControlled: true,
         isDismissible: false,
@@ -395,25 +398,21 @@ class _EventActionModalState extends State<AssigmentModal> {
         ActionOption(
           icon: Icons.business,
           title: 'Oficina',
-          subtitle: 'Reuniones / Administrativo',
           onTap: () => _onActivitySelected('Oficina', Icons.business),
         ),
         ActionOption(
           icon: Icons.build,
           title: 'Taller',
-          subtitle: 'Reparaciones',
           onTap: () => _onActivitySelected('Taller', Icons.build),
         ),
         ActionOption(
           icon: Icons.local_shipping,
           title: 'Transporte',
-          subtitle: 'Traslados',
           onTap: () => _onActivitySelected('Transporte', Icons.local_shipping),
         ),
         ActionOption(
           icon: Icons.construction,
           title: 'Servicio',
-          subtitle: 'Visitas técnicas',
           onTap: () => _onActivitySelected('Servicio', Icons.construction),
         ),
         const SizedBox(height: AppSpacing.xl),
@@ -519,21 +518,18 @@ class _EventActionModalState extends State<AssigmentModal> {
           ActionOption(
             icon: Icons.business,
             title: 'Oficina',
-            subtitle: 'Reuniones / Administrativo',
             onTap: () => _onActivitySelected('Oficina', Icons.business),
           ),
         if (activeIcon != Icons.build)
           ActionOption(
             icon: Icons.build,
             title: 'Taller',
-            subtitle: 'Reparaciones',
             onTap: () => _onActivitySelected('Taller', Icons.build),
           ),
         if (activeIcon != Icons.local_shipping)
           ActionOption(
             icon: Icons.local_shipping,
             title: 'Transporte',
-            subtitle: 'Traslados',
             onTap: () =>
                 _onActivitySelected('Transporte', Icons.local_shipping),
           ),
@@ -541,7 +537,6 @@ class _EventActionModalState extends State<AssigmentModal> {
           ActionOption(
             icon: Icons.construction,
             title: 'Servicio',
-            subtitle: 'Visitas técnicas',
             onTap: () => _onActivitySelected('Servicio', Icons.construction),
           ),
         const SizedBox(height: AppSpacing.md),
@@ -587,21 +582,26 @@ class _EventActionModalState extends State<AssigmentModal> {
               ),
             ),
             onPressed: _isLoading ? null : () => _openOvertimeForm(label),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.bedtime_outlined,
-                    color: AppColors.textSecondary, size: 28),
-                SizedBox(width: AppSpacing.sm),
-                Text(
-                  'Solicitar horas extra',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+            child: const Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: AppSpacing.xs),
+                      child: Icon(Icons.bedtime_outlined,
+                          color: AppColors.textSecondary, size: 14),
+                    ),
                   ),
-                ),
-              ],
+                  TextSpan(text: 'Solicitar horas extra'),
+                ],
+              ),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),

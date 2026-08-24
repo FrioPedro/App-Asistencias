@@ -33,6 +33,7 @@ class OvertimeTimePickerSheet extends StatefulWidget {
   }) {
     return showModalBottomSheet<int>(
       context: context,
+      useSafeArea: true,
       backgroundColor: AppColors.bg,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

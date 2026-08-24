@@ -9,7 +9,9 @@ import 'package:app_asistencias/ui/screens/overtime/overtime_requests_screen.dar
 /// Botón del header que abre [OvertimeRequestsScreen], con el conteo de
 /// solicitudes pendientes.
 class OvertimeHeaderButton extends StatefulWidget {
-  const OvertimeHeaderButton({super.key});
+  final double size;
+
+  const OvertimeHeaderButton({super.key, this.size = 40});
 
   @override
   State<OvertimeHeaderButton> createState() => _OvertimeHeaderButtonState();
@@ -62,22 +64,24 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
 
   @override
   Widget build(BuildContext context) {
+    final badgeSize = widget.size * 0.45;
+
     return SizedBox(
-      width: 40,
-      height: 40,
+      width: widget.size,
+      height: widget.size,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: widget.size,
+            height: widget.size,
             decoration: const BoxDecoration(
               color: AppColors.surface,
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.assignment,
-                  color: Colors.white, size: 20),
+              icon: Icon(Icons.assignment,
+                  color: Colors.white, size: widget.size * 0.5),
               padding: EdgeInsets.zero,
               tooltip: 'Mis solicitudes de horas extra',
               onPressed: _openRequests,
@@ -89,7 +93,8 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
               right: -2,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                constraints:
+                    BoxConstraints(minWidth: badgeSize, minHeight: badgeSize),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: _badgeColor,
@@ -99,9 +104,10 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
                 child: Text(
                   _badgeCount > 9 ? '9+' : '$_badgeCount',
                   textAlign: TextAlign.center,
+                  textScaler: TextScaler.noScaling,
                   style: TextStyle(
                     color: _badgeTextColor,
-                    fontSize: 10,
+                    fontSize: badgeSize * 0.6,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

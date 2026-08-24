@@ -358,25 +358,33 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
   Widget _buildDateTimeRow({required bool isEnd}) {
     final value = isEnd ? _end : _start;
 
+    final date = _buildPickerField(
+      icon: Icons.calendar_today_outlined,
+      text: OvertimeFormat.fullDate(value),
+      onTap: () => _pickDate(isEnd: isEnd),
+    );
+    final time = _buildPickerField(
+      icon: Icons.schedule,
+      text: OvertimeFormat.time(_minutesOf(value)),
+      onTap: () => _pickTime(isEnd: isEnd),
+    );
+
+    // 20 px es donde la fecha completa deja de caber junto a la hora.
+    if (MediaQuery.textScalerOf(context).scale(15) > 20) {
+      return Column(
+        children: [
+          date,
+          const SizedBox(height: AppSpacing.sm),
+          time,
+        ],
+      );
+    }
+
     return Row(
       children: [
-        Expanded(
-          flex: 3,
-          child: _buildPickerField(
-            icon: Icons.calendar_today_outlined,
-            text: OvertimeFormat.fullDate(value),
-            onTap: () => _pickDate(isEnd: isEnd),
-          ),
-        ),
+        Expanded(flex: 3, child: date),
         const SizedBox(width: AppSpacing.md),
-        Expanded(
-          flex: 2,
-          child: _buildPickerField(
-            icon: Icons.schedule,
-            text: OvertimeFormat.time(_minutesOf(value)),
-            onTap: () => _pickTime(isEnd: isEnd),
-          ),
-        ),
+        Expanded(flex: 2, child: time),
       ],
     );
   }
@@ -389,8 +397,9 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
     return GestureDetector(
       onTap: _isSubmitting ? null : onTap,
       child: Container(
-        height: _controlHeight,
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+        constraints: const BoxConstraints(minHeight: _controlHeight),
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -402,7 +411,6 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
             Expanded(
               child: Text(
                 text,
-                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -486,9 +494,9 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
       builder: (context, _, __) {
         final enabled = _canSubmit;
 
-        return SizedBox(
-          width: double.infinity,
-          height: _controlHeight,
+        return ConstrainedBox(
+          constraints: const BoxConstraints(
+              minWidth: double.infinity, minHeight: _controlHeight),
           child: ElevatedButton(
             onPressed: enabled ? _submit : null,
             child: _isSubmitting
@@ -502,6 +510,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
                   )
                 : const Text(
                     'ENVIAR SOLICITUD',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
