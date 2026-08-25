@@ -5,7 +5,7 @@ import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 import 'package:app_asistencias/models/overtime_request_model.dart';
 import 'package:app_asistencias/ui/screens/overtime/overtime_format.dart';
-import 'package:app_asistencias/ui/screens/overtime/overtime_status_style.dart';
+import 'package:app_asistencias/ui/screens/overtime/overtime_approval_status_style.dart';
 
 /// Detalle de una solicitud de horas extra, abierto al tocar su tarjeta en
 /// [OvertimeRequestsScreen]. Es solo lectura: el operario no puede editar ni
@@ -14,22 +14,16 @@ class OvertimeDetailSheet extends StatelessWidget {
   final OvertimeRequestModel request;
   final String projectCode;
 
-  /// Una solicitud que ya empezo pinta el marco en gris: sigue mostrando su
-  /// estado, pero ya no hay nada que resolver.
-  final bool isPast;
-
   const OvertimeDetailSheet({
     super.key,
     required this.request,
     required this.projectCode,
-    this.isPast = false,
   });
 
   static void show(
     BuildContext context, {
     required OvertimeRequestModel request,
     required String projectCode,
-    bool isPast = false,
   }) {
     showModalBottomSheet(
       context: context,
@@ -43,7 +37,6 @@ class OvertimeDetailSheet extends StatelessWidget {
       builder: (_) => OvertimeDetailSheet(
         request: request,
         projectCode: projectCode,
-        isPast: isPast,
       ),
     );
   }
@@ -80,7 +73,7 @@ class OvertimeDetailSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Solicitud de horas extra',
+                  'Justificación de horas extra',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -116,7 +109,11 @@ class OvertimeDetailSheet extends StatelessWidget {
       _statusLine(),
       if (request.status != OvertimeStatus.pending &&
           _reviewerMessage.isNotEmpty)
-        _block('Sustento', _reviewerMessage),
+        _block(
+            request.status == OvertimeStatus.rejected
+                ? 'Sustento de rechazo'
+                : 'Sustento de aprobación',
+            _reviewerMessage),
     ]);
   }
 

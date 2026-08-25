@@ -12,8 +12,13 @@ import 'package:app_asistencias/ui/screens/overtime/overtime_time_picker_sheet.d
 import 'package:app_asistencias/ui/widgets/custom_snackbar.dart';
 import 'package:app_asistencias/ui/widgets/form_text_field.dart';
 
-/// Formulario de solicitud anticipada de horas extra: la solicitud es un
-/// bloque continuo de fecha y hora de inicio a fecha y hora de fin.
+/// Formulario de justificacion de horas extra ya trabajadas: el bloque es
+/// continuo, de fecha y hora de inicio a fecha y hora de fin.
+///
+/// Las horas extra no se piden por adelantado, se justifican despues. El
+/// objetivo del proceso es que no haya horas extra, porque indican mal manejo
+/// del supervisor o falta de personal, asi que la ventana permitida es corta:
+/// el dia actual y [_businessDaysBack] dias habiles hacia atras.
 ///
 /// La persistencia y el envío viven en [OvertimeProvider].
 class OvertimeRequestFormScreen extends StatefulWidget {
@@ -52,6 +57,10 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
   /// Tope de duración: más de 72 h seguidas es un error de dedo en la fecha,
   /// no una jornada real.
   static const Duration _maxDuration = Duration(hours: 72);
+
+  /// Acordado con operaciones: el operario justifica el dia actual y los 3
+  /// dias habiles anteriores, no mas.
+  static const int _businessDaysBack = 3;
 
   final _formKey = GlobalKey<FormState>();
   final _justificationController = TextEditingController();
@@ -113,14 +122,34 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
   bool get _spansDays => OvertimeRequestModel.dateOnly(_end)
       .isAfter(OvertimeRequestModel.dateOnly(_start));
 
-  bool get _startIsPast => !_start.isAfter(DateTime.now());
+  DateTime get _today => OvertimeRequestModel.dateOnly(DateTime.now());
 
-  bool get _hasValidRange =>
-      !_startIsPast && _duration > Duration.zero && _duration <= _maxDuration;
+  /// Primer dia justificable: se retrocede saltando sabados y domingos.
+  DateTime get _earliestDay {
+    var day = _today;
+    var remaining = _businessDaysBack;
+
+    while (remaining > 0) {
+      day =
+          OvertimeRequestModel.dateOnly(day.subtract(const Duration(days: 1)));
+      if (day.weekday != DateTime.saturday && day.weekday != DateTime.sunday) {
+        remaining--;
+      }
+    }
+
+    return day;
+  }
+
+  /// El fin no llega a superar al inicio: el bloque no tiene duracion.
+  bool get _endNotAfterStart => _duration <= Duration.zero;
+
+  bool get _endOutOfRange => _endNotAfterStart;
+
+  // bool get _hasValidRange => !_endOutOfRange;
 
   bool get _canSubmit =>
       !_isSubmitting &&
-      _hasValidRange &&
+      !_endOutOfRange &&
       _justificationController.text.trim().length >=
           OvertimeRequestFormScreen.minJustificationChars;
 
@@ -144,14 +173,23 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
     final today = OvertimeRequestModel.dateOnly(now);
     final current = OvertimeRequestModel.dateOnly(isEnd ? _end : _start);
 
-    final first = isEnd ? OvertimeRequestModel.dateOnly(_start) : today;
-    final initial = current.isBefore(first) ? first : current;
+    final startDay = OvertimeRequestModel.dateOnly(_start);
+
+    // El inicio se elige dentro de la ventana habil; el fin arranca en el dia
+    // del inicio y llega hasta donde alcanza [_maxDuration], para el turno que
+    // cruza medianoche.
+    final first = isEnd ? startDay : _earliestDay;
+    final last = isEnd ? startDay.add(_maxDuration) : today;
+
+    final initial = current.isBefore(first)
+        ? first
+        : (current.isAfter(last) ? last : current);
 
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
       firstDate: first,
-      lastDate: today.add(const Duration(days: 90)),
+      lastDate: last,
       helpText: isEnd ? 'Fecha de fin' : 'Fecha de inicio',
       cancelText: 'Cancelar',
       confirmText: 'Listo',
@@ -201,7 +239,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (!_hasValidRange) {
+    if (_endOutOfRange) {
       CustomSnackBar.show(context, 'Revise las fechas y horas', isError: true);
       return;
     }
@@ -257,7 +295,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           icon: const Icon(Icons.arrow_back),
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
         ),
-        title: const Text('Solicitar horas extra'),
+        title: const Text('Justificar horas extra'),
       ),
       body: SafeArea(
         child: GestureDetector(
@@ -272,10 +310,16 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildContextChip(
+                      Icons.warning_amber,
+                      'Tienes $_businessDaysBack días hábiles para justificar tus horas extra.',
+                      false, AppColors.warning),
+                  const SizedBox(height: AppSpacing.xl),
                   if (widget.contextLabel != null) ...[
                     _buildLabel('Asignación'),
                     const SizedBox(height: AppSpacing.sm),
-                    _buildContextChip(widget.contextLabel!),
+                    _buildContextChip(
+                        Icons.work_outline, widget.contextLabel!, true, AppColors.primary),
                     const SizedBox(height: AppSpacing.lg),
                   ],
                   _buildLabel('Inicio'),
@@ -295,7 +339,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
                     child: FormTextField(
                       label: 'Justificación',
                       controller: _justificationController,
-                      hint: '¿Por qué necesita hacer horas extra?',
+                      hint: 'Justifique a su supervisor',
                       isRequired: true,
                       maxLines: 4,
                       minChars: OvertimeRequestFormScreen.minJustificationChars,
@@ -327,21 +371,24 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
     );
   }
 
-  Widget _buildContextChip(String label) {
+  Widget _buildContextChip(IconData icon, String label, bool ellipsis, Color bgColor) {
     return Container(
       padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg, vertical: AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.15),
+        color: bgColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: Row(
         children: [
-          const Icon(Icons.work_outline, color: AppColors.primary, size: 20),
+          Icon(icon,
+              color: AppColors.textSecondary,
+              size: MediaQuery.textScalerOf(context).scale(20)),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
               label,
+              overflow: ellipsis ? TextOverflow.ellipsis : null,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
@@ -358,15 +405,21 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
   Widget _buildDateTimeRow({required bool isEnd}) {
     final value = isEnd ? _end : _start;
 
+    // Los dos mensajes de error mandan a corregir el fin, asi que solo se
+    // marcan sus selectores.
+    final hasError = isEnd && _endOutOfRange;
+
     final date = _buildPickerField(
       icon: Icons.calendar_today_outlined,
       text: OvertimeFormat.fullDate(value),
       onTap: () => _pickDate(isEnd: isEnd),
+      hasError: hasError,
     );
     final time = _buildPickerField(
       icon: Icons.schedule,
       text: OvertimeFormat.time(_minutesOf(value)),
       onTap: () => _pickTime(isEnd: isEnd),
+      hasError: hasError,
     );
 
     // 20 px es donde la fecha completa deja de caber junto a la hora.
@@ -393,6 +446,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
     required IconData icon,
     required String text,
     required VoidCallback onTap,
+    bool hasError = false,
   }) {
     return GestureDetector(
       onTap: _isSubmitting ? null : onTap,
@@ -401,12 +455,17 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
         padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color:
+              hasError ? AppColors.danger.withOpacity(0.15) : AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
+          border:
+              hasError ? Border.all(color: AppColors.danger, width: 1.5) : null,
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.textSecondary, size: 20),
+            Icon(icon,
+                color: hasError ? AppColors.danger : AppColors.textSecondary,
+                size: 20),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
@@ -426,10 +485,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
 
   /// Contador de duración.
   Widget _buildTotalDuration() {
-    if (!_hasValidRange) {
-      final tooLong = _duration > _maxDuration;
-      final startIsPast = _startIsPast;
-
+    if (_endOutOfRange) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(
@@ -438,14 +494,10 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           color: AppColors.danger.withOpacity(0.15),
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
-        child: Text(
-          startIsPast
-              ? 'Inicio no válido. Las horas extra se deben solicitar por adelantado.'
-              : tooLong
-                  ? 'Son más de 72 horas seguidas. Revise la fecha de fin.'
-                  : 'El fin debe ser después del inicio',
+        child: const Text(
+          'El fin debe ser después del inicio',
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             color: AppColors.danger,
             fontSize: 14,
             fontWeight: FontWeight.bold,
@@ -459,9 +511,9 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
       padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.15),
+        color: AppColors.danger.withOpacity(0.15),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.primary.withOpacity(0.4)),
+        border: Border.all(color: AppColors.danger.withOpacity(0.4)),
       ),
       child: Column(
         children: [
@@ -494,30 +546,30 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
       builder: (context, _, __) {
         final enabled = _canSubmit;
 
-        return ConstrainedBox(
-          constraints: const BoxConstraints(
-              minWidth: double.infinity, minHeight: _controlHeight),
-          child: ElevatedButton(
-            onPressed: enabled ? _submit : null,
-            child: _isSubmitting
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text(
-                    'ENVIAR SOLICITUD',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+        return ElevatedButton(
+          onPressed: enabled ? _submit : null,
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size.fromHeight(_controlHeight),
+            backgroundColor: AppColors.danger,
           ),
+          child: _isSubmitting
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  'SOLICITAR APROBACIÓN',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
         );
       },
     );

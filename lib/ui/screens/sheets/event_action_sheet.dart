@@ -13,7 +13,7 @@ import 'office_exit_sheet.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
-import '../overtime/overtime_request_form_screen.dart';
+import '../overtime/overtime_form_screen.dart';
 
 class AssigmentModal extends StatefulWidget {
   final AssigmentModel assignment;
@@ -446,8 +446,8 @@ class _EventActionModalState extends State<AssigmentModal> {
         const SizedBox(height: AppSpacing.sm),
         Text(
           (widget.isActiveactivity
-              ? 'Puedes gestionar tu turno o solicitar horas extra.'
-              : 'Puedes solicitar horas extra.'),
+              ? 'Puedes gestionar tu turno o solicitar aprobación de horas extra.'
+              : 'Puedes solicitar aprobación de horas extra.'),
           style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         if (!widget.isAnyEventActive || widget.isActiveactivity)
@@ -567,8 +567,8 @@ class _EventActionModalState extends State<AssigmentModal> {
     if (label == null || label.trim().isEmpty) return const SizedBox.shrink();
 
     return ElevatedButton.icon(
-      icon: const Icon(Icons.bedtime_outlined),
-      label: const Text("Solicitar horas extra"),
+      icon: const Icon(Icons.assignment),
+      label: const Text("Justificar horas extra"),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.surfaceRaised,
         foregroundColor: Colors.white,
@@ -584,11 +584,10 @@ class _EventActionModalState extends State<AssigmentModal> {
   Future<void> _openOvertimeForm(String label) async {
     final now = DateTime.now();
 
-    // Sin hora de fin programada en la asignación, se sugiere la próxima media
-    // hora; el operario la confirma en el formulario.
-    final rounded = now.minute == 0 || now.minute == 30
-        ? now
-        : now.add(Duration(minutes: (now.minute < 30 ? 30 : 60) - now.minute));
+    // Las horas extra se justifican, no se piden por adelantado: se sugiere la
+    // media hora ya cumplida para que el formulario no abra con un inicio
+    // futuro, que seria invalido. El operario la confirma ahi.
+    final rounded = now.subtract(Duration(minutes: now.minute % 30));
 
     await Navigator.push(
       context,

@@ -71,6 +71,17 @@ class OvertimeFormat {
     }
   }
 
+  static String tabLabels(OvertimeStatus status) {
+    switch (status) {
+      case OvertimeStatus.approved:
+        return 'Aprobadas';
+      case OvertimeStatus.rejected:
+        return 'Rechazadas';
+      case OvertimeStatus.pending:
+        return 'Pendientes';
+    }
+  }
+
   /// "6:00 p.m." a partir de un DateTime.
   static String timeOf(DateTime d) => time(d.hour * 60 + d.minute);
 

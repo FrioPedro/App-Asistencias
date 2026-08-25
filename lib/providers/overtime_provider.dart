@@ -44,26 +44,36 @@ class OvertimeProvider {
         .limit(limit)
         .findAll();
 
-    final now = DateTime.now();
+    // Las pendientes se ordenan por cuando se enviaron y las resueltas por
+    // cuando se resolvieron: lo mas reciente primero.
+    List<OvertimeRequestModel> byStatus(
+      OvertimeStatus status,
+      DateTime? Function(OvertimeRequestModel) dateOf,
+    ) {
+      final list = all.where((r) => r.status == status).toList();
 
-    final pasadas = all.where((r) => r.start.isBefore(now)).toList()
-      ..sort((a, b) => b.start.compareTo(a.start));
+      list.sort((a, b) {
+        final da = dateOf(a);
+        final db = dateOf(b);
 
-    final vigentes = all.where((r) => !r.start.isBefore(now)).toList()
-      ..sort((a, b) => a.start.compareTo(b.start));
+        if (da == null && db == null) return 0;
+        if (da == null) return 1;
+        if (db == null) return -1;
 
-    List<OvertimeRequestModel> byStatus(OvertimeStatus status) =>
-        vigentes.where((r) => r.status == status).toList();
+        return db.compareTo(da);
+      });
+
+      return list;
+    }
 
     final assigments = await _assigmentsFor(all);
 
     return OvertimeRequestGroups(
       projectNames: _projectNames(assigments),
       projectCodes: _projectCodes(assigments),
-      approved: byStatus(OvertimeStatus.approved),
-      pending: byStatus(OvertimeStatus.pending),
-      rejected: byStatus(OvertimeStatus.rejected),
-      pasadas: pasadas,
+      approved: byStatus(OvertimeStatus.approved, (r) => r.resolvedAt),
+      pending: byStatus(OvertimeStatus.pending, (r) => r.submittedAt),
+      rejected: byStatus(OvertimeStatus.rejected, (r) => r.resolvedAt),
     );
   }
 
@@ -137,7 +147,6 @@ class OvertimeRequestGroups {
   final List<OvertimeRequestModel> approved;
   final List<OvertimeRequestModel> pending;
   final List<OvertimeRequestModel> rejected;
-  final List<OvertimeRequestModel> pasadas;
 
   const OvertimeRequestGroups({
     this.projectNames = const {},
@@ -145,7 +154,6 @@ class OvertimeRequestGroups {
     this.approved = const [],
     this.pending = const [],
     this.rejected = const [],
-    this.pasadas = const [],
   });
 
   /// Si la asignacion no bajo a local, queda el identificador a la vista.
@@ -157,9 +165,5 @@ class OvertimeRequestGroups {
   String projectCode(OvertimeRequestModel request) =>
       projectCodes[request.projectId] ?? '';
 
-  bool get isEmpty =>
-      approved.isEmpty &&
-      pending.isEmpty &&
-      rejected.isEmpty &&
-      pasadas.isEmpty;
+  bool get isEmpty => approved.isEmpty && pending.isEmpty && rejected.isEmpty;
 }
