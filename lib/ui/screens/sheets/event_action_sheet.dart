@@ -568,7 +568,7 @@ class _EventActionModalState extends State<AssigmentModal> {
 
     return ElevatedButton.icon(
       icon: const Icon(Icons.assignment),
-      label: const Text("Justificar horas extra"),
+      label: const Text("Horas extra"),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.surfaceRaised,
         foregroundColor: Colors.white,

@@ -701,6 +701,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                       controller: _recomendacionesController,
                       hint: '¿Qué se necesita hacer después?',
                       isRequired: true,
+                      minChars: 20,
                       enabled: !_isSubmitting,
                     ),
                   ],

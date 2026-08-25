@@ -295,7 +295,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           icon: const Icon(Icons.arrow_back),
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
         ),
-        title: const Text('Justificar horas extra'),
+        title: const Text('Horas extra'),
       ),
       body: SafeArea(
         child: GestureDetector(
@@ -310,11 +310,6 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildContextChip(
-                      Icons.warning_amber,
-                      'Tienes $_businessDaysBack días hábiles para justificar tus horas extra.',
-                      false, AppColors.warning),
-                  const SizedBox(height: AppSpacing.xl),
                   if (widget.contextLabel != null) ...[
                     _buildLabel('Asignación'),
                     const SizedBox(height: AppSpacing.sm),
