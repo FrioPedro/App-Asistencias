@@ -30,31 +30,43 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
       specialPickerType: SpecialPickerType.noPreview,
       specialItemPosition: SpecialItemPosition.prepend,
       specialItemBuilder: (context, path, length) {
-        return GestureDetector(
-          onTap: () async {
-            // El pop cierra el picker, no esta pantalla: se toma el Navigator
-            // de su context antes de abrir la camara.
-            final navigator = Navigator.of(context);
+        return SizedBox.expand(
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.surfaceAlt,
+              elevation: 0,
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: const RoundedRectangleBorder(),
+            ),
+            onPressed: () async {
+              // El pop cierra el picker, no esta pantalla: se toma el Navigator
+              // de su context antes de abrir la camara.
+              final navigator = Navigator.of(context);
 
-            final AssetEntity? result = await CameraPicker.pickFromCamera(
-              context,
-              pickerConfig: const CameraPickerConfig(
-                enableRecording: false,
-                shouldDeletePreviewFile: true,
-              ),
-            );
+              final AssetEntity? result = await CameraPicker.pickFromCamera(
+                context,
+                pickerConfig: const CameraPickerConfig(
+                  enableRecording: false,
+                  shouldDeletePreviewFile: true,
+                ),
+              );
 
-            if (result != null) navigator.pop([result]);
-          },
-          child: Container(
-            color: AppColors.surfaceAlt,
+              if (result != null) navigator.pop([result]);
+            },
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.camera_alt, color: Colors.white, size: 30),
                 SizedBox(height: AppSpacing.xs),
-                Text("Cámara",
-                    style: TextStyle(color: Colors.white, fontSize: 12))
+                Flexible(
+                  child: Text(
+                    "Cámara",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
               ],
             ),
           ),
@@ -141,31 +153,41 @@ class _PhotosInputWrapperState extends State<PhotosInputWrapper> {
             ),
           ),
         if (_selectedAssets.length < widget.maxPhotos)
-          GestureDetector(
-            onTap: _pickAssets,
-            child: Container(
-              width: double.infinity,
-              height: 50,
-              decoration: BoxDecoration(
-                color: AppColors.surface,
+          ElevatedButton(
+            onPressed: _pickAssets,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.textSecondary,
+              elevation: 0,
+              minimumSize: const Size.fromHeight(AppSpacing.ctaHeight),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+              side: const BorderSide(color: AppColors.border),
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(color: AppColors.border),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            child: Text.rich(
+              TextSpan(
                 children: [
-                  const Icon(Icons.add_a_photo, color: AppColors.textSecondary),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    _selectedAssets.isEmpty
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: AppSpacing.sm),
+                      child: Icon(Icons.add_a_photo,
+                          color: AppColors.textSecondary,
+                          size: MediaQuery.textScalerOf(context).scale(20)),
+                    ),
+                  ),
+                  TextSpan(
+                    text: _selectedAssets.isEmpty
                         ? "Subir Fotos (Máx ${widget.maxPhotos})"
                         : "Agregar más (${_selectedAssets.length}/${widget.maxPhotos})",
-                    style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
       ],

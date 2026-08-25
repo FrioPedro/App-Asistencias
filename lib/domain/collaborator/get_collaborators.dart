@@ -1,4 +1,4 @@
-import 'package:app_asistencias/core/enpoinService.dart';
+import 'package:app_asistencias/core/endpointService.dart';
 import 'package:app_asistencias/models/collaborator_model.dart';
 
 /// Obtiene la lista de colaboradores desde la API.

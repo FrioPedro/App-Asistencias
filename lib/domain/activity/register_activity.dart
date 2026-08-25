@@ -30,7 +30,7 @@ class ActivityRegistrar {
           '[ACTIVITY] GPS obtained: lat=${gps.latitude}, lng=${gps.longitude}');
     }
 
-    final _activityModel= await CreateActivity.storeEntry(
+    final activityModel= await CreateActivity.storeEntry(
       assignment: assignment,
       task: task,
       collaboratorDocumentId: collaboratorDocumentId,
@@ -41,7 +41,7 @@ class ActivityRegistrar {
     );
 
     print('[ACTIVITY] Entry stored locally');
-    return _activityModel;
+    return activityModel;
   }
 
   /// Registra SALIDA tomando GPS internamente (sin params lat/lng)

@@ -89,12 +89,12 @@ class _PhotoCaptionScreenState extends State<PhotoCaptionScreen> {
           style: TextStyle(color: AppColors.textSecondary),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            style:
-                TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.surfaceRaised),
             child: const Text('Cancelar'),
           ),
+          const SizedBox(height: AppSpacing.sm),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),

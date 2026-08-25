@@ -2,7 +2,7 @@ import 'package:app_asistencias/domain/activity/register_activity.dart';
 import 'package:app_asistencias/domain/session/active_session_storage.dart';
 import 'package:app_asistencias/models/assigment_model.dart';
 import 'package:app_asistencias/core/database.dart';
-import 'package:app_asistencias/core/enpoinService.dart';
+import 'package:app_asistencias/core/endpointService.dart';
 import 'package:isar/isar.dart';
 
 class GetAssigned {

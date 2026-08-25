@@ -265,11 +265,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget _buildEventList(List<AssigmentModel> Attendance) {
+  Widget _buildEventList(List<AssigmentModel> attendance) {
     // Definimos el contenido de la lista (vacía con mensaje o con elementos)
     Widget listContent;
 
-    if (Attendance.isEmpty) {
+    if (attendance.isEmpty) {
       // Usamos ListView con un solo hijo que ocupa todo el espacio para permitir el scroll y el refresh
       listContent = ListView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -291,9 +291,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       listContent = ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-        itemCount: Attendance.length,
+        itemCount: attendance.length,
         itemBuilder: (context, index) {
-          final event = Attendance[index];
+          final event = attendance[index];
 
           // 1) eventKey = llave de la card (documentId)
           final String eventKey = event.serverId.toString();

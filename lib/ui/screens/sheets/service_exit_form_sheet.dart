@@ -401,37 +401,40 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
     required String label,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
+        elevation: 0,
         padding: const EdgeInsets.symmetric(
             vertical: AppSpacing.xl, horizontal: AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 32),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.15),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Icon(icon, color: AppColors.primary, size: 32),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -696,8 +699,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                     FormTextField(
                       label: 'RECOMENDACIONES',
                       controller: _recomendacionesController,
-                      hint: 'Recomendaciones para el cliente...',
-                      isRequired: false,
+                      hint: '¿Qué se necesita hacer después?',
+                      isRequired: true,
                       enabled: !_isSubmitting,
                     ),
                   ],
@@ -719,7 +722,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                           ),
                           const SizedBox(height: AppSpacing.md),
                           Text(
-                            'Subiendo ${_allPhotos.length} fotos... ${(_uploadProgress * 100).toInt()}%',
+                            'Subiendo ${_allPhotos.length} foto${_allPhotos.length > 1 ? 's' : ''}... ${(_uploadProgress * 100).toInt()}%',
                             style: const TextStyle(
                                 color: AppColors.textSecondary, fontSize: 13),
                           ),
@@ -731,20 +734,37 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                       padding: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: Row(
                         children: [
-                          const Icon(Icons.warning_amber_rounded,
-                              color: AppColors.warning, size: 18),
-                          const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: Text(
-                              _pendingCaptions == 1
-                                  ? 'Falta la descripción de 1 foto'
-                                  : 'Faltan las descripciones de '
-                                      '$_pendingCaptions fotos',
-                              style: const TextStyle(
-                                color: AppColors.warning,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  const WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.only(right: AppSpacing.xs),
+                                      child: Icon(Icons.warning_amber_rounded,
+                                          color: AppColors.warning, size: 14),
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: _pendingCaptions == 1
+                                        ? 'Falta la descripción de 1 foto'
+                                        : 'Faltan las descripciones de '
+                                            '$_pendingCaptions fotos',
+                                    style: const TextStyle(
+                                      color: AppColors.warning,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                               ),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -757,7 +777,8 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                           ? null
                           : _onSubmit,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                        padding:
+                            const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                         backgroundColor: AppColors.danger,
                         disabledBackgroundColor: AppColors.disabled,
                         elevation: 0,
@@ -780,13 +801,15 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                                   const WidgetSpan(
                                     alignment: PlaceholderAlignment.middle,
                                     child: Padding(
-                                      padding: EdgeInsets.only(
-                                          right: AppSpacing.xs),
+                                      padding:
+                                          EdgeInsets.only(right: AppSpacing.xs),
                                       child: Icon(Icons.check_circle_outline,
                                           color: Colors.white, size: 14),
                                     ),
                                   ),
-                                  TextSpan(text: 'FINALIZAR (${_allPhotos.length} fotos)'),
+                                  TextSpan(
+                                      text:
+                                          'FINALIZAR (${_allPhotos.length} fotos)'),
                                 ],
                               ),
                               textAlign: TextAlign.center,
@@ -907,50 +930,50 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
             ),
           ),
         if (photos.length < _maxPhotosPerSection && !_isSubmitting)
-          GestureDetector(
-            onTap: () => _showPhotoOptions(isAntes: isAntes),
-            child: Container(
-              width: double.infinity,
-              constraints:
-                  const BoxConstraints(minHeight: AppSpacing.ctaHeight),
+          ElevatedButton(
+            onPressed: () => _showPhotoOptions(isAntes: isAntes),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.textSecondary,
+              elevation: 0,
+              minimumSize: const Size.fromHeight(AppSpacing.ctaHeight),
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    WidgetSpan(
-                      alignment: PlaceholderAlignment.middle,
-                      child: Container(
-                        margin: const EdgeInsets.only(right: AppSpacing.md),
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add_a_photo_rounded,
-                            color: AppColors.primary, size: 20),
+            ),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Container(
+                      margin: const EdgeInsets.only(right: AppSpacing.md),
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.15),
+                        shape: BoxShape.circle,
                       ),
+                      child: const Icon(Icons.add_a_photo_rounded,
+                          color: AppColors.primary, size: 20),
                     ),
-                    TextSpan(
-                      text:
-                          photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(
+                    text:
+                        photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
+                  ),
+                ],
               ),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600),
             ),
           ),
         if (photos.isNotEmpty && !_isSubmitting) ...[
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
           ConstrainedBox(
             constraints: const BoxConstraints(
                 minWidth: double.infinity, minHeight: AppSpacing.ctaHeight),
@@ -959,6 +982,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
               style: OutlinedButton.styleFrom(
                 foregroundColor:
                     pending > 0 ? AppColors.warning : AppColors.success,
+                backgroundColor: AppColors.surface,
                 side: BorderSide(
                     color: pending > 0 ? AppColors.warning : AppColors.success,
                     width: 1.5),
@@ -983,7 +1007,7 @@ class _ServiceExitFormScreenState extends State<ServiceExitFormScreen> {
                     ),
                     TextSpan(
                       text: pending > 0
-                          ? 'DESCRIBIR FOTOS  ·  faltan $pending'
+                          ? 'DESCRIBIR FOTOS'
                           : 'DESCRIPCIONES LISTAS (${photos.length})',
                     ),
                   ],

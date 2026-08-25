@@ -10,7 +10,7 @@ import 'package:app_asistencias/ui/theme/app_radius.dart';
 /// obligatoriedad / mínimo de caracteres, revalidando en cada tecla luego de
 /// la primera interacción del usuario.
 class FormTextField extends StatelessWidget {
-  final String label;
+  final String? label;
   final TextEditingController controller;
   final String hint;
 
@@ -29,7 +29,7 @@ class FormTextField extends StatelessWidget {
 
   const FormTextField({
     super.key,
-    required this.label,
+    this.label,
     required this.controller,
     required this.hint,
     this.isRequired = true,
@@ -66,16 +66,18 @@ class FormTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+        if (label != null && label!.isNotEmpty) ...[
+          Text(
+            label!,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
+        ],
         if (_hasCounter)
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,

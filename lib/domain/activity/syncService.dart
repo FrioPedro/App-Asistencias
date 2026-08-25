@@ -1,5 +1,5 @@
 import 'package:app_asistencias/core/database.dart';
-import 'package:app_asistencias/core/enpoinService.dart';
+import 'package:app_asistencias/core/endpointService.dart';
 import 'package:app_asistencias/domain/connectivity/network_info.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/models/activity/activity_model.dart';

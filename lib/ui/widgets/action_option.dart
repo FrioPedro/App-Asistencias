@@ -23,7 +23,7 @@ class ActionOption extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surface, // Gris un poco más claro que el fondo
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Row(

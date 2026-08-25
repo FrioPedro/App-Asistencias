@@ -133,7 +133,7 @@ class ServiceExitAsNotes {
         taskType.name; // 'office' | 'workshop' | 'service' | 'transport'
     try {
       final doc = sid.toString();
-      final NoteSyncService _sync = NoteSyncService();
+      final NoteSyncService sync = NoteSyncService();
 
       // 1) Textos (si no están vacíos)
       if (incidencias.trim().isNotEmpty) {
@@ -200,7 +200,7 @@ class ServiceExitAsNotes {
             type: ListForm.foto_despues);
       }
 
-      await _sync.syncIfPossible();
+      await sync.syncIfPossible();
       return true;
     } catch (e) {
       return false;
@@ -225,7 +225,7 @@ class WorkshopExitAsNotes {
         taskType.name; // 'office' | 'workshop' | 'service' | 'transport'
     try {
       final doc = sid.toString();
-      final NoteSyncService _sync = NoteSyncService();
+      final NoteSyncService sync = NoteSyncService();
 
       // 1) Notas (Obligatorio validado en UI, pero guardamos si no es vacío)
       if (notes.trim().isNotEmpty) {
@@ -251,7 +251,7 @@ class WorkshopExitAsNotes {
             type: ListForm.foto_antes);
       }
 
-      await _sync.syncIfPossible();
+      await sync.syncIfPossible();
       return true;
     } catch (e) {
       return false;

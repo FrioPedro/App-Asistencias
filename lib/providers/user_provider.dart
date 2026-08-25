@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:app_asistencias/core/enpoinService.dart';
+import 'package:app_asistencias/core/endpointService.dart';
 import 'package:app_asistencias/domain/user/get_user.dart';
 import 'package:app_asistencias/models/user/user_model.dart';
 import 'package:app_asistencias/models/branch_model.dart';

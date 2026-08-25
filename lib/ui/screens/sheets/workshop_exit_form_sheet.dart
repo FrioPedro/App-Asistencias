@@ -358,37 +358,40 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
     required String label,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.surface,
+        foregroundColor: Colors.white,
+        elevation: 0,
         padding: const EdgeInsets.symmetric(
             vertical: AppSpacing.xl, horizontal: AppSpacing.md),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: AppColors.primary, size: 32),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.15),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Icon(icon, color: AppColors.primary, size: 32),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -581,7 +584,6 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                     ),
                   SizedBox(
                     width: double.infinity,
-                    height: AppSpacing.ctaHeight,
                     child: ElevatedButton(
                       onPressed: (_isSubmitting || _pendingCaptions > 0)
                           ? null
@@ -609,13 +611,15 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
                                   const WidgetSpan(
                                     alignment: PlaceholderAlignment.middle,
                                     child: Padding(
-                                      padding: EdgeInsets.only(
-                                          right: AppSpacing.sm),
+                                      padding:
+                                          EdgeInsets.only(right: AppSpacing.sm),
                                       child: Icon(Icons.check_circle_outline,
                                           color: Colors.white, size: 22),
                                     ),
                                   ),
-                                  TextSpan(text: 'FINALIZAR (${_photos.length} fotos)'),
+                                  TextSpan(
+                                      text:
+                                          'FINALIZAR (${_photos.length} fotos)'),
                                 ],
                               ),
                               textAlign: TextAlign.center,
@@ -697,46 +701,46 @@ class _WorkshopExitFormScreenState extends State<WorkshopExitFormScreen> {
             ),
           ),
         if (photos.length < _maxPhotos && !_isSubmitting)
-          GestureDetector(
-            onTap: () => _showPhotoOptions(),
-            child: Container(
-              width: double.infinity,
-              constraints:
-                  const BoxConstraints(minHeight: AppSpacing.ctaHeight),
+          ElevatedButton(
+            onPressed: () => _showPhotoOptions(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.textSecondary,
+              elevation: 0,
+              minimumSize: const Size.fromHeight(AppSpacing.ctaHeight),
               padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
+              shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    WidgetSpan(
-                      alignment: PlaceholderAlignment.middle,
-                      child: Container(
-                        margin: const EdgeInsets.only(right: AppSpacing.md),
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add_a_photo_rounded,
-                            color: AppColors.primary, size: 20),
+            ),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: Container(
+                      margin: const EdgeInsets.only(right: AppSpacing.md),
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.15),
+                        shape: BoxShape.circle,
                       ),
+                      child: const Icon(Icons.add_a_photo_rounded,
+                          color: AppColors.primary, size: 20),
                     ),
-                    TextSpan(
-                      text:
-                          photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(
+                    text:
+                        photos.isEmpty ? 'Agregar fotos' : 'Agregar más fotos',
+                  ),
+                ],
               ),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600),
             ),
           ),
         if (photos.isNotEmpty && !_isSubmitting) ...[

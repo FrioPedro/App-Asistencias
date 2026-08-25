@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:app_asistencias/models/taskType_model.dart';
 import 'package:dio/dio.dart';
 import 'package:app_asistencias/core/database.dart';
-import 'package:app_asistencias/core/enpoinService.dart';
+import 'package:app_asistencias/core/endpointService.dart';
 import 'package:app_asistencias/domain/connectivity/network_info.dart';
 import 'package:app_asistencias/models/note_model.dart';
 import 'package:isar/isar.dart';

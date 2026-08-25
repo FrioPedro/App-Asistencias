@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:app_asistencias/core/enpoinService.dart';
+import 'package:app_asistencias/core/endpointService.dart';
 
 /// Crea una nueva asignación enviándola al servidor.
 /// Ubicado en la capa de dominio siguiendo la arquitectura del proyecto.

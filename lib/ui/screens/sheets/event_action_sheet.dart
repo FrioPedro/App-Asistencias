@@ -9,7 +9,7 @@ import '../../widgets/custom_snackbar.dart';
 import '../../widgets/action_option.dart';
 import 'service_exit_form_sheet.dart';
 import 'workshop_exit_form_sheet.dart';
-import 'office_workshop_exit_sheet.dart';
+import 'office_exit_sheet.dart';
 import '../../../providers/log_provider.dart';
 import '../../../models/log_model.dart';
 import 'package:app_asistencias/models/taskType_model.dart';
@@ -452,8 +452,9 @@ class _EventActionModalState extends State<AssigmentModal> {
         ),
         if (!widget.isAnyEventActive || widget.isActiveactivity)
           _buildManageShiftButton(),
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.lg),
         _buildOvertimeShortcut(),
+        const SizedBox(height: AppSpacing.xs),
       ],
     );
   }
@@ -565,48 +566,18 @@ class _EventActionModalState extends State<AssigmentModal> {
     final label = widget.assignment.description ?? widget.assignment.documentId;
     if (label == null || label.trim().isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.surfaceRaised,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
-              minimumSize: const Size.fromHeight(56),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-            ),
-            onPressed: _isLoading ? null : () => _openOvertimeForm(label),
-            child: const Text.rich(
-              TextSpan(
-                children: [
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.middle,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: AppSpacing.xs),
-                      child: Icon(Icons.bedtime_outlined,
-                          color: AppColors.textSecondary, size: 14),
-                    ),
-                  ),
-                  TextSpan(text: 'Solicitar horas extra'),
-                ],
-              ),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+    return ElevatedButton.icon(
+      icon: const Icon(Icons.bedtime_outlined),
+      label: const Text("Solicitar horas extra"),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.surfaceRaised,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
-        const SizedBox(height: AppSpacing.xxl),
-      ],
+      ),
+      onPressed: _isLoading ? null : () => _openOvertimeForm(label),
     );
   }
 

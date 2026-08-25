@@ -65,7 +65,7 @@ class AttendanceProvider {
     }
 
     // 2) marca la nueva entrada (Hora base + 100ms)
-    final _activity = await ActivityRegistrar.registerEntryWithGPS(
+    final activity = await ActivityRegistrar.registerEntryWithGPS(
       collaboratorDocumentId: user.nationalId ?? '',
       userZone: user.zone,
       assignment: assignment,
@@ -74,7 +74,7 @@ class AttendanceProvider {
     );
 
     // 3) guarda nuevo activo
-    final eventKey = _activity.keyGroup;
+    final eventKey = activity.keyGroup;
 
     if (eventKey == null) {
       throw Exception('No se puede iniciar: eventKey es null');

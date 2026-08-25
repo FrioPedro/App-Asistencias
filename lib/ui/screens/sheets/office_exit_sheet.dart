@@ -1,10 +1,10 @@
+import 'package:app_asistencias/ui/widgets/form_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:app_asistencias/ui/theme/app_spacing.dart';
 import 'package:app_asistencias/ui/theme/app_radius.dart';
 import 'package:app_asistencias/ui/theme/app_colors.dart';
 import 'dart:async';
 import '../../../models/assigment_model.dart';
-// import '../../../models/activity/activity_model.dart';
 import '../../../providers/attendance_provider.dart';
 import 'package:app_asistencias/providers/notes_provider.dart';
 import 'package:app_asistencias/providers/log_provider.dart';
@@ -30,10 +30,12 @@ class OfficeWorkshopExitModal extends StatefulWidget {
 }
 
 class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
-  final TextEditingController _descriptionController = TextEditingController();
-  bool _isLoading = false;
   final AttendanceProvider _eventsService = AttendanceProvider();
   final NotesProvider _notesProvider = NotesProvider();
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -113,16 +115,20 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
     });
   }
 
-  Future<void> _handleSubmit() async {
-    if (_descriptionController.text.trim().isEmpty) {
-      _showOverlayToast(
-        'Por favor, ingresa una descripción de la tarea.',
-        isError: true,
-      );
+  Future<void> _onSubmit() async {
+    if (_isSubmitting) return;
+
+    final formValid = _formKey.currentState!.validate();
+
+    if (!formValid) {
+      LogProvider.log(
+          'Intento de envío de formulario de oficina fallido: Campos obligatorios incompletos',
+          type: LogType.warning,
+          origin: 'OfficeWorkshopExitScreen');
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() => _isSubmitting = true);
 
     try {
       final sid = widget.eventKey;
@@ -157,7 +163,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => _isSubmitting = false);
       }
     }
   }
@@ -171,10 +177,7 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
         left: AppSpacing.xl,
         right: AppSpacing.xl,
         top: AppSpacing.xl,
-        // ✅ 2. SUBIMOS EL CONTENIDO DEL MODAL
-        // Aumentamos de AppSpacing.xxl a 100. Esto empuja el botón hacia arriba
-        // dejando espacio vacío abajo para que el mensaje no lo tape.
-        bottom: bottomInset + 100.0,
+        bottom: bottomInset,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -200,62 +203,59 @@ class _OfficeWorkshopExitModalState extends State<OfficeWorkshopExitModal> {
                 child: IconButton(
                   icon: const Icon(Icons.close,
                       color: AppColors.textSecondary, size: 28),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed:
+                      _isSubmitting ? null : () => Navigator.pop(context),
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          Container(
-            height: 150,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-            child: TextField(
-              controller: _descriptionController,
-              style: const TextStyle(color: Colors.white),
-              maxLines: null,
-              expands: true,
-              textAlignVertical: TextAlignVertical.top,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                hintText: 'Describe qué actividades realizaste...',
-                hintStyle: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          SizedBox(
-            height: AppSpacing.ctaHeight,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _handleSubmit,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.danger,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+          Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FormTextField(
+                  controller: _descriptionController,
+                  hint: 'Describe qué actividades realizaste...',
+                  isRequired: true,
+                  minChars: 10,
+                  maxLines: 3,
+                  enabled: !_isSubmitting,
                 ),
-                disabledBackgroundColor: AppColors.disabled,
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
+                const SizedBox(height: AppSpacing.xl),
+                SizedBox(
+                  height: AppSpacing.ctaHeight,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _onSubmit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.danger,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
                       ),
-                    )
-                  : const Text(
-                      'Finalizar y Subir',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      disabledBackgroundColor: AppColors.disabled,
                     ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Finalizar y Subir',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+              ],
             ),
           ),
         ],

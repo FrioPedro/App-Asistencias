@@ -1,4 +1,4 @@
-import 'package:app_asistencias/core/enpoinService.dart';
+import 'package:app_asistencias/core/endpointService.dart';
 import 'package:app_asistencias/models/client_model.dart';
 
 /// Obtiene la lista de clientes desde la API.
