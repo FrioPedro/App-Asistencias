@@ -83,7 +83,7 @@ class _OvertimeHeaderButtonState extends State<OvertimeHeaderButton> {
               icon: Icon(Icons.assignment,
                   color: Colors.white, size: widget.size * 0.5),
               padding: EdgeInsets.zero,
-              tooltip: 'Mis solicitudes de horas extra',
+              tooltip: 'Mis solicitudes de horas extras',
               onPressed: _openRequests,
             ),
           ),

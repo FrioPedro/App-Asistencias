@@ -7,7 +7,7 @@ import 'package:app_asistencias/models/overtime_request_model.dart';
 import 'package:app_asistencias/ui/screens/overtime/overtime_format.dart';
 import 'package:app_asistencias/ui/screens/overtime/overtime_approval_status_style.dart';
 
-/// Detalle de una solicitud de horas extra, abierto al tocar su tarjeta en
+/// Detalle de una solicitud de horas extras, abierto al tocar su tarjeta en
 /// [OvertimeRequestsScreen]. Es solo lectura: el operario no puede editar ni
 /// cancelar desde aca.
 class OvertimeDetailSheet extends StatelessWidget {
@@ -73,7 +73,7 @@ class OvertimeDetailSheet extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Justificación de horas extra',
+                  'Justificación de horas extras',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,

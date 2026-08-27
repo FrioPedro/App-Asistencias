@@ -10,7 +10,7 @@ part 'overtime_request_model.g.dart';
 /// Estado de la solicitud desde el punto de vista del operario.
 enum OvertimeStatus { pending, approved, rejected }
 
-/// Justificacion de horas extra ya trabajadas.
+/// Justificacion de horas extras ya trabajadas.
 ///
 /// El servidor maneja el bloque como dos timestamps (`Initial` / `Finish`),
 /// asi que aca se guardan igual. La sincronizacion vive en

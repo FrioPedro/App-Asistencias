@@ -10,7 +10,7 @@ import 'package:app_asistencias/models/overtime_request_model.dart';
 import 'package:app_asistencias/providers/log_provider.dart';
 import 'package:isar/isar.dart';
 
-/// Sincronizacion de solicitudes de horas extra.
+/// Sincronizacion de solicitudes de horas extras.
 ///
 /// El listado solo responde por proyecto, asi que el pull hace una consulta
 /// por cada asignacion activa del usuario.
@@ -42,7 +42,7 @@ class OvertimeSyncService {
 
     if (!connected) {
       LogProvider.log(
-        'Sincronizacion de horas extra abortada: Sin conexion',
+        'Sincronizacion de horas extras abortada: Sin conexion',
         type: LogType.warning,
         origin: 'OvertimeSyncService',
       );
@@ -72,7 +72,7 @@ class OvertimeSyncService {
     if (pending.isEmpty) return;
 
     LogProvider.log(
-      'Sincronizacion de horas extra iniciada: ${pending.length} solicitudes',
+      'Sincronizacion de horas extras iniciada: ${pending.length} solicitudes',
       type: LogType.info,
       origin: 'OvertimeSyncService',
     );
@@ -103,8 +103,8 @@ class OvertimeSyncService {
 
         LogProvider.log(
           ok
-              ? 'Solicitud de horas extra sincronizada (ID local: ${r.id})'
-              : 'Error al sincronizar horas extra: servidor retorno ${res.statusCode}',
+              ? 'Solicitud de horas extras sincronizada (ID local: ${r.id})'
+              : 'Error al sincronizar horas extras: servidor retorno ${res.statusCode}',
           type: ok ? LogType.info : LogType.error,
           origin: 'OvertimeSyncService',
         );
@@ -117,7 +117,7 @@ class OvertimeSyncService {
         });
 
         LogProvider.log(
-          'Error critico al sincronizar horas extra: $e',
+          'Error critico al sincronizar horas extras: $e',
           type: LogType.error,
           origin: 'OvertimeSyncService',
         );
@@ -162,7 +162,7 @@ class OvertimeSyncService {
 
       if (res.statusCode != 200) {
         LogProvider.log(
-          'El listado de horas extra del proyecto $projectId respondio '
+          'El listado de horas extras del proyecto $projectId respondio '
           '${res.statusCode}: ${res.data}',
           type: LogType.error,
           origin: 'OvertimeSyncService',
@@ -202,7 +202,7 @@ class OvertimeSyncService {
       });
     } catch (e) {
       LogProvider.log(
-        'Error al traer horas extra del proyecto $projectId: $e',
+        'Error al traer horas extras del proyecto $projectId: $e',
         type: LogType.error,
         origin: 'OvertimeSyncService',
       );

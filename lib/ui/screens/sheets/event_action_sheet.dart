@@ -446,8 +446,8 @@ class _EventActionModalState extends State<AssigmentModal> {
         const SizedBox(height: AppSpacing.sm),
         Text(
           (widget.isActiveactivity
-              ? 'Puedes gestionar tu turno o solicitar aprobación de horas extra.'
-              : 'Puedes solicitar aprobación de horas extra.'),
+              ? 'Puedes gestionar tu turno o solicitar aprobación de horas extras.'
+              : 'Puedes solicitar aprobación de horas extras.'),
           style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
         ),
         if (!widget.isAnyEventActive || widget.isActiveactivity)
@@ -568,7 +568,7 @@ class _EventActionModalState extends State<AssigmentModal> {
 
     return ElevatedButton.icon(
       icon: const Icon(Icons.assignment),
-      label: const Text("Horas extra"),
+      label: const Text("Horas extras"),
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.surfaceRaised,
         foregroundColor: Colors.white,
@@ -584,7 +584,7 @@ class _EventActionModalState extends State<AssigmentModal> {
   Future<void> _openOvertimeForm(String label) async {
     final now = DateTime.now();
 
-    // Las horas extra se justifican, no se piden por adelantado: se sugiere la
+    // Las horas extras se justifican, no se piden por adelantado: se sugiere la
     // media hora ya cumplida para que el formulario no abra con un inicio
     // futuro, que seria invalido. El operario la confirma ahi.
     final rounded = now.subtract(Duration(minutes: now.minute % 30));

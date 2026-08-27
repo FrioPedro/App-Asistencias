@@ -3,7 +3,7 @@ import 'package:app_asistencias/ui/theme/app_colors.dart';
 
 import 'package:app_asistencias/models/overtime_request_model.dart';
 
-/// Color de estado de una solicitud de horas extra. Lo consumen la tarjeta de
+/// Color de estado de una solicitud de horas extras. Lo consumen la tarjeta de
 /// `OvertimeRequestsScreen` y `OvertimeDetailSheet`, que tienen que coincidir.
 extension OvertimeStatusStyle on OvertimeStatus {
   Color get color {

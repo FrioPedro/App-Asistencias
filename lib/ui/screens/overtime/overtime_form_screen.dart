@@ -12,11 +12,11 @@ import 'package:app_asistencias/ui/screens/overtime/overtime_time_picker_sheet.d
 import 'package:app_asistencias/ui/widgets/custom_snackbar.dart';
 import 'package:app_asistencias/ui/widgets/form_text_field.dart';
 
-/// Formulario de justificacion de horas extra ya trabajadas: el bloque es
+/// Formulario de justificacion de horas extras ya trabajadas: el bloque es
 /// continuo, de fecha y hora de inicio a fecha y hora de fin.
 ///
-/// Las horas extra no se piden por adelantado, se justifican despues. El
-/// objetivo del proceso es que no haya horas extra, porque indican mal manejo
+/// Las horas extras no se piden por adelantado, se justifican despues. El
+/// objetivo del proceso es que no haya horas extras, porque indican mal manejo
 /// del supervisor o falta de personal, asi que la ventana permitida es corta:
 /// el dia actual y [_businessDaysBack] dias habiles hacia atras.
 ///
@@ -80,7 +80,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
     final now = DateTime.now();
     final day = OvertimeRequestModel.dateOnly(widget.initialDate ?? now);
 
-    // 18 * 60 = 6:00 p.m., la franja típica de horas extra en planta.
+    // 18 * 60 = 6:00 p.m., la franja típica de horas extras en planta.
     final startMinutes = widget.initialStartMinutes ?? 18 * 60;
 
     _start = day.add(Duration(minutes: startMinutes));
@@ -255,7 +255,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
       );
 
       LogProvider.log(
-        'Solicitud de horas extra creada: ${OvertimeFormat.dateRange(request)} '
+        'Solicitud de horas extras creada: ${OvertimeFormat.dateRange(request)} '
         'de ${OvertimeFormat.duration(request.duration)}',
         type: LogType.info,
         origin: 'OvertimeRequestFormScreen',
@@ -272,7 +272,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
       Navigator.pop(context, true);
     } catch (e) {
       LogProvider.log(
-        'Error al crear solicitud de horas extra: $e',
+        'Error al crear solicitud de horas extras: $e',
         type: LogType.error,
         origin: 'OvertimeRequestFormScreen',
       );
@@ -295,7 +295,7 @@ class _OvertimeRequestFormScreenState extends State<OvertimeRequestFormScreen>
           icon: const Icon(Icons.arrow_back),
           onPressed: _isSubmitting ? null : () => Navigator.pop(context),
         ),
-        title: const Text('Horas extra'),
+        title: const Text('Horas extras'),
       ),
       body: SafeArea(
         child: GestureDetector(

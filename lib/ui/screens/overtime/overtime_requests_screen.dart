@@ -9,7 +9,7 @@ import 'package:app_asistencias/ui/screens/overtime/overtime_detail_sheet.dart';
 import 'package:app_asistencias/ui/screens/overtime/overtime_format.dart';
 import 'package:app_asistencias/ui/screens/overtime/overtime_approval_status_style.dart';
 
-/// Pantalla de consulta de solicitudes de horas extra. Es solo lectura: la
+/// Pantalla de consulta de solicitudes de horas extras. Es solo lectura: la
 /// creación vive en el turno activo ([AssigmentModal]).
 class OvertimeRequestsScreen extends StatefulWidget {
   const OvertimeRequestsScreen({super.key});
@@ -143,7 +143,7 @@ class _OvertimeRequestsScreenState extends State<OvertimeRequestsScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Aprobaciones de horas extra'),
+        title: const Text('Aprobaciones de horas extras'),
       ),
       body: SafeArea(
         child: _isLoading

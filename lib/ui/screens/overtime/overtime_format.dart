@@ -1,6 +1,6 @@
 import 'package:app_asistencias/models/overtime_request_model.dart';
 
-/// Formato de fechas, horas y antigüedad para la feature de horas extra.
+/// Formato de fechas, horas y antigüedad para la feature de horas extras.
 class OvertimeFormat {
   static const List<String> _weekdays = [
     'Lun',
@@ -123,7 +123,7 @@ class OvertimeFormat {
     return '$hours h $minutes min';
   }
 
-  /// "4 horas extra" / "19 h 24 min extra" / "45 minutos extra".
+  /// "4 horas extras" / "19 h 24 min extra" / "45 minutos extra".
   static String durationLong(Duration d) {
     final total = d.inMinutes;
     if (total <= 0) return 'Sin horas';

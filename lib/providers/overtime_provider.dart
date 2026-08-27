@@ -77,7 +77,7 @@ class OvertimeProvider {
     );
   }
 
-  /// El listado de horas extra solo devuelve el identificador de proyecto; el
+  /// El listado de horas extras solo devuelve el identificador de proyecto; el
   /// nombre y el codigo viven en la asignacion.
   Future<List<AssigmentModel>> _assigmentsFor(
     List<OvertimeRequestModel> requests,
